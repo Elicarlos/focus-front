@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pragma | Central de Foco & Produtividade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-cajuina"> <!-- Default theme for the user's domain -->
+    
+    <!-- Canvas para efeito de confete -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- BANNER SKINNER ALERT (Alerta de Procrastinação Ativa) -->
+    <div id="skinner-banner" class="skinner-alert-banner">
+        <div class="skinner-banner-content">
+            <span class="warning-icon">⚠️</span>
+            <div class="skinner-banner-text">
+                <strong>Alerta de Procrastinação!</strong>
+                <span>Você está ocioso há muito tempo. Inicie uma tarefa ou perderá XP!</span>
+            </div>
+            <button id="skinner-banner-action" class="skinner-banner-btn">Focar Agora (5 min)</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        
+        <!-- BARRA LATERAL: Perfil, Nível, Conquistas, Jardim de Foco e Bosque -->
+        <aside class="sidebar">
+            <div class="brand-section">
+                <div class="brand-logo" id="app-logo">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <h1 class="brand-name" id="app-title">Cajuína Code</h1>
+            </div>
+
+            <!-- Card de Nível, XP e Moedas -->
+            <div class="profile-card">
+                <div class="profile-header-row">
+                    <div class="level-badge">NÍVEL <span id="level-number">1</span></div>
+                    <div class="gems-badge" title="Gemas de Foco. Ganhas ao completar tarefas.">💎 <span id="gems-count">0</span></div>
+                </div>
+                <div class="xp-container">
+                    <div class="xp-header">
+                        <span>Foco Acumulado</span>
+                        <span id="xp-text">0 / 100 XP</span>
+                    </div>
+                    <div class="xp-bar-bg">
+                        <div class="xp-bar-fill" id="xp-fill"></div>
+                    </div>
+                </div>
+                <div class="streak-badge">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M17.66 11.57c-.77-1.9-2.03-3.66-3.75-4.94L12 5.07 10.09 6.63c-1.72 1.28-2.98 3.04-3.75 4.94C5.57 13.57 6.13 16.5 7.75 18.5c1.62 2 4.25 3 6.25 3s4.63-1 6.25-3c1.62-2 2.18-4.93 1.41-6.93zM12 19.5c-2.33 0-4-1.67-4-4 0-.97.37-1.97 1-2.78.63-.8 1.5-1.47 2.37-2 .87.53 1.74 1.2 2.37 2 .63.81 1.01 1.81 1.01 2.78 0 2.33-1.67 4-4 4z"/>
+                    </svg>
+                    <span>Sequência: <strong id="streak-count">0</strong> dias</span>
+                </div>
+            </div>
+
+            <!-- Jardim de Foco (Árvore Virtual) -->
+            <div class="garden-card">
+                <div class="garden-header-row">
+                    <h3>Jardim de Foco</h3>
+                    <div class="water-badge" id="water-badge" title="Unidades de água acumuladas ao focar. Use para regar a árvore.">💧 <span id="water-count">0</span></div>
+                </div>
+                <div class="tree-display">
+                    <svg id="garden-tree" viewBox="0 0 100 100" width="120" height="120">
+                        <defs>
+                            <linearGradient id="gold-gradient-pot" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fef08a" />
+                                <stop offset="50%" stop-color="#eab308" />
+                                <stop offset="100%" stop-color="#ca8a04" />
+                            </linearGradient>
+                        </defs>
+                        <!-- Aura de Foco (Ativável via Shop) -->
+                        <g id="tree-aura"></g>
+                        <!-- Solo -->
+                        <path d="M20,80 Q50,75 80,80" stroke="var(--accent-glow)" stroke-width="3" fill="none" />
+                        <!-- Vaso / Suporte (Customizável) -->
+                        <path id="tree-pot" d="M35,80 L65,80 L60,88 L40,88 Z" fill="#1f1e24" stroke="rgba(255,255,255,0.05)" stroke-width="1.5" />
+                        <!-- Tronco -->
+                        <path id="tree-trunk" d="M50,80 L50,80" stroke="var(--text-main)" stroke-width="4" stroke-linecap="round" />
+                        <!-- Folhas/Galhos -->
+                        <g id="tree-branches"></g>
+                    </svg>
+                </div>
+                
+                <!-- Barra de Vitalidade -->
+                <div class="vitality-container">
+                    <div class="vitality-header">
+                        <span>Saúde do Jardim</span>
+                        <span id="vitality-text">Saudável</span>
+                    </div>
+                    <div class="vitality-bar-bg">
+                        <div class="vitality-bar-fill" id="vitality-fill"></div>
+                    </div>
+                </div>
+
+                <div class="garden-actions-row">
+                    <button id="water-tree-btn" class="water-btn" disabled>Regar Jardim (+10 Saúde)</button>
+                </div>
+
+                <p class="garden-status" id="garden-desc">Sua semente de foco está plantada. Conclua tarefas para vê-la crescer.</p>
+            </div>
+
+            <!-- Bosque de Troféus -->
+            <div class="forest-card">
+                <h3>Bosque de Troféus</h3>
+                <div class="forest-grid" id="forest-grid">
+                    <p class="empty-forest-msg" id="empty-forest-msg">Nenhum objetivo eternizado ainda.</p>
+                </div>
+            </div>
+
+            <!-- Badges/Conquistas -->
+            <div class="badges-card">
+                <h3>Conquistas</h3>
+                <div class="badges-grid" id="badges-grid">
+                    <!-- Badges serão gerados dinamicamente via JS -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="main-content">
+            
+            <!-- Linha do Tempo e Meta Principal -->
+            <header class="project-header">
+                <div class="project-info">
+                    <span class="project-tag">Projeto Ativo</span>
+                    <div class="project-title-wrapper">
+                        <h2 id="project-display-name">Carregando...</h2>
+                        <button id="quick-edit-project-btn" class="icon-text-btn" title="Editar objetivo rapidamente">✏️</button>
+                    </div>
+                </div>
+                <div class="countdown-widget">
+                    <div class="countdown-time">
+                        <div class="time-block">
+                            <span id="days-left">00</span>
+                            <small>dias</small>
+                        </div>
+                        <div class="time-block">
+                            <span id="hours-left">00</span>
+                            <small>horas</small>
+                        </div>
+                        <div class="time-block">
+                            <span id="mins-left">00</span>
+                            <small>min</small>
+                        </div>
+                    </div>
+                    <div class="countdown-progress">
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="deadline-progress-fill"></div>
+                        </div>
+                        <span id="progress-percent">0% do prazo</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                
+                <!-- SEÇÃO CENTRAL: Timer e Tarefa Única -->
+                <div class="focus-section card">
+                    <div class="focus-header">
+                        <h3>Foco Único</h3>
+                        <span class="tooltip-btn" title="Dica de Dopamina: Defina apenas UMA tarefa por vez. Evite a ansiedade das listas gigantes!">?</span>
+                    </div>
+                    
+                    <div class="single-task-box">
+                        <input type="text" id="current-task-input" placeholder="O que você vai concluir agora?" autocomplete="off">
+                        <button id="complete-task-btn" class="glow-btn" disabled>Concluir Meta</button>
+                    </div>
+
+                    <!-- Timer Pomodoro / 5 Minutos -->
+                    <div class="timer-container">
+                        <div class="timer-display" id="timer-display">25:00</div>
+                        
+                        <div class="timer-modes">
+                            <button class="timer-mode-btn active" data-time="1500">Pomodoro (25m)</button>
+                            <button class="timer-mode-btn mode-dopamine" data-time="300" title="Vença a preguiça! Faça só por 5 minutos.">Só 5 Minutos</button>
+                            <button class="timer-mode-btn" data-time="300">Pausa Curta (5m)</button>
+                        </div>
+
+                        <div class="timer-controls">
+                            <button id="start-timer-btn" class="control-btn primary">Iniciar</button>
+                            <button id="reset-timer-btn" class="control-btn secondary">Reiniciar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO DIREITA: Hábitos e Tarefas Secundárias (To-Do) -->
+                <div class="daily-section card">
+                    <div class="section-title">
+                        <h3>Micro-Hábitos Diários</h3>
+                        <button id="edit-habits-btn" class="text-btn">Editar</button>
+                    </div>
+                    <div class="habits-list" id="habits-list">
+                        <!-- Gerado dinamicamente -->
+                    </div>
+
+                    <hr class="divider">
+
+                    <!-- Lista de Tarefas Secundárias (To-Do List) -->
+                    <div class="section-title">
+                        <h3>Tarefas Secundárias</h3>
+                    </div>
+                    <div class="todo-input-row">
+                        <input type="text" id="todo-input" placeholder="Nova tarefa (Ganha Adubo 🍂)" autocomplete="off">
+                        <button id="add-todo-btn" class="todo-add-btn">+</button>
+                    </div>
+                    <div class="todo-list" id="todo-list">
+                        <!-- Tarefas secundárias geradas via JS -->
+                    </div>
+
+                    <hr class="divider">
+
+                    <!-- Missão Semanal -->
+                    <div class="section-title">
+                        <h3>Desafio Semanal</h3>
+                    </div>
+                    <div class="weekly-quest-box">
+                        <div class="weekly-header">
+                            <span id="weekly-quest-title">Carregar...</span>
+                            <span id="weekly-quest-reward">💎 +150</span>
+                        </div>
+                        <div class="weekly-progress-container">
+                            <div class="progress-bar-bg" style="height: 5px;">
+                                <div class="progress-bar-fill" id="weekly-progress-fill" style="width: 0%;"></div>
+                            </div>
+                            <span id="weekly-progress-text">0/0 XP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO INFERIOR: Bloco de Escrita / TCC Helper / RPG, LOJA & ALQUIMIA -->
+                <div class="writing-section card">
+                    <div class="writing-header">
+                        <div class="writing-tabs">
+                            <button class="write-tab active" data-tab="assistant">Assistente de Escrita</button>
+                            <button class="write-tab" data-tab="freewriting">Modo Freewriting</button>
+                            <button class="write-tab write-tab-rpg" data-tab="rpg">💎 RPG, Loja & Alquimia</button>
+                        </div>
+                        <div class="journey-selector-container" id="journey-selector-wrapper">
+                            <label for="journey-select">Jornada:</label>
+                            <select id="journey-select">
+                                <option value="tcc">Pré-Projeto & TCC</option>
+                                <option value="creative">Escrita Criativa</option>
+                                <option value="code">Tech & Documentação</option>
+                                <option value="general">Planejamento Geral</option>
+                            </select>
+                            <button id="create-journey-trigger" class="add-journey-btn" title="Criar Jornada Customizada">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo 1: Assistente de Escrita Guiado -->
+                    <div class="tab-content active" id="tab-assistant">
+                        <div class="assistant-layout">
+                            <div class="templates-sidebar" id="templates-list">
+                                <!-- Gerado dinamicamente -->
+                            </div>
+                            <div class="editor-area">
+                                <div class="editor-header">
+                                    <h4 id="current-template-title">Selecione um tópico</h4>
+                                    <span id="word-count">0 palavras</span>
+                                </div>
+                                <div class="editor-guide" id="current-template-guide">
+                                    Escolha um tópico na barra lateral para ver instruções pragmáticas de escrita.
+                                </div>
+                                <textarea id="editor-textarea" placeholder="Comece a escrever aqui..."></textarea>
+                                <div class="editor-actions">
+                                    <button id="save-draft-btn" class="glow-btn">Salvar Rascunho</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo 2: Modo Freewriting -->
+                    <div class="tab-content" id="tab-freewriting">
+                        <div class="freewriting-layout">
+                            <div class="freewriting-intro">
+                                <h4>Vença o Perfeccionismo e o Bloqueio</h4>
+                                <p>O temporizador de 3 minutos começará a rodar. O segredo é <strong>não parar de digitar</strong>. Escreva qualquer coisa, mesmo ideias desconexas ou "não sei o que escrever". O importante é colocar as palavras para fora sem julgar.</p>
+                                <button id="start-freewriting-btn" class="glow-btn">Iniciar Fluxo (3 Minutos)</button>
+                            </div>
+                            <div class="freewriting-active-area" style="display: none;">
+                                <div class="freewriting-header">
+                                    <span id="freewriting-timer">03:00</span>
+                                    <span id="freewriting-warning">Escreva continuamente!</span>
+                                </div>
+                                <textarea id="freewriting-textarea" placeholder="Digite sem parar, sem editar e sem apagar..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conteúdo 3: RPG, Loja de Recompensas, Alquimia e Inventário -->
+                    <div class="tab-content" id="tab-rpg">
+                        <div class="rpg-layout-three">
+                            
+                            <!-- 1. Loja de Itens -->
+                            <div class="rpg-column">
+                                <h4>💎 Loja Virtual</h4>
+                                <div class="shop-grid-vertical" id="shop-items-grid">
+                                    <!-- Gerado dinamicamente -->
+                                </div>
+                            </div>
+
+                            <!-- 2. Laboratório de Alquimia & Inventário -->
+                            <div class="rpg-column">
+                                <h4>🧪 Alquimia & Inventário</h4>
+                                <div class="alchemy-box">
+                                    <div class="ingredients-inventory">
+                                        <div class="ing-item" title="Conclua timers ou hábitos">
+                                            <span class="ing-icon">🌿</span>
+                                            <span class="ing-name">Mudas</span>
+                                            <strong class="ing-count" id="ing-mudas-count">0</strong>
+                                        </div>
+                                        <div class="ing-item" title="Conclua tarefas secundárias">
+                                            <span class="ing-icon">🍂</span>
+                                            <span class="ing-name">Adubos</span>
+                                            <strong class="ing-count" id="ing-adubos-count">0</strong>
+                                        </div>
+                                        <div class="ing-item" title="Conclua timers Pomodoro">
+                                            <span class="ing-icon">🧪</span>
+                                            <span class="ing-name">Essências</span>
+                                            <strong class="ing-count" id="ing-essencias-count">0</strong>
+                                        </div>
+                                    </div>
+
+                                    <h5 class="alchemy-sub-title">Receitas de Criação</h5>
+                                    <div class="recipes-list" id="recipes-list">
+                                        <!-- Receitas e botões de craft via JS -->
+                                    </div>
+
+                                    <hr class="divider" style="margin: 12px 0;">
+
+                                    <!-- Nova Seção de Inventário Físico do Jogador (🎒) -->
+                                    <h5 class="alchemy-sub-title">🎒 Meu Baú de Itens</h5>
+                                    <div class="bag-inventory-list" id="bag-inventory-list">
+                                        <!-- Listagem de poções e cosméticos adquiridos com ações de usar/equipar -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Árvore de Habilidades -->
+                            <div class="rpg-column">
+                                <div class="skills-header-row">
+                                    <h4>🌳 Habilidades</h4>
+                                </div>
+                                <span class="skill-points-display">Disponíveis: <strong id="skill-points-count">0</strong></span>
+                                <div class="skills-tree-container" id="skills-tree-grid" style="margin-top: 10px;">
+                                    <!-- Nodes da árvore de habilidades -->
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- BOTÃO DE CONFIGURAÇÕES -->
+        <button id="settings-trigger" class="settings-btn" title="Configurações">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+        </button>
+
+        <!-- MODAL DE CONFIGURAÇÕES -->
+        <div id="settings-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Configurações do Pragma</h3>
+                    <button class="close-modal-btn" id="close-settings-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    
+                    <!-- Configurações de Projeto -->
+                    <div class="settings-group">
+                        <h4>Meta & Prazo</h4>
+                        <div class="input-row">
+                            <label for="project-name-input">Nome do Projeto:</label>
+                            <input type="text" id="project-name-input" value="Pré-Projeto de TCC">
+                        </div>
+                        <div class="input-row">
+                            <label for="project-deadline-input">Data Limite (Prazo):</label>
+                            <input type="date" id="project-deadline-input">
+                        </div>
+                    </div>
+
+                    <!-- Configurações de Foco Ativo -->
+                    <div class="settings-group">
+                        <h4>Mecânicas de Foco Ativo</h4>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="skinner-mode-toggle">
+                            <label for="skinner-mode-toggle">Habilitar Penalidade por Desistência (Perda de XP ao cancelar timer)</label>
+                        </div>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="skinner-idle-toggle" checked>
+                            <label for="skinner-idle-toggle">Habilitar Alertas Sonoros de Procrastinação Ociosa</label>
+                        </div>
+                    </div>
+
+                    <!-- Configurações de Marca / Identidade -->
+                    <div class="settings-group">
+                        <h4>Tema & Identidade</h4>
+                        <div class="theme-selector-grid">
+                            <div class="theme-option" data-theme="cajuina">
+                                <div class="theme-preview cajuina-preview"></div>
+                                <span>Cajuína Code</span>
+                            </div>
+                            <div class="theme-option" data-theme="pragma">
+                                <div class="theme-preview pragma-preview"></div>
+                                <span>Pragma Roxo</span>
+                            </div>
+                            <div class="theme-option" data-theme="geraqrcode">
+                                <div class="theme-preview geraqrcode-preview"></div>
+                                <span>GeraQRCode</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configurações de Som -->
+                    <div class="settings-group">
+                        <h4>Preferências</h4>
+                        <div class="checkbox-row">
+                            <input type="checkbox" id="sound-toggle" checked>
+                            <label for="sound-toggle">Habilitar Efeitos Sonoros 8-Bit (RPG)</label>
+                        </div>
+                    </div>
+
+                    <!-- Botão de Debug/Simulador -->
+                    <div class="settings-group">
+                        <h4>Laboratório de Teste comportamental</h4>
+                        <p class="settings-desc">Simule a passagem do tempo para testar a inatividade da árvore de foco (teste de consistência).</p>
+                        <button id="simulate-inactive-btn" class="control-btn secondary">Simular 24h sem Foco</button>
+                    </div>
+
+                    <!-- Exportação/Importação de Dados -->
+                    <div class="settings-group">
+                        <h4>Backup de Dados</h4>
+                        <p class="settings-desc">Seus dados são salvos localmente. Exporte para transferir ou salvar uma cópia de segurança.</p>
+                        <div class="backup-buttons">
+                            <button id="export-backup-btn" class="control-btn secondary">Exportar Dados (.JSON)</button>
+                            <button id="import-backup-trigger" class="control-btn secondary">Importar Dados</button>
+                            <input type="file" id="import-backup-file" accept=".json" style="display: none;">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="glow-btn" id="save-settings-btn">Salvar Configurações</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE ONBOARDING INICIAL / NOVO PROJETO -->
+        <div id="onboarding-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Defina Seu Próximo Grande Objetivo</h3>
+                </div>
+                <div class="modal-body">
+                    <p class="settings-desc">O Pragma irá cobrar de você a conclusão deste objetivo de forma ativa. Ajuste de acordo com a sua meta real.</p>
+                    
+                    <div class="input-row">
+                        <label for="onboard-project-name">Qual é o seu objetivo principal?</label>
+                        <input type="text" id="onboard-project-name" placeholder="Ex: Terminar Pré-Projeto de TCC, Aprender React, etc.">
+                    </div>
+                    
+                    <div class="input-row">
+                        <label for="onboard-project-deadline">Qual é o seu prazo final?</label>
+                        <input type="date" id="onboard-project-deadline">
+                    </div>
+
+                    <div class="settings-group">
+                        <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Escolha sua Jornada de Escrita:</label>
+                        <select id="onboard-journey-select" style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: var(--border-radius-sm); color: #fff; padding: 10px; font-family: var(--font-primary); font-weight: 600; width: 100%;">
+                            <option value="tcc">Pré-Projeto & TCC (Acadêmico)</option>
+                            <option value="code">Tech & Documentação (Programação/SaaS)</option>
+                            <option value="creative">Escrita Criativa (Artigos/Livros/Copywriting)</option>
+                            <option value="general">Planejamento Geral (Metas Genéricas)</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-group">
+                        <p class="settings-desc">Estipule 3 micro-hábitos diários fáceis e inegociáveis para este objetivo:</p>
+                        <div class="input-row" style="margin-top: 6px;">
+                            <input type="text" id="onboard-habit-1" placeholder="Hábito 1 (Ex: Abrir o arquivo do projeto)">
+                        </div>
+                        <div class="input-row">
+                            <input type="text" id="onboard-habit-2" placeholder="Hábito 2 (Ex: Escrever pelo menos 1 frase)">
+                        </div>
+                        <div class="input-row">
+                            <input type="text" id="onboard-habit-3" placeholder="Hábito 3 (Ex: Organizar mesa de estudo por 2 min)">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="glow-btn" id="start-onboard-btn">Iniciar Minha Jornada de Foco</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE ONBOARDING DE JORNADA PERSONALIZADA -->
+        <div id="custom-journey-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Criar Jornada Personalizada</h3>
+                    <button class="close-modal-btn" id="close-custom-journey-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-row">
+                        <label for="custom-journey-name">Nome da Jornada:</label>
+                        <input type="text" id="custom-journey-name" placeholder="Ex: Tese de Mestrado, Roteiro de Vídeo">
+                    </div>
+                    <div class="settings-group">
+                        <div class="section-title">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Passos de Escrita (Mínimo 1):</label>
+                            <button id="add-step-fields-btn" class="text-btn">+ Adicionar Passo</button>
+                        </div>
+                        <div id="custom-steps-container" class="custom-steps-builder">
+                            <!-- Linhas de campos de passos geradas dinamicamente -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="glow-btn" id="save-custom-journey-btn">Salvar Jornada</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE SUBIDA DE NÍVEL (DOPAMINA BOOST) -->
+        <div id="levelup-modal" class="modal-overlay levelup-overlay">
+            <div class="levelup-content">
+                <div class="levelup-stars">⭐⭐⭐</div>
+                <h2>SUBIU DE NÍVEL!</h2>
+                <div class="levelup-number" id="new-level-display">2</div>
+                <p>Seu jardim está crescendo e seu foco está se tornando imparável.</p>
+                <button class="glow-btn" id="claim-levelup-btn">Reivindicar Recompensa (+ Confetes)</button>
+            </div>
+        </div>
+
+        <!-- MODAL DE EDIÇÃO DE HÁBITOS -->
+        <div id="habits-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Personalizar Micro-Hábitos</h3>
+                    <button class="close-modal-btn" id="close-habits-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="settings-desc">Escolha hábitos diários minúsculos e inegociáveis. O segredo é mantê-los muito fáceis para vencer a preguiça.</p>
+                    <div class="input-row">
+                        <label for="habit-1-input">Hábito 1:</label>
+                        <input type="text" id="habit-1-input">
+                    </div>
+                    <div class="input-row">
+                        <label for="habit-2-input">Hábito 2:</label>
+                        <input type="text" id="habit-2-input">
+                    </div>
+                    <div class="input-row">
+                        <label for="habit-3-input">Hábito 3:</label>
+                        <input type="text" id="habit-3-input">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="glow-btn" id="save-habits-btn">Salvar Hábitos</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
