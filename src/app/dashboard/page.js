@@ -35,7 +35,6 @@ export default function PragmaDashboard() {
 
   const audioCtxRef = useRef(null);
   const timerIntervalRef = useRef(null);
-  const googleBtnContainerRef = useRef(null);
   const confettiCanvasRef = useRef(null);
   const taskInputRef = useRef(null);
 
@@ -53,12 +52,6 @@ export default function PragmaDashboard() {
             client_id: "274648341216-k3s64mlubsm394u5ephef4hopiv887ng.apps.googleusercontent.com",
             callback: handleGoogleLoginResponse
           });
-          if (googleBtnContainerRef.current) {
-            window.google.accounts.id.renderButton(
-              googleBtnContainerRef.current,
-              { theme: "outline", size: "large", width: 180 }
-            );
-          }
         } else { setTimeout(initGoogle, 500); }
       };
       initGoogle();
@@ -248,7 +241,6 @@ export default function PragmaDashboard() {
       <Sidebar
         token={token}
         userProfile={userProfile}
-        googleBtnContainerRef={googleBtnContainerRef}
         onLogout={handleLogout}
         onOpenRanking={loadGlobalRanking}
         streak={streak}
