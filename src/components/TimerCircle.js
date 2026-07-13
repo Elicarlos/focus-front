@@ -1,21 +1,42 @@
 "use client";
 
-import { RotateCcw, Zap, Flame, Circle } from "lucide-react";
+import { RotateCcw, Zap, Flame, Circle, Timer } from "lucide-react";
 
 const MODE_FOCUS = 1500;
 const MODE_BREAK = 300;
 const MAX_SESSIONS = 4;
 
-export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMode, handleStartTimer, selectTimerMode, formatTimer, sessionsToday = 0 }) {
+function getHeatColor(progress) {
+  if (progress > 0.6) return "#e6edf3";
+  if (progress > 0.4) return "#fbbf24";
+  if (progress > 0.2) return "#f97316";
+  return "#ef4444";
+}
+
+function getHeatGlow(progress) {
+  if (progress > 0.6) return "rgba(230,237,243,0)";
+  if (progress > 0.4) return "rgba(251,191,36,0.25)";
+  if (progress > 0.2) return "rgba(249,115,22,0.35)";
+  return "rgba(239,68,68,0.45)";
+}
+
+export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMode, handleStartTimer, selectTimerMode, formatTimer, sessionsToday = 0, onStartQuick }) {
   const isFocus = activeTimerMode === MODE_FOCUS;
   const progress = timerSeconds / activeTimerMode;
   const isUrgent = progress < 0.15 && timerRunning;
 
+  const heatColor = timerRunning ? getHeatColor(progress) : (isFocus ? "#4ade80" : "#60a5fa");
   const arcColor = isUrgent ? "#f97316" : isFocus ? "#4ade80" : "#60a5fa";
-  const glowColor = isUrgent ? "rgba(249,115,22,0.3)" : isFocus ? "rgba(74,222,128,0.25)" : "rgba(96,165,250,0.25)";
+  const glowColor = isUrgent ? "rgba(249,115,22,0.3)" : timerRunning ? getHeatGlow(progress) : (isFocus ? "rgba(74,222,128,0.25)" : "rgba(96,165,250,0.25)");
   const btnBg = isFocus ? "#22c55e" : "#3b82f6";
   const btnHoverBg = isFocus ? "#16a34a" : "#2563eb";
   const btnLabel = timerRunning ? (isFocus ? "Pausar Foco" : "Pausar Pausa") : (isFocus ? "Iniciar Foco" : "Iniciar Pausa");
+
+  // SVG progress ring
+  const ringRadius = 140;
+  const ringStroke = 6;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference * (1 - progress);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: "100%", maxWidth: 480 }}>
@@ -35,21 +56,57 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
         <span style={{ fontSize: 11, fontWeight: 700, color: "#4b5563" }}>{sessionsToday}/{MAX_SESSIONS}</span>
       </div>
 
-      {/* Número grande */}
-      <div style={timerRunning ? { filter: `drop-shadow(0 0 40px ${glowColor})` } : {}}>
-        <span style={{
-          fontSize: 112,
-          fontWeight: 900,
-          fontVariantNumeric: "tabular-nums",
-          lineHeight: 1,
-          letterSpacing: "-0.04em",
-          color: timerRunning ? arcColor : "#e6edf3",
-          transition: "color 0.3s",
-          fontFamily: "Outfit, sans-serif",
-          userSelect: "none"
-        }}>
-          {formatTimer(timerSeconds)}
-        </span>
+      {/* Timer com anel de progresso */}
+      <div style={{ position: "relative", width: ringRadius * 2 + 40, height: ringRadius * 2 + 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <svg
+          width={ringRadius * 2 + 40}
+          height={ringRadius * 2 + 40}
+          style={{ position: "absolute", inset: 0, transform: "rotate(-90deg)" }}
+        >
+          {/* Background ring */}
+          <circle
+            cx={ringRadius + 20}
+            cy={ringRadius + 20}
+            r={ringRadius}
+            fill="none"
+            stroke="#21262d"
+            strokeWidth={ringStroke}
+          />
+          {/* Progress ring */}
+          <circle
+            cx={ringRadius + 20}
+            cy={ringRadius + 20}
+            r={ringRadius}
+            fill="none"
+            stroke={heatColor}
+            strokeWidth={ringStroke}
+            strokeLinecap="round"
+            strokeDasharray={ringCircumference}
+            strokeDashoffset={ringOffset}
+            style={{
+              transition: "stroke-dashoffset 1s linear, stroke 0.5s ease",
+              filter: timerRunning ? `drop-shadow(0 0 8px ${glowColor})` : "none",
+            }}
+          />
+        </svg>
+
+        {/* Número do timer */}
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <span style={{
+            fontSize: 96,
+            fontWeight: 900,
+            fontVariantNumeric: "tabular-nums",
+            lineHeight: 1,
+            letterSpacing: "-0.04em",
+            color: heatColor,
+            transition: "color 0.5s ease",
+            fontFamily: "Outfit, sans-serif",
+            userSelect: "none",
+            textShadow: timerRunning ? `0 0 40px ${glowColor}` : "none",
+          }}>
+            {formatTimer(timerSeconds)}
+          </span>
+        </div>
       </div>
 
       {/* Badge modo */}
@@ -84,8 +141,8 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
         ))}
       </div>
 
-      {/* Botões Iniciar + Reiniciar */}
-      <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 380 }}>
+      {/* Botões Iniciar + Reiniciar + Rápido */}
+      <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 420 }}>
         <button onClick={handleStartTimer} style={{
           flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
           padding: "16px 24px", borderRadius: 14, fontSize: 15, fontWeight: 900,
@@ -108,6 +165,19 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
         >
           <RotateCcw size={15} /> Reiniciar
         </button>
+        {isFocus && !timerRunning && (
+          <button onClick={onStartQuick} title="Sessão rápida de 5 minutos" style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            padding: "16px 16px", borderRadius: 14, fontSize: 12, fontWeight: 900,
+            background: "#161b22", color: "#f59e0b", border: "1px solid #92400e", cursor: "pointer",
+            fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#78350f"; e.currentTarget.style.color = "#fbbf24"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "#161b22"; e.currentTarget.style.color = "#f59e0b"; }}
+          >
+            <Timer size={15} /> 5min
+          </button>
+        )}
       </div>
     </div>
   );

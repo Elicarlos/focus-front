@@ -1,6 +1,6 @@
 "use client";
 
-import { Target, Timer, Trophy, Zap, Flame } from "lucide-react";
+import { Target, Timer, Trophy, Zap, Flame, Award } from "lucide-react";
 import MascotTree from "@/components/MascotTree";
 
 const S = {
@@ -17,7 +17,7 @@ const S = {
   avatarFallback: { width: 36, height: 36, borderRadius: "50%", background: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, flexShrink: 0 },
 };
 
-export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, streak = 0, treeHealth, totalFocusMinutes, xpGain, timerRunning = false, open = true }) {
+export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, streak = 0, treeHealth, totalFocusMinutes, xpGain, timerRunning = false, open = true }) {
   const opacity = timerRunning ? 0.2 : open ? 1 : 0;
   const pointerEvents = (timerRunning || !open) ? "none" : "auto";
 
@@ -58,6 +58,9 @@ export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, s
         </button>
         <button onClick={onOpenRanking} style={S.navBtn(false)}>
           <Trophy size={16} strokeWidth={2} /> Ranking Global
+        </button>
+        <button onClick={onOpenAchievements} style={S.navBtn(false)}>
+          <Award size={16} strokeWidth={2} /> Conquistas
         </button>
       </nav>
 

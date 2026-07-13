@@ -4,9 +4,27 @@ import { useState, useEffect, useRef } from "react";
 import { Pencil, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import TimerCircle from "@/components/TimerCircle";
+import VictoryModal from "@/components/VictoryModal";
+import AchievementsModal from "@/components/Achievements";
+import MascotTree from "@/components/MascotTree";
 import { SettingsModal, RankingModal, CheckInModal } from "@/components/Modals";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
+
+function getLevel(min) { return Math.floor(min / 100) + 1; }
+function getLevelName(lvl) {
+  return ["Semente","Broto","Muda","Arbusto","Árvore Jovem","Carvalho","Sequóia","Lenda"][Math.min(lvl - 1, 7)];
+}
+
+function calculateStreak(lastActivityDate) {
+  if (!lastActivityDate) return 0;
+  const last = new Date(lastActivityDate);
+  const now = new Date();
+  const diffDays = Math.floor((now - last) / 86400000);
+  if (diffDays > 1) return 0;
+  const saved = localStorage.getItem("pragma_streak");
+  return saved ? parseInt(saved) : 0;
+}
 
 export default function PragmaDashboard() {
   const [token, setToken] = useState(null);
@@ -19,6 +37,7 @@ export default function PragmaDashboard() {
   const [treeHealth, setTreeHealth] = useState(0);
   const [totalFocusMinutes, setTotalFocusMinutes] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [totalSessions, setTotalSessions] = useState(0);
 
   const [timerSeconds, setTimerSeconds] = useState(1500);
   const [timerRunning, setTimerRunning] = useState(false);
@@ -33,6 +52,12 @@ export default function PragmaDashboard() {
   const [selectedMood, setSelectedMood] = useState(null);
   const [microStep, setMicroStep] = useState("");
 
+  // Novos states
+  const [victoryActive, setVictoryActive] = useState(false);
+  const [victoryData, setVictoryData] = useState({ xp: 0, total: 0, level: 1, levelName: "Semente", sessions: 0 });
+  const [achievementsActive, setAchievementsActive] = useState(false);
+  const [showTreeInCenter, setShowTreeInCenter] = useState(false);
+
   const audioCtxRef = useRef(null);
   const timerIntervalRef = useRef(null);
   const confettiCanvasRef = useRef(null);
@@ -42,6 +67,17 @@ export default function PragmaDashboard() {
     const savedToken = localStorage.getItem("pragma_token");
     if (savedToken) { setToken(savedToken); fetchUserData(savedToken); }
     else loadStateLocal();
+
+    // Carregar streak e totalSessions
+    const savedStreak = localStorage.getItem("pragma_streak");
+    if (savedStreak) setStreak(parseInt(savedStreak));
+    const savedTotalSessions = localStorage.getItem("pragma_total_sessions");
+    if (savedTotalSessions) setTotalSessions(parseInt(savedTotalSessions));
+
+    // Solicitar permissão de notificação
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
   }, []);
 
   useEffect(() => {
@@ -77,6 +113,8 @@ export default function PragmaDashboard() {
       if (res.status === 401) { handleLogout(); return; }
       const d = await res.json();
       setUserProfile(d); setTreeHealth(d.tree_health); setTotalFocusMinutes(d.xp);
+      if (d.streak) setStreak(d.streak);
+      if (d.total_sessions) setTotalSessions(d.total_sessions);
     } catch (e) { console.error(e); loadStateLocal(); }
   };
 
@@ -104,9 +142,10 @@ export default function PragmaDashboard() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           email: userProfile.email, username: userProfile.username, xp: totalFocusMinutes,
-          level: 1, gems: 100, streak: 1, water_units: 0, skill_points: 0,
+          level: getLevel(totalFocusMinutes), gems: 100, streak, water_units: 0, skill_points: 0,
           tree_health: treeHealth, tree_dead: treeHealth <= 0,
-          mudas: 0, adubos: 0, essencias: 0, last_streak_date: "", last_activity_date: ""
+          mudas: 0, adubos: 0, essencias: 0, last_streak_date: "", last_activity_date: new Date().toISOString(),
+          total_sessions: totalSessions
         })
       });
     } catch (e) { console.error(e); }
@@ -115,7 +154,9 @@ export default function PragmaDashboard() {
   useEffect(() => {
     if (token) syncWithBackend();
     else localStorage.setItem("pragma_state_minimal", JSON.stringify({ currentTask, projectDeadline, treeHealth, totalFocusMinutes }));
-  }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes]);
+    localStorage.setItem("pragma_streak", streak.toString());
+    localStorage.setItem("pragma_total_sessions", totalSessions.toString());
+  }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes, streak, totalSessions]);
 
   const loadGlobalRanking = async () => {
     try {
@@ -147,13 +188,28 @@ export default function PragmaDashboard() {
     if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = audioCtxRef.current;
     if (ctx.state === "suspended") ctx.resume();
-    const osc = ctx.createOscillator(); const gain = ctx.createGain();
-    osc.connect(gain); gain.connect(ctx.destination);
-    const t = ctx.currentTime;
+
     if (type === "alarm") {
-      osc.type = "sine"; osc.frequency.setValueAtTime(660, t); osc.frequency.linearRampToValueAtTime(440, t + 0.2);
-      gain.gain.setValueAtTime(0.08, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-      osc.start(t); osc.stop(t + 0.4);
+      // Som de vitória - sequência ascendente
+      const notes = [523, 659, 784, 1047];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        const t = ctx.currentTime + i * 0.15;
+        osc.type = "sine"; osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.06, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+        osc.start(t); osc.stop(t + 0.3);
+      });
+    } else if (type === "tick") {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = "sine"; osc.frequency.setValueAtTime(800, ctx.currentTime);
+      gain.gain.setValueAtTime(0.02, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.05);
     }
   };
 
@@ -161,11 +217,11 @@ export default function PragmaDashboard() {
     const canvas = confettiCanvasRef.current; if (!canvas) return;
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    const particles = Array.from({ length: 70 }, () => ({
+    const particles = Array.from({ length: 100 }, () => ({
       x: Math.random() * canvas.width, y: Math.random() * -canvas.height - 20,
-      size: Math.random() * 6 + 3, color: `hsl(${Math.random() * 360},65%,55%)`,
-      sx: Math.random() * 3 - 1.5, sy: Math.random() * 3 + 3,
-      rot: Math.random() * 360, rs: Math.random() * 3 - 1.5
+      size: Math.random() * 8 + 3, color: `hsl(${Math.random() * 360},70%,55%)`,
+      sx: Math.random() * 4 - 2, sy: Math.random() * 4 + 4,
+      rot: Math.random() * 360, rs: Math.random() * 4 - 2
     }));
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -182,15 +238,20 @@ export default function PragmaDashboard() {
     animate();
   };
 
+  const sendNotification = (title, body) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(title, { body, icon: "/favicon.ico" });
+    }
+  };
+
   const handleStartTimer = () => {
-    if (timerRunning) { clearInterval(timerIntervalRef.current); setTimerRunning(false); return; }
+    if (timerRunning) { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); return; }
     if (!currentTask.trim()) {
       setTaskShaking(true);
       setTimeout(() => setTaskShaking(false), 400);
       taskInputRef.current?.focus();
       return;
     }
-    // Abre check-in apenas para sessões de foco (não pausa)
     if (activeTimerMode === 1500) {
       setSelectedMood(null);
       setMicroStep("");
@@ -200,36 +261,126 @@ export default function PragmaDashboard() {
     confirmStartTimer();
   };
 
-  const confirmStartTimer = () => {
-    setCheckInActive(false);
+  const handleQuickStart = () => {
+    if (!currentTask.trim()) {
+      setTaskShaking(true);
+      setTimeout(() => setTaskShaking(false), 400);
+      taskInputRef.current?.focus();
+      return;
+    }
+    setActiveTimerMode(300);
+    setTimerSeconds(300);
     setTimerRunning(true);
+    setShowTreeInCenter(true);
     timerIntervalRef.current = setInterval(() => {
       setTimerSeconds(prev => {
         if (prev <= 1) {
-          clearInterval(timerIntervalRef.current); setTimerRunning(false);
+          clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false);
           playSound("alarm"); triggerConfetti();
-          const isFocus = activeTimerMode === 1500;
-          setTotalFocusMinutes(m => m + (isFocus ? 25 : 5));
-          if (isFocus) { setTreeHealth(th => Math.min(100, th + 25)); setSessionsToday(s => Math.min(4, s + 1)); setXpGain(true); setTimeout(() => setXpGain(false), 1800); setTimeout(() => selectTimerMode(300), 500); }
-          else setTimeout(() => selectTimerMode(1500), 500);
-          return activeTimerMode;
+          setTotalFocusMinutes(m => m + 5);
+          const newSessions = totalSessions + 1;
+          setTotalSessions(newSessions);
+          setSessionsToday(s => Math.min(4, s + 1));
+          setXpGain(true); setTimeout(() => setXpGain(false), 1800);
+
+          // Atualizar streak
+          const today = new Date().toDateString();
+          const lastDate = localStorage.getItem("pragma_last_activity");
+          if (lastDate !== today) {
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            const newStreak = lastDate === yesterday ? streak + 1 : 1;
+            setStreak(newStreak);
+            localStorage.setItem("pragma_last_activity", today);
+            sendNotification("Grove", `Sessão rápida completa! Streak: ${newStreak} dias`);
+          }
+
+          // Mostrar vitória
+          const lvl = getLevel(totalFocusMinutes + 5);
+          setVictoryData({ xp: 5, total: totalFocusMinutes + 5, level: lvl, levelName: getLevelName(lvl), sessions: sessionsToday + 1 });
+          setTimeout(() => setVictoryActive(true), 300);
+
+          setTimeout(() => selectTimerMode(1500), 500);
+          return 300;
         }
         return prev - 1;
       });
     }, 1000);
   };
 
-  const selectTimerMode = (d) => { clearInterval(timerIntervalRef.current); setTimerRunning(false); setActiveTimerMode(d); setTimerSeconds(d); };
+  const confirmStartTimer = () => {
+    setCheckInActive(false);
+    setTimerRunning(true);
+    setShowTreeInCenter(true);
+    timerIntervalRef.current = setInterval(() => {
+      setTimerSeconds(prev => {
+        if (prev <= 1) {
+          clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false);
+          playSound("alarm"); triggerConfetti();
+          const isFocus = activeTimerMode === 1500;
+          const xpGained = isFocus ? 25 : 5;
+          setTotalFocusMinutes(m => m + xpGained);
+          const newSessions = totalSessions + 1;
+          setTotalSessions(newSessions);
+
+          if (isFocus) {
+            setTreeHealth(th => Math.min(100, th + 25));
+            setSessionsToday(s => Math.min(4, s + 1));
+            setXpGain(true); setTimeout(() => setXpGain(false), 1800);
+
+            // Atualizar streak
+            const today = new Date().toDateString();
+            const lastDate = localStorage.getItem("pragma_last_activity");
+            let newStreak = streak;
+            if (lastDate !== today) {
+              const yesterday = new Date(Date.now() - 86400000).toDateString();
+              newStreak = lastDate === yesterday ? streak + 1 : 1;
+              setStreak(newStreak);
+              localStorage.setItem("pragma_last_activity", today);
+            }
+
+            // Mostrar vitória
+            const lvl = getLevel(totalFocusMinutes + xpGained);
+            setVictoryData({ xp: xpGained, total: totalFocusMinutes + xpGained, level: lvl, levelName: getLevelName(lvl), sessions: sessionsToday + 1 });
+            setTimeout(() => setVictoryActive(true), 300);
+
+            sendNotification("Grove", `Sessão completa! +25 XP. Streak: ${newStreak} dias`);
+            setTimeout(() => selectTimerMode(300), 2000);
+          } else {
+            sendNotification("Grove", "Pausa completa! Hora de voltar ao foco.");
+            setTimeout(() => selectTimerMode(1500), 500);
+          }
+          return activeTimerMode;
+        }
+        // Tick a cada 5 minutos para som sutil
+        if (prev % 300 === 0 && prev > 0) playSound("tick");
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const selectTimerMode = (d) => { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); setActiveTimerMode(d); setTimerSeconds(d); };
   const formatTimer = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  const handleShare = () => {
+    const text = `🌳 Grove - ${victoryData.sessions} sessões completas!\n🔥 Streak: ${streak} dias\n🌱 Nível ${victoryData.level} · ${victoryData.levelName}\n\nFocado e produtivo! #GroveApp`;
+    if (navigator.share) {
+      navigator.share({ title: "Grove", text });
+    } else {
+      navigator.clipboard.writeText(text);
+      alert("Copiado para a área de transferência!");
+    }
+    setVictoryActive(false);
+  };
 
   const isUrgent = parseInt(timeLeftStr.days) <= 3;
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const level = getLevel(totalFocusMinutes);
 
   return (
     <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", fontFamily: "Outfit, sans-serif", display: "flex", position: "relative", userSelect: "none" }}>
       <canvas ref={confettiCanvasRef} style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 50 }} />
 
-      {/* Overlay mobile quando sidebar aberta */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
@@ -243,6 +394,7 @@ export default function PragmaDashboard() {
         userProfile={userProfile}
         onLogout={handleLogout}
         onOpenRanking={loadGlobalRanking}
+        onOpenAchievements={() => setAchievementsActive(true)}
         streak={streak}
         treeHealth={treeHealth}
         totalFocusMinutes={totalFocusMinutes}
@@ -255,7 +407,7 @@ export default function PragmaDashboard() {
       {/* Área principal */}
       <main style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100vh", minWidth: 0 }}>
 
-        {/* Header: projeto ativo + countdown */}
+        {/* Header */}
         <div style={{
           borderBottom: "1px solid #21262d",
           padding: "14px 20px",
@@ -267,7 +419,6 @@ export default function PragmaDashboard() {
           pointerEvents: timerRunning ? "none" : "auto",
           transition: "opacity 0.7s"
         }}>
-          {/* Botão toggle sidebar */}
           <button
             onClick={() => setSidebarOpen(o => !o)}
             title={sidebarOpen ? "Esconder sidebar" : "Mostrar sidebar"}
@@ -276,7 +427,6 @@ export default function PragmaDashboard() {
             {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
 
-          {/* Projeto */}
           <div className={taskShaking ? "shake" : ""} style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: taskShaking ? "#f97316" : "#22c55e", marginBottom: 4, transition: "color 0.2s" }}>
               {taskShaking ? "⚠ Defina o projeto antes de iniciar" : "Projeto Ativo"}
@@ -295,7 +445,6 @@ export default function PragmaDashboard() {
             </div>
           </div>
 
-          {/* Countdown */}
           <div style={{ display: "flex", alignItems: "center", gap: 24, flexShrink: 0 }}>
             {[{ v: timeLeftStr.days, l: "Dias" }, { v: timeLeftStr.hours, l: "Horas" }].map(({ v, l }) => (
               <div key={l} style={{ textAlign: "center" }}>
@@ -310,17 +459,32 @@ export default function PragmaDashboard() {
           </div>
         </div>
 
-        {/* Timer — centralizado */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 32px" }}>
-          <TimerCircle
-            timerSeconds={timerSeconds}
-            timerRunning={timerRunning}
-            activeTimerMode={activeTimerMode}
-            handleStartTimer={handleStartTimer}
-            selectTimerMode={selectTimerMode}
-            formatTimer={formatTimer}
-            sessionsToday={sessionsToday}
-          />
+        {/* Área do timer com árvore central quando rodando */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative" }}>
+          {/* Árvore central durante sessão */}
+          {showTreeInCenter && (
+            <div style={{
+              position: "absolute", top: "50%", left: "50%",
+              transform: "translate(-50%, -50%)",
+              opacity: 0.15, pointerEvents: "none",
+              transition: "opacity 1s ease"
+            }}>
+              <MascotTree treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={false} />
+            </div>
+          )}
+
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <TimerCircle
+              timerSeconds={timerSeconds}
+              timerRunning={timerRunning}
+              activeTimerMode={activeTimerMode}
+              handleStartTimer={handleStartTimer}
+              selectTimerMode={selectTimerMode}
+              formatTimer={formatTimer}
+              sessionsToday={sessionsToday}
+              onStartQuick={handleQuickStart}
+            />
+          </div>
         </div>
       </main>
 
@@ -345,6 +509,21 @@ export default function PragmaDashboard() {
         setMicroStep={setMicroStep}
         onConfirm={confirmStartTimer}
         onClose={() => setCheckInActive(false)}
+      />
+      <VictoryModal
+        active={victoryActive}
+        xpGained={victoryData.xp}
+        totalXP={victoryData.total}
+        level={victoryData.level}
+        levelName={victoryData.levelName}
+        sessionsToday={victoryData.sessions}
+        onContinue={() => setVictoryActive(false)}
+        onShare={handleShare}
+      />
+      <AchievementsModal
+        active={achievementsActive}
+        onClose={() => setAchievementsActive(false)}
+        stats={{ totalSessions, streak, totalXP: totalFocusMinutes, level, treeHealth }}
       />
     </div>
   );
