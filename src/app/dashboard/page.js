@@ -331,40 +331,40 @@ export default function PragmaDashboard() {
   const strokeDashoffset = circumference - (timerSeconds / activeTimerMode) * circumference;
 
   return (
-    <div className="min-h-screen bg-[#f7faf7] text-[#3c3c3c] flex flex-col md:flex-row font-sans relative overflow-hidden select-none">
+    <div className="min-h-screen bg-[#f2f6f4] text-[#0f2d4a] flex flex-col md:flex-row font-sans relative overflow-hidden select-none">
       <canvas id="confetti-canvas" ref={confettiCanvasRef} className="absolute inset-0 pointer-events-none z-50"></canvas>
 
       {/* Sidebar Esquerda (Estilo Duolingo Minimal) */}
-      <aside className="w-full md:w-[260px] bg-white border-r-2 border-[#e5e5e5] flex flex-col p-6 z-10 gap-8">
+      <aside className="w-full md:w-[260px] bg-white border-r-2 border-[#d9e2ec] flex flex-col p-6 z-10 gap-8">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#58cc02] flex items-center justify-center shadow-[0_3px_0_#46a302]">
+          <div className="w-9 h-9 rounded-xl bg-[#10b981] flex items-center justify-center shadow-[0_3px_0_#059669]">
             <Target className="w-5 h-5 text-white" strokeWidth={3} />
           </div>
-          <span className="font-black text-2xl tracking-wider text-[#58cc02]">PRAGMA</span>
+          <span className="font-black text-2xl tracking-wider text-[#0f2d4a]">PRAGMA</span>
         </div>
 
         {/* Perfil & Login do Google One Tap */}
-        <div className="p-4 bg-[#f1f1f1] border-2 border-[#e5e5e5] rounded-2xl flex flex-col gap-2">
+        <div className="p-4 bg-[#eef3f6] border-2 border-[#d9e2ec] rounded-2xl flex flex-col gap-2">
           {!token ? (
             <div>
-              <div className="text-[10px] font-black text-[#777777] mb-2 text-center uppercase tracking-wider">Entrar na Conta</div>
+              <div className="text-[10px] font-black text-[#627d98] mb-2 text-center uppercase tracking-wider">Entrar na Conta</div>
               <div ref={googleBtnContainerRef} id="google-login-btn"></div>
             </div>
           ) : (
             <div className="flex items-center gap-3">
               {userProfile?.avatar_url ? (
-                <img src={userProfile.avatar_url} className="w-8 h-8 rounded-full border-2 border-[#58cc02]" alt="Avatar" />
+                <img src={userProfile.avatar_url} className="w-8 h-8 rounded-full border-2 border-[#10b981]" alt="Avatar" />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-xs text-[#3c3c3c] border border-[#e5e5e5]">U</div>
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-xs text-[#0f2d4a] border border-[#d9e2ec]">U</div>
               )}
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-black truncate text-[#3c3c3c] flex items-center gap-1">
+                <div className="text-xs font-black truncate text-[#0f2d4a] flex items-center gap-1">
                   {userProfile?.username}
-                  <span className="text-[9px] px-1 py-0.25 rounded bg-[#e5e5e5] font-normal text-[#3c3c3c] border border-[#e5e5e5]">
+                  <span className="text-[9px] px-1 py-0.25 rounded bg-[#d9e2ec] font-normal text-[#0f2d4a] border border-[#d9e2ec]">
                     {userProfile?.country || "BR"}
                   </span>
                 </div>
-                <div className="text-[10px] text-[#777777] truncate">{userProfile?.email}</div>
+                <div className="text-[10px] text-[#627d98] truncate">{userProfile?.email}</div>
               </div>
               <button onClick={handleLogout} className="text-[10px] text-red-600 hover:text-red-700 font-extrabold cursor-pointer transition-all">Sair</button>
             </div>
@@ -378,49 +378,49 @@ export default function PragmaDashboard() {
             <span className="font-extrabold text-sm">Dashboard Foco</span>
           </button>
           <button onClick={loadGlobalRanking} className="flex items-center gap-3 px-4 py-3 rounded-2xl btn-duo-white text-left transition-all cursor-pointer">
-            <Trophy className="w-5 h-5 text-[#afafaf]" />
-            <span className="font-extrabold text-sm text-[#afafaf] hover:text-[#777777]">Ranking Mundial</span>
+            <Trophy className="w-5 h-5 text-[#9fb3c8]" />
+            <span className="font-extrabold text-sm text-[#627d98] hover:text-[#0f2d4a]">Ranking Mundial</span>
           </button>
           <button onClick={() => setSettingsActive(true)} className="flex items-center gap-3 px-4 py-3 rounded-2xl btn-duo-white text-left transition-all cursor-pointer">
-            <Calendar className="w-5 h-5 text-[#afafaf]" />
-            <span className="font-extrabold text-sm text-[#afafaf] hover:text-[#777777]">Configurar Prazo</span>
+            <Calendar className="w-5 h-5 text-[#9fb3c8]" />
+            <span className="font-extrabold text-sm text-[#627d98] hover:text-[#0f2d4a]">Configurar Prazo</span>
           </button>
         </nav>
 
-        <div className="text-[10px] text-[#afafaf] text-center font-bold">
+        <div className="text-[10px] text-[#9fb3c8] text-center font-bold">
           PRAGMA &bull; Mantenha o Foco
         </div>
       </aside>
 
       {/* Área de Conteúdo Principal */}
-      <main className="flex-1 px-6 py-8 flex flex-col md:flex-row items-stretch justify-center gap-8 z-10 max-w-5xl mx-auto w-full">
+      <main className="flex-grow px-6 py-8 flex flex-col md:flex-row items-stretch justify-center gap-8 z-10 max-w-5xl mx-auto w-full">
         
         {/* Coluna Esquerda: Objetivo & Timer */}
         <div className="flex-[1.2] flex flex-col gap-6 w-full">
           
           {/* Card Objetivo Ativo */}
-          <div className="bg-white border-2 border-[#e5e5e5] border-b-4 p-5 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
+          <div className="bg-white border-2 border-[#d9e2ec] border-b-4 p-5 rounded-2xl flex flex-col gap-4 relative overflow-hidden">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase font-black tracking-widest text-[#58cc02]">O que vamos fazer agora?</span>
+              <span className="text-[10px] uppercase font-black tracking-widest text-[#10b981]">O que vamos fazer agora?</span>
               <input 
                 type="text" 
                 value={currentTask} 
                 onChange={(e) => setCurrentTask(e.target.value)} 
                 placeholder="Escreva sua meta simples aqui..."
-                className="w-full bg-transparent text-lg font-black text-[#3c3c3c] placeholder-[#afafaf] border-b-2 border-[#e5e5e5] pb-2 focus:border-[#58cc02] focus:outline-none transition-all"
+                className="w-full bg-transparent text-lg font-black text-[#0f2d4a] placeholder-[#cbd5e1] border-b-2 border-[#d9e2ec] pb-2 focus:border-[#10b981] focus:outline-none transition-all"
               />
             </div>
             
-            <div className="flex justify-between items-center text-xs font-bold text-[#777777]">
-              <span className="cursor-pointer hover:text-[#58cc02] transition-all flex items-center gap-1.5" onClick={() => setSettingsActive(true)}>
-                <Calendar className="w-3.5 h-3.5 text-[#58cc02]" /> Prazo: {projectDeadline}
+            <div className="flex justify-between items-center text-xs font-bold text-[#627d98]">
+              <span className="cursor-pointer hover:text-[#10b981] transition-all flex items-center gap-1.5" onClick={() => setSettingsActive(true)}>
+                <Calendar className="w-3.5 h-3.5 text-[#10b981]" /> Prazo: {projectDeadline}
               </span>
               <span>Faltam {timeLeftStr.days} dias</span>
             </div>
           </div>
 
           {/* Card do Timer (Clean & Friendly) */}
-          <div className="bg-white border-2 border-[#e5e5e5] border-b-4 p-8 rounded-3xl relative overflow-hidden flex flex-col items-center justify-center gap-8">
+          <div className="bg-white border-2 border-[#d9e2ec] border-b-4 p-8 rounded-3xl relative overflow-hidden flex flex-col items-center justify-center gap-8">
             
             {/* Timer Circular */}
             <div className="relative flex items-center justify-center w-[220px] h-[220px] md:w-[240px] md:h-[240px] z-10">
@@ -429,7 +429,7 @@ export default function PragmaDashboard() {
                   cx="50%"
                   cy="50%"
                   r="90"
-                  className="stroke-[#e5e5e5]"
+                  className="stroke-[#d9e2ec]"
                   strokeWidth="8"
                   fill="transparent"
                 />
@@ -437,7 +437,7 @@ export default function PragmaDashboard() {
                   cx="50%"
                   cy="50%"
                   r="90"
-                  className="stroke-[#58cc02] transition-all duration-300"
+                  className="stroke-[#10b981] transition-all duration-300"
                   strokeWidth="8"
                   fill="transparent"
                   strokeDasharray={2 * Math.PI * 90}
@@ -447,10 +447,10 @@ export default function PragmaDashboard() {
               </svg>
 
               <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="text-5xl md:text-6xl font-black tracking-tight tabular-nums text-[#3c3c3c]">
+                <span className="text-5xl md:text-6xl font-black tracking-tight tabular-nums text-[#0f2d4a]">
                   {formatTimer(timerSeconds)}
                 </span>
-                <span className="text-[10px] uppercase font-black tracking-widest text-[#ffffff] mt-2 bg-[#58cc02] px-3.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-[0_2px_0_#46a302]">
+                <span className="text-[10px] uppercase font-black tracking-widest text-[#ffffff] mt-2 bg-[#10b981] px-3.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-[0_2px_0_#059669]">
                   <Activity className="w-2.5 h-2.5" /> {activeTimerMode === 1500 ? "Foco" : "Intervalo"}
                 </span>
               </div>
@@ -484,7 +484,7 @@ export default function PragmaDashboard() {
                   onClick={() => selectTimerMode(activeTimerMode)} 
                   className="px-5 py-4 rounded-2xl btn-duo-white transition-all cursor-pointer flex items-center justify-center"
                 >
-                  <RefreshCw className="w-4 h-4 text-[#afafaf]" />
+                  <RefreshCw className="w-4 h-4 text-[#9fb3c8]" />
                 </button>
               </div>
             </div>
@@ -495,60 +495,60 @@ export default function PragmaDashboard() {
         <div className="flex-[0.8] flex flex-col gap-6 w-full">
           
           {/* Card: Jardim de Hábitos */}
-          <div className="p-6 bg-white border-2 border-[#e5e5e5] border-b-4 rounded-2xl flex items-center justify-between relative overflow-hidden">
+          <div className="p-6 bg-white border-2 border-[#d9e2ec] border-b-4 rounded-2xl flex items-center justify-between relative overflow-hidden">
             <div className="flex flex-col gap-2 z-10">
-              <span className="text-[10px] uppercase font-black tracking-widest text-[#afafaf]">Tempo Focado</span>
-              <div className="text-3xl font-black text-[#3c3c3c] leading-none">
-                {totalFocusMinutes} <span className="text-xs font-bold text-[#777777]">minutos</span>
+              <span className="text-[10px] uppercase font-black tracking-widest text-[#9fb3c8]">Tempo Focado</span>
+              <div className="text-3xl font-black text-[#0f2d4a] leading-none">
+                {totalFocusMinutes} <span className="text-xs font-bold text-[#627d98]">minutos</span>
               </div>
-              <span className="text-[10px] font-black text-[#58cc02]">Saúde do Mascotinho: {treeHealth}%</span>
+              <span className="text-[10px] font-black text-[#10b981]">Saúde do Mascotinho: {treeHealth}%</span>
               
               {/* Barra de progresso */}
-              <div className="w-28 h-2.5 bg-[#e5e5e5] rounded-full overflow-hidden mt-1">
-                <div className="h-full bg-[#58cc02] transition-all duration-500" style={{ width: `${treeHealth}%` }}></div>
+              <div className="w-28 h-2.5 bg-[#d9e2ec] rounded-full overflow-hidden mt-1">
+                <div className="h-full bg-[#10b981] transition-all duration-500" style={{ width: `${treeHealth}%` }}></div>
               </div>
             </div>
 
             {/* Ilustração Minimalista da Árvore */}
-            <div className="w-16 h-16 flex items-center justify-center bg-[#f7faf7] border-2 border-[#e5e5e5] rounded-2xl p-2 z-10">
+            <div className="w-16 h-16 flex items-center justify-center bg-[#f2f6f4] border-2 border-[#d9e2ec] rounded-2xl p-2 z-10">
               <svg viewBox="0 0 100 100" className={`w-full h-full transition-all duration-300 ${treeHealth <= 0 ? "grayscale opacity-45" : ""}`}>
                 {/* Chão */}
-                <path d="M20,80 Q50,78 80,80" stroke="#afafaf" strokeWidth="4" fill="none" />
+                <path d="M20,80 Q50,78 80,80" stroke="#9fb3c8" strokeWidth="4" fill="none" />
                 {/* Tronco */}
-                <path d="M50,80 L50,48" stroke="#777777" strokeWidth="7" strokeLinecap="round" />
+                <path d="M50,80 L50,48" stroke="#627d98" strokeWidth="7" strokeLinecap="round" />
                 
                 {/* Copa (Folhas) */}
-                <circle cx="50" cy="38" r="18" fill="#58cc02" />
-                <circle cx="36" cy="46" r="14" fill="#46a302" />
-                <circle cx="64" cy="44" r="14" fill="#58cc02" />
+                <circle cx="50" cy="38" r="18" fill="#10b981" />
+                <circle cx="36" cy="46" r="14" fill="#059669" />
+                <circle cx="64" cy="44" r="14" fill="#10b981" />
 
                 {/* Expressões do Mascote (Olhos e Boca) */}
                 {treeHealth <= 0 ? (
                   // Olhos em X e Boca Reta (Morta/Seca)
                   <>
-                    <path d="M40,38 L48,46" stroke="#3c3c3c" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M48,38 L40,46" stroke="#3c3c3c" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M54,38 L62,46" stroke="#3c3c3c" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M62,38 L54,46" stroke="#3c3c3c" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M44,56 L58,56" stroke="#3c3c3c" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M40,38 L48,46" stroke="#0f2d4a" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M48,38 L40,46" stroke="#0f2d4a" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M54,38 L62,46" stroke="#0f2d4a" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M62,38 L54,46" stroke="#0f2d4a" strokeWidth="3" strokeLinecap="round" />
+                    <path d="M44,56 L58,56" stroke="#0f2d4a" strokeWidth="3" strokeLinecap="round" />
                   </>
                 ) : treeHealth < 50 ? (
                   // Olhos Preocupados e Boca Triste (Saúde Baixa)
                   <>
-                    <circle cx="43" cy="42" r="3.5" fill="#3c3c3c" />
-                    <circle cx="57" cy="42" r="3.5" fill="#3c3c3c" />
-                    <path d="M40,35 Q44,32 47,35" stroke="#3c3c3c" strokeWidth="2" fill="none" strokeLinecap="round" />
-                    <path d="M53,35 Q56,32 60,35" stroke="#3c3c3c" strokeWidth="2" fill="none" strokeLinecap="round" />
-                    <path d="M46,55 Q50,50 54,55" stroke="#3c3c3c" strokeWidth="3" fill="none" strokeLinecap="round" />
+                    <circle cx="43" cy="42" r="3.5" fill="#0f2d4a" />
+                    <circle cx="57" cy="42" r="3.5" fill="#0f2d4a" />
+                    <path d="M40,35 Q44,32 47,35" stroke="#0f2d4a" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <path d="M53,35 Q56,32 60,35" stroke="#0f2d4a" strokeWidth="2" fill="none" strokeLinecap="round" />
+                    <path d="M46,55 Q50,50 54,55" stroke="#0f2d4a" strokeWidth="3" fill="none" strokeLinecap="round" />
                   </>
                 ) : (
                   // Olhos Felizes com Brilho e Sorriso Aberto (Saudável)
                   <>
-                    <circle cx="43" cy="42" r="4.5" fill="#3c3c3c" />
+                    <circle cx="43" cy="42" r="4.5" fill="#0f2d4a" />
                     <circle cx="44.5" cy="40.5" r="1.5" fill="#ffffff" />
-                    <circle cx="57" cy="42" r="4.5" fill="#3c3c3c" />
+                    <circle cx="57" cy="42" r="4.5" fill="#0f2d4a" />
                     <circle cx="58.5" cy="40.5" r="1.5" fill="#ffffff" />
-                    <path d="M45,52 Q50,60 55,52" stroke="#3c3c3c" strokeWidth="3.5" fill="none" strokeLinecap="round" />
+                    <path d="M45,52 Q50,60 55,52" stroke="#0f2d4a" strokeWidth="3.5" fill="none" strokeLinecap="round" />
                   </>
                 )}
               </svg>
@@ -556,15 +556,15 @@ export default function PragmaDashboard() {
           </div>
 
           {/* Card: Bloco de Notas */}
-          <div className="flex-1 flex flex-col gap-2 bg-white border-2 border-[#e5e5e5] border-b-4 p-5 rounded-2xl">
-            <span className="text-[10px] uppercase font-black tracking-widest text-[#58cc02] flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-[#58cc02]" /> Limpeza Mental
+          <div className="flex-1 flex flex-col gap-2 bg-white border-2 border-[#d9e2ec] border-b-4 p-5 rounded-2xl">
+            <span className="text-[10px] uppercase font-black tracking-widest text-[#10b981] flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-[#10b981]" /> Limpeza Mental
             </span>
             <textarea 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Escreva aqui qualquer pensamento que queira tirar da cabeça antes de começar..."
-              className="w-full h-full min-h-[160px] bg-transparent border-0 focus:outline-none text-sm font-bold text-[#3c3c3c] placeholder-[#afafaf] resize-none transition-all"
+              className="w-full h-full min-h-[160px] bg-transparent border-0 focus:outline-none text-sm font-bold text-[#0f2d4a] placeholder-[#9fb3c8] resize-none transition-all"
             />
           </div>
         </div>
@@ -574,9 +574,9 @@ export default function PragmaDashboard() {
       {settingsActive && (
         <div className="modal-overlay active">
           <div className="modal-content">
-            <div className="modal-header flex justify-between items-center pb-4 border-b-2 border-[#e5e5e5]">
-              <h3 className="font-black text-[#3c3c3c] flex items-center gap-2">
-                <Settings className="w-4 h-4 text-[#58cc02]" /> Definir Prazo
+            <div className="modal-header flex justify-between items-center pb-4 border-b-2 border-[#d9e2ec]">
+              <h3 className="font-black text-[#0f2d4a] flex items-center gap-2">
+                <Settings className="w-4 h-4 text-[#10b981]" /> Definir Prazo
               </h3>
               <button className="close-modal-btn font-black cursor-pointer" onClick={() => setSettingsActive(false)}>
                 <X className="w-6 h-6" />
@@ -584,16 +584,16 @@ export default function PragmaDashboard() {
             </div>
             <div className="modal-body py-6 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-[#777777] font-black">Data Limite da Meta:</label>
+                <label className="text-xs text-[#627d98] font-black">Data Limite da Meta:</label>
                 <input 
                   type="date" 
                   value={projectDeadline} 
                   onChange={(e) => setProjectDeadline(e.target.value)} 
-                  className="w-full p-3 rounded-2xl bg-[#f7faf7] border-2 border-[#e5e5e5] text-[#3c3c3c] font-black focus:outline-none focus:border-[#58cc02]"
+                  className="w-full p-3 rounded-2xl bg-[#f2f6f4] border-2 border-[#d9e2ec] text-[#0f2d4a] font-black focus:outline-none focus:border-[#10b981]"
                 />
               </div>
             </div>
-            <div className="modal-footer pt-4 border-t-2 border-[#e5e5e5] flex gap-3">
+            <div className="modal-footer pt-4 border-t-2 border-[#d9e2ec] flex gap-3">
               <button className="w-full py-3.5 rounded-2xl btn-duo-green text-xs active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5" onClick={() => { setSettingsActive(false); updateDeadlineCountdown(); }}>
                 <Check className="w-4 h-4 text-white" /> Salvar
               </button>
@@ -606,9 +606,9 @@ export default function PragmaDashboard() {
       {rankingActive && (
         <div className="modal-overlay active">
           <div className="modal-content max-w-sm">
-            <div className="modal-header flex justify-between items-center pb-4 border-b-2 border-[#e5e5e5]">
-              <h3 className="font-black text-[#3c3c3c] flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-[#58cc02]" /> Ranking de Foco
+            <div className="modal-header flex justify-between items-center pb-4 border-b-2 border-[#d9e2ec]">
+              <h3 className="font-black text-[#0f2d4a] flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-[#10b981]" /> Ranking de Foco
               </h3>
               <button className="close-modal-btn font-black cursor-pointer" onClick={() => setRankingActive(false)}>
                 <X className="w-6 h-6" />
@@ -616,23 +616,23 @@ export default function PragmaDashboard() {
             </div>
             <div className="modal-body py-6 flex flex-col gap-2 max-h-[400px] overflow-y-auto">
               {rankingList.map((user, idx) => (
-                <div key={user.username} className={`flex items-center gap-3 p-3 rounded-2xl border-2 ${idx === 0 ? 'bg-[#58cc02]/10 border-[#58cc02]' : 'bg-[#f7faf7] border-[#e5e5e5]'}`}>
-                  <span className="font-black text-sm w-5 text-center text-[#3c3c3c]">{idx + 1}</span>
+                <div key={user.username} className={`flex items-center gap-3 p-3 rounded-2xl border-2 ${idx === 0 ? 'bg-[#10b981]/10 border-[#10b981]' : 'bg-[#f2f6f4] border-[#d9e2ec]'}`}>
+                  <span className="font-black text-sm w-5 text-center text-[#0f2d4a]">{idx + 1}</span>
                   {user.avatar_url ? (
                     <img src={user.avatar_url} className="w-8 h-8 rounded-full border border-[#cbdccb]" alt="Avatar" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-xs text-[#3c3c3c] border border-[#e5e5e5]">U</div>
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-xs text-[#0f2d4a] border border-[#d9e2ec]">U</div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-black truncate text-[#3c3c3c] flex items-center gap-1.5">
+                    <div className="text-sm font-black truncate text-[#0f2d4a] flex items-center gap-1.5">
                       {user.username}
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white font-normal text-[#3c3c3c] border border-[#e5e5e5]">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white font-normal text-[#0f2d4a] border border-[#d9e2ec]">
                         {user.country || "BR"}
                       </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs font-black text-[#3c3c3c]">{user.level} min</div>
+                    <div className="text-xs font-black text-[#0f2d4a]">{user.level} min</div>
                   </div>
                 </div>
               ))}
