@@ -4,156 +4,34 @@ import { useState, useEffect, useRef } from "react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
 
-// Definições de Badges
-const BADGES = [
-  { id: 'inertia', icon: '🚀', title: 'Adeus Inércia', desc: 'Completou um timer de 5 minutos.' },
-  { id: 'focus', icon: '🛡️', title: 'Foco de Aço', desc: 'Completou um timer Pomodoro (25 min).' },
-  { id: 'freewriter', icon: '✍️', title: 'Escritor Veloz', desc: 'Concluiu uma sessão de Freewriting.' },
-  { id: 'level5', icon: '👑', title: 'Mestre do Foco', desc: 'Alcançou o nível 5 de produtividade.' },
-  { id: 'projectDone', icon: '🏆', title: 'Entregador Pragmático', desc: 'Concluiu uma meta principal de foco.' }
-];
-
-// Definições de itens do Shop (Simplificado)
-const SHOP_ITEMS = [
-  { id: 'potion', icon: '🧪', title: 'Poção de Vitalidade', desc: 'Cura +50 de saúde do Jardim de Foco.', price: 80, type: 'consumable' },
-  { id: 'goldpot', icon: '🏺', title: 'Vaso de Ouro', desc: 'Transforma o vaso da árvore em ouro brilhante (cosmético).', price: 200, type: 'cosmetic' },
-  { id: 'aura', icon: '✨', title: 'Aura de Foco', desc: 'Adiciona partículas de luz flutuantes ao redor da árvore (cosmético).', price: 350, type: 'cosmetic' }
-];
-
-// Definições de Jornadas
-const WRITING_JOURNEYS = {
-  tcc: [
-    { id: 'tcc_intro', title: '1. Introdução', guide: 'Apresente o seu tema de forma direta. O que você vai estudar? Qual é o problema principal que seu projeto tenta resolver? Evite enrolações.' },
-    { id: 'tcc_obj', title: '2. Objetivos', guide: 'Onde você quer chegar? Defina 1 Objetivo Geral (a grande meta) e 3 Objetivos Específicos (os passos intermediários para alcançar a meta).' },
-    { id: 'tcc_just', title: '3. Justificativa', guide: 'Por que este trabalho é importante? Quem se beneficia dele? Demonstre a relevância teórica ou prática do seu TCC.' },
-    { id: 'tcc_met', title: '4. Metodologia', guide: 'Como você fará a pesquisa ou o desenvolvimento? Quais ferramentas, métodos de coleta de dados ou tecnologias serão utilizados?' }
-  ],
-  creative: [
-    { id: 'cre_concept', title: '1. Premissa', guide: 'Escreva a ideia central em uma frase: Quem é o protagonista, qual é o conflito principal e qual o cenário?' },
-    { id: 'cre_chars', title: '2. Protagonista', guide: 'Defina o que o seu personagem principal quer mais do que tudo e qual o seu maior defeito que o impede.' },
-    { id: 'cre_plot', title: '3. Estrutura Rápida', guide: 'Esboce em tópicos: O Gancho Inicial, a Mudança no Meio e o Clímax da sua história.' }
-  ],
-  code: [
-    { id: 'code_overview', title: '1. README Geral', guide: 'Explique o que é o software de forma simples para alguém que nunca ouviu falar. Qual problema ele resolve?' },
-    { id: 'code_install', title: '2. Instalação', guide: 'Liste os passos e comandos necessários para instalar as dependências e rodar o projeto localmente.' },
-    { id: 'code_usage', title: '3. Exemplo de Uso', guide: 'Forneça um exemplo básico de código ou comando demonstrando o projeto funcionando na prática.' }
-  ],
-  general: [
-    { id: 'gen_meta', title: '1. O Objetivo', guide: 'O que exatamente você quer concluir? Seja muito específico e pragmático nas palavras.' },
-    { id: 'gen_step1', title: '2. Passo Mínimo', guide: 'Qual a menor ação possível que você pode fazer hoje para iniciar este projeto?' },
-    { id: 'gen_delivery', title: '3. Critério de Sucesso', guide: 'Como você vai saber que o projeto está 100% concluído? Defina as regras de entrega.' }
-  ]
-};
-
-const MOTIVATIONAL_PHRASES = [
-  "A procrastinação chora quando você foca.",
-  "Mais vale um parágrafo imperfeito hoje do que um TCC perfeito que não existe.",
-  "Só 5 minutos. Você consegue começar por 5 minutos.",
-  "A inércia é o maior inimigo. Você já deu o primeiro passo.",
-  "1% melhor a cada dia. Foco pragmático.",
-  "Você vai mesmo deixar sua árvore de foco murchar hoje?",
-  "A cobrança diária é dura, mas a aprovação é doce."
-];
-
-export default function PragmaApp() {
-  // --- AUTENTICAÇÃO E DADOS DA VPS ---
+export default function PragmaDashboard() {
   const [token, setToken] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [rankingList, setRankingList] = useState([]);
   const [rankingActive, setRankingActive] = useState(false);
 
-  // --- ESTADOS DO JOGO ---
-  const [xp, setXp] = useState(0);
-  const [level, setLevel] = useState(1);
-  const [streak, setStreak] = useState(0);
-  const [lastStreakDate, setLastStreakDate] = useState(null);
-  const [lastActivityDate, setLastActivityDate] = useState(null);
-  const [projectName, setProjectName] = useState("Pré-Projeto de TCC");
-  const [projectDeadline, setProjectDeadline] = useState("2026-07-31");
-  const [theme, setTheme] = useState("cajuina");
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [skinnerHardcore, setSkinnerHardcore] = useState(false);
-  const [skinnerIdleAlert, setSkinnerIdleAlert] = useState(true);
-  const [treeHealth, setTreeHealth] = useState(100);
+  // Estados de Foco Minimalista
   const [currentTask, setCurrentTask] = useState("");
-  
-  // RPG (Gemas e Água)
-  const [gems, setGems] = useState(100);
-  const [itemsOwned, setItemsOwned] = useState([]);
-  const [itemsOwnedUnlocked, setItemsOwnedUnlocked] = useState([]);
-  const [waterUnits, setWaterUnits] = useState(0);
-  const [forest, setForest] = useState([]);
-  const [potionsCount, setPotionsCount] = useState(0);
-  const [todoList, setTodoList] = useState([]);
-
-  // Jornadas customizadas e Antifraude
-  const [customJourneys, setCustomJourneys] = useState([]);
-  const [draftsXpClaimedToday, setDraftsXpClaimedToday] = useState({});
-  const [drafts, setDrafts] = useState({});
-
-  // UI e Abas
-  const [activeTab, setActiveTab] = useState("assistant");
-  const [journeySelected, setJourneySelected] = useState("tcc");
-  const [activeTemplateId, setActiveTemplateId] = useState(null);
-  const [editorText, setEditorText] = useState("");
-  const [todoInputValue, setTodoInputValue] = useState("");
-  
-  // Modais
-  const [settingsActive, setSettingsActive] = useState(false);
-  const [onboardingActive, setOnboardingActive] = useState(false);
-  const [customJourneyActive, setCustomJourneyActive] = useState(false);
-  const [levelupActive, setLevelupActive] = useState(false);
-  const [habitsModalActive, setHabitsModalActive] = useState(false);
-
-  // Skinner/Alerta Ocioso
-  const [idleAlertActive, setIdleAlertActive] = useState(false);
-  const [weeklyXp, setWeeklyXp] = useState(0);
-  const [weeklyQuestCompleted, setWeeklyQuestCompleted] = useState(false);
-
-  // Hábitos
-  const [habits, setHabits] = useState([
-    { id: 1, text: "Abrir o arquivo e ler uma página", completed: false },
-    { id: 2, text: "Escrever pelo menos uma frase nova", completed: false },
-    { id: 3, text: "Organizar a mesa de trabalho por 2 min", completed: false }
-  ]);
+  const [projectDeadline, setProjectDeadline] = useState("2026-07-31");
+  const [treeHealth, setTreeHealth] = useState(100);
+  const [totalFocusMinutes, setTotalFocusMinutes] = useState(0);
+  const [notes, setNotes] = useState("");
 
   // Timers
   const [timerSeconds, setTimerSeconds] = useState(1500);
   const [timerRunning, setTimerRunning] = useState(false);
   const [activeTimerMode, setActiveTimerMode] = useState(1500);
 
-  // Freewriting
-  const [freewritingActive, setFreewritingActive] = useState(false);
-  const [freewritingTimeLeft, setFreewritingTimeLeft] = useState(180);
-  const [freewritingText, setFreewritingText] = useState("");
-  const [freewritingWarning, setFreewritingWarning] = useState("Fluxo contínuo ativo...");
+  // Modais e Contadores
+  const [settingsActive, setSettingsActive] = useState(false);
+  const [timeLeftStr, setTimeLeftStr] = useState({ days: "00", hours: "00", percent: 0 });
 
-  // Referências
   const audioCtxRef = useRef(null);
   const timerIntervalRef = useRef(null);
-  const freewritingTimerRef = useRef(null);
-  const typingTimerRef = useRef(null);
-  const idleTimeRef = useRef(0);
-  const lastTypingTimeRef = useRef(Date.now());
-  const confettiCanvasRef = useRef(null);
   const googleBtnContainerRef = useRef(null);
+  const confettiCanvasRef = useRef(null);
 
-  // Onboarding dinâmico
-  const [onboardProject, setOnboardProject] = useState("");
-  const [onboardDeadline, setOnboardDeadline] = useState("");
-  const [onboardJourney, setOnboardJourney] = useState("tcc");
-  const [onboardHabit1, setOnboardHabit1] = useState("");
-  const [onboardHabit2, setOnboardHabit2] = useState("");
-  const [onboardHabit3, setOnboardHabit3] = useState("");
-
-  // Construtor de Jornada Customizada
-  const [customJourneyName, setCustomJourneyName] = useState("");
-  const [customSteps, setCustomSteps] = useState([{ title: "", guide: "" }]);
-
-  // --- CONTADORES DE PRAZO ---
-  const [timeLeftStr, setTimeLeftStr] = useState({ days: "00", hours: "00", minutes: "00", percent: 0 });
-
-  // --- CARREGAMENTO INICIAL E SINCRONIZAÇÃO DE REDE ---
+  // --- CARREGAMENTO INICIAL ---
   useEffect(() => {
     const savedToken = localStorage.getItem("pragma_token");
     if (savedToken) {
@@ -179,56 +57,25 @@ export default function PragmaApp() {
               { theme: "outline", size: "large", width: "100%" }
             );
           }
-          window.google.accounts.id.prompt();
         } else {
           setTimeout(initGoogle, 500);
         }
       };
       initGoogle();
     }
-  }, [token, activeTab]);
+  }, [token]);
 
   const loadStateLocal = () => {
-    const saved = localStorage.getItem("pragma_state");
+    const saved = localStorage.getItem("pragma_state_minimal");
     if (saved) {
       try {
         const data = JSON.parse(saved);
-        if (data.xp !== undefined) setXp(data.xp);
-        if (data.level !== undefined) setLevel(data.level);
-        if (data.streak !== undefined) setStreak(data.streak);
-        if (data.lastStreakDate !== undefined) setLastStreakDate(data.lastStreakDate);
-        if (data.lastActivityDate !== undefined) setLastActivityDate(data.lastActivityDate);
-        if (data.projectName !== undefined) setProjectName(data.projectName);
+        if (data.currentTask !== undefined) setCurrentTask(data.currentTask);
         if (data.projectDeadline !== undefined) setProjectDeadline(data.projectDeadline);
-        if (data.theme !== undefined) {
-          setTheme(data.theme);
-          applyThemeClass(data.theme);
-        }
-        if (data.soundEnabled !== undefined) setSoundEnabled(data.soundEnabled);
-        if (data.skinnerHardcore !== undefined) setSkinnerHardcore(data.skinnerHardcore);
-        if (data.skinnerIdleAlert !== undefined) setSkinnerIdleAlert(data.skinnerIdleAlert);
         if (data.treeHealth !== undefined) setTreeHealth(data.treeHealth);
-        if (data.gems !== undefined) setGems(data.gems);
-        if (data.itemsOwned !== undefined) setItemsOwned(data.itemsOwned);
-        if (data.itemsOwnedUnlocked !== undefined) setItemsOwnedUnlocked(data.itemsOwnedUnlocked);
-        if (data.waterUnits !== undefined) setWaterUnits(data.waterUnits);
-        if (data.forest !== undefined) setForest(data.forest);
-        if (data.todoList !== undefined) setTodoList(data.todoList);
-        if (data.habits !== undefined) setHabits(data.habits);
-        
-        if (data.inventory !== undefined) {
-          if (data.inventory.potions !== undefined) setPotionsCount(data.inventory.potions.potion || 0);
-        }
-        if (data.customJourneys !== undefined) setCustomJourneys(data.customJourneys);
-        if (data.draftsXpClaimedToday !== undefined) setDraftsXpClaimedToday(data.draftsXpClaimedToday);
-        if (data.drafts !== undefined) setDrafts(data.drafts);
-        if (data.weeklyXp !== undefined) setWeeklyXp(data.weeklyXp);
-        if (data.weeklyQuestCompleted !== undefined) setWeeklyQuestCompleted(data.weeklyQuestCompleted);
-      } catch (e) {
-        console.error("Erro ao ler dados locais.", e);
-      }
-    } else {
-      setOnboardingActive(true);
+        if (data.totalFocusMinutes !== undefined) setTotalFocusMinutes(data.totalFocusMinutes);
+        if (data.notes !== undefined) setNotes(data.notes);
+      } catch (e) { console.error(e); }
     }
   };
 
@@ -243,67 +90,12 @@ export default function PragmaApp() {
       }
       const data = await res.json();
       setUserProfile(data);
-      setXp(data.xp);
-      setLevel(data.level);
-      setGems(data.gems);
-      setStreak(data.streak);
-      setWaterUnits(data.water_units);
       setTreeHealth(data.tree_health);
-      setLastStreakDate(data.last_streak_date);
-      setLastActivityDate(data.last_activity_date);
-
-      fetchTodos(jwtToken);
-      fetchForest(jwtToken);
-      fetchInventory(jwtToken);
+      setTotalFocusMinutes(data.xp); // Mapeamos minutos focados diretamente no campo XP do backend
     } catch (e) {
-      console.error("Erro ao conectar com a API do backend.", e);
+      console.error(e);
       loadStateLocal();
     }
-  };
-
-  const fetchTodos = async (jwtToken) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/todos`, {
-        headers: { "Authorization": `Bearer ${jwtToken}` }
-      });
-      const data = await res.json();
-      setTodoList(data);
-    } catch (e) { console.error(e); }
-  };
-
-  const fetchForest = async (jwtToken) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/forest`, {
-        headers: { "Authorization": `Bearer ${jwtToken}` }
-      });
-      const data = await res.json();
-      setForest(data);
-    } catch (e) { console.error(e); }
-  };
-
-  const fetchInventory = async (jwtToken) => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/inventory`, {
-        headers: { "Authorization": `Bearer ${jwtToken}` }
-      });
-      const data = await res.json();
-      
-      const ownedIds = [];
-      const ownedUnlocked = [];
-      let potionCountVal = 0;
-      
-      data.forEach(item => {
-        if (item.item_id === "potion_vitality") potionCountVal = item.quantity;
-        else {
-          ownedUnlocked.push(item.item_id);
-          if (item.equipped) ownedIds.push(item.item_id);
-        }
-      });
-
-      setItemsOwned(ownedIds);
-      setItemsOwnedUnlocked(ownedUnlocked);
-      setPotionsCount(potionCountVal);
-    } catch (e) { console.error(e); }
   };
 
   const handleGoogleLoginResponse = async (googleResponse) => {
@@ -319,9 +111,7 @@ export default function PragmaApp() {
         setToken(data.access_token);
         fetchUserData(data.access_token);
       }
-    } catch (e) {
-      alert("Falha ao logar com o Google.");
-    }
+    } catch (e) { console.error(e); }
   };
 
   const handleLogout = () => {
@@ -343,43 +133,32 @@ export default function PragmaApp() {
         body: JSON.stringify({
           email: userProfile.email,
           username: userProfile.username,
-          xp,
-          level,
-          gems,
-          streak,
-          water_units: waterUnits,
+          xp: totalFocusMinutes,
+          level: 1,
+          gems: 100,
+          streak: 1,
+          water_units: 0,
           skill_points: 0,
           tree_health: treeHealth,
           tree_dead: treeHealth <= 0,
           mudas: 0,
           adubos: 0,
           essencias: 0,
-          last_streak_date: lastStreakDate,
-          last_activity_date: lastActivityDate
+          last_streak_date: "",
+          last_activity_date: ""
         })
       });
-    } catch (e) {
-      console.error("Erro ao sincronizar dados com o servidor.", e);
-    }
+    } catch (e) { console.error(e); }
   };
 
   useEffect(() => {
     if (token) {
       syncWithBackend();
     } else {
-      const stateObj = {
-        xp, level, streak, lastStreakDate, lastActivityDate, projectName, projectDeadline, theme,
-        soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, treeDead: treeHealth <= 0, gems, skillPoints: 0,
-        skillsPurchased: [], itemsOwned, itemsOwnedUnlocked, waterUnits, forest, todoList, habits,
-        inventory: { potions: { potion: potionsCount } }, customJourneys, draftsXpClaimedToday, drafts,
-        weeklyXp, weeklyQuestCompleted
-      };
-      localStorage.setItem("pragma_state", JSON.stringify(stateObj));
+      const stateObj = { currentTask, projectDeadline, treeHealth, totalFocusMinutes, notes };
+      localStorage.setItem("pragma_state_minimal", JSON.stringify(stateObj));
     }
-  }, [xp, level, streak, lastStreakDate, lastActivityDate, projectName, projectDeadline, theme,
-      soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, gems, itemsOwned, itemsOwnedUnlocked, 
-      waterUnits, forest, todoList, habits, potionsCount, customJourneys, draftsXpClaimedToday, drafts,
-      weeklyXp, weeklyQuestCompleted]);
+  }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes, notes]);
 
   const loadGlobalRanking = async () => {
     try {
@@ -387,66 +166,55 @@ export default function PragmaApp() {
       const data = await res.json();
       setRankingList(data);
       setRankingActive(true);
-    } catch (e) {
-      alert("Erro ao obter o ranking global.");
-    }
+    } catch (e) { alert("Erro ao obter o ranking."); }
   };
 
   useEffect(() => {
     updateDeadlineCountdown();
     const deadlineInterval = setInterval(updateDeadlineCountdown, 60000);
+    return () => clearInterval(deadlineInterval);
+  }, [projectDeadline]);
 
-    const resetIdleTime = () => {
-      idleTimeRef.current = 0;
-      setIdleAlertActive(false);
-    };
+  const updateDeadlineCountdown = () => {
+    if (!projectDeadline) return;
+    const target = new Date(`${projectDeadline}T23:59:59`);
+    const now = new Date();
+    const diff = target - now;
 
-    window.addEventListener("mousemove", resetIdleTime);
-    window.addEventListener("keydown", resetIdleTime);
-    window.addEventListener("click", resetIdleTime);
+    if (diff <= 0) {
+      setTimeLeftStr({ days: "00", hours: "00", percent: 100 });
+      return;
+    }
 
-    const idleInterval = setInterval(() => {
-      if (!timerRunning && skinnerIdleAlert) {
-        idleTimeRef.current++;
-        if (idleTimeRef.current >= 600) { 
-          setIdleAlertActive(true);
-          playSound("beep");
-          
-          if (idleTimeRef.current % 30 === 0) {
-            setXp(prev => Math.max(0, prev - 5));
-            setTreeHealth(prev => Math.max(0, prev - 3));
-          }
-        }
-      } else {
-        idleTimeRef.current = 0;
-      }
-    }, 1000);
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-    return () => {
-      clearInterval(deadlineInterval);
-      clearInterval(idleInterval);
-      window.removeEventListener("mousemove", resetIdleTime);
-      window.removeEventListener("keydown", resetIdleTime);
-      window.removeEventListener("click", resetIdleTime);
-    };
-  }, [timerRunning, skinnerIdleAlert]);
+    const monthStart = new Date(target.getFullYear(), target.getMonth(), 1);
+    const total = target - monthStart;
+    const elapsed = now - monthStart;
+    let percent = Math.min(100, Math.max(0, (elapsed / total) * 100));
 
-  // --- ENGINE DE AUDIO ---
+    setTimeLeftStr({
+      days: days.toString().padStart(2, '0'),
+      hours: hours.toString().padStart(2, '0'),
+      percent: Math.round(percent)
+    });
+  };
+
+  // --- AUDIO API ---
   const playSound = (type) => {
-    if (!soundEnabled) return;
     if (!audioCtxRef.current) {
       audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
     const audioCtx = audioCtxRef.current;
     if (audioCtx.state === "suspended") audioCtx.resume();
-
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     const now = audioCtx.currentTime;
 
-    if (type === "coin") {
+    if (type === "success") {
       osc.type = "sine";
       osc.frequency.setValueAtTime(587.33, now);
       osc.frequency.setValueAtTime(880, now + 0.1);
@@ -454,43 +222,14 @@ export default function PragmaApp() {
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
       osc.start(now);
       osc.stop(now + 0.3);
-    } else if (type === "levelup") {
-      osc.type = "triangle";
-      const notes = [523.25, 659.25, 783.99, 1046.50];
-      notes.forEach((freq, idx) => {
-        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
-      });
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.setValueAtTime(0.15, now + 0.3);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      osc.start(now);
-      osc.stop(now + 0.5);
     } else if (type === "alarm") {
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(880, now);
       osc.frequency.linearRampToValueAtTime(440, now + 0.2);
-      osc.frequency.setValueAtTime(880, now + 0.2);
-      osc.frequency.linearRampToValueAtTime(440, now + 0.4);
       gain.gain.setValueAtTime(0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-      osc.start(now);
-      osc.stop(now + 0.5);
-    } else if (type === "fail") {
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(220, now);
-      osc.frequency.linearRampToValueAtTime(110, now + 0.4);
-      gain.gain.setValueAtTime(0.2, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
       osc.start(now);
       osc.stop(now + 0.4);
-    } else if (type === "beep") {
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(1000, now);
-      osc.frequency.setValueAtTime(800, now + 0.1);
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      osc.start(now);
-      osc.stop(now + 0.2);
     }
   };
 
@@ -500,21 +239,19 @@ export default function PragmaApp() {
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    
     let particles = [];
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 80; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * -canvas.height - 20,
-        size: Math.random() * 8 + 6,
-        color: `hsl(${Math.random() * 360}, 80%, 60%)`,
+        size: Math.random() * 6 + 4,
+        color: `hsl(${Math.random() * 360}, 70%, 50%)`,
         speedX: Math.random() * 4 - 2,
-        speedY: Math.random() * 5 + 4,
+        speedY: Math.random() * 4 + 3,
         rotation: Math.random() * 360,
         rotationSpeed: Math.random() * 4 - 2
       });
     }
-
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let active = false;
@@ -535,104 +272,9 @@ export default function PragmaApp() {
     animate();
   };
 
-  // --- CONTADORES E PONTOS ---
-  const addXP = (amount) => {
-    // Se a árvore estiver murcha (health = 0), recebe apenas 50% do XP (Penalidade estritamente visual/reforço)
-    const penaltyFactor = treeHealth <= 0 ? 0.5 : 1.0;
-    const finalXp = Math.round(amount * penaltyFactor);
-    
-    if (!weeklyQuestCompleted) {
-      setWeeklyXp(prev => {
-        const nextVal = Math.min(300, prev + finalXp);
-        if (nextVal >= 300) {
-          setWeeklyQuestCompleted(true);
-          setGems(g => g + 150);
-          playSound("levelup");
-          triggerConfetti();
-          alert("🏆 Quest Semanal Concluída! Você ganhou +150 Gemas.");
-        }
-        return nextVal;
-      });
-    }
-
-    const gemsEarned = Math.round(amount * 0.2);
-    if (gemsEarned > 0) setGems(g => g + gemsEarned);
-
-    setXp(prev => {
-      let nextXp = prev + finalXp;
-      if (nextXp >= 100) {
-        nextXp -= 100;
-        setLevel(lvl => {
-          const nextLvl = lvl + 1;
-          setGems(g => g + 50);
-          setLevelupActive(true);
-          playSound("levelup");
-          triggerConfetti();
-          return nextLvl;
-        });
-      }
-      return nextXp;
-    });
-  };
-
-  const healGarden = (amount) => {
-    setTreeHealth(prev => Math.min(100, prev + amount));
-  };
-
-  // --- TEMAS VISUAIS ---
-  const applyThemeClass = (themeName) => {
-    document.body.className = "";
-    document.body.classList.add(`theme-${themeName}`);
-  };
-
-  const selectTheme = (themeName) => {
-    setTheme(themeName);
-    applyThemeClass(themeName);
-  };
-
-  const updateDeadlineCountdown = () => {
-    if (!projectDeadline) return;
-    const target = new Date(`${projectDeadline}T23:59:59`);
-    const now = new Date();
-    const diff = target - now;
-
-    if (diff <= 0) {
-      setTimeLeftStr({ days: "00", hours: "00", minutes: "00", percent: 100 });
-      return;
-    }
-
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    const monthStart = new Date(target.getFullYear(), target.getMonth(), 1);
-    const total = target - monthStart;
-    const elapsed = now - monthStart;
-    let percent = Math.min(100, Math.max(0, (elapsed / total) * 100));
-
-    setTimeLeftStr({
-      days: days.toString().padStart(2, '0'),
-      hours: hours.toString().padStart(2, '0'),
-      minutes: mins.toString().padStart(2, '0'),
-      percent: Math.round(percent)
-    });
-  };
-
-  const formatTimer = (seconds) => {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = (seconds % 60).toString().padStart(2, '0');
-    return `${mins}:${secs}`;
-  };
-
-  // --- TIMER DE FOCO (Livre para ser usado sempre) ---
+  // --- TIMER ---
   const handleStartTimer = () => {
     if (timerRunning) {
-      if (skinnerHardcore) {
-        playSound("fail");
-        setXp(prev => Math.max(0, prev - 25));
-        setTreeHealth(prev => Math.max(0, prev - 15));
-        alert("⚠️ Penalidade por Desistência! (-25 XP e -15 de saúde da árvore)");
-      }
       clearInterval(timerIntervalRef.current);
       setTimerRunning(false);
     } else {
@@ -645,19 +287,10 @@ export default function PragmaApp() {
             playSound("alarm");
             triggerConfetti();
             
-            if (activeTimerMode === 1500) { 
-              addXP(100);
-              healGarden(40);
-              setWaterUnits(w => w + 5);
-              alert("🛡️ Pomodoro concluído! (+100 XP e +5💧 Água para o Regador)");
-            } else if (activeTimerMode === 300) { 
-              addXP(50);
-              healGarden(20);
-              setWaterUnits(w => w + 1);
-              alert("🚀 Foco rápido concluído! (+50 XP e +1💧 Água para o Regador)");
-            } else {
-              addXP(10);
-            }
+            const minutesFocused = activeTimerMode === 1500 ? 25 : 5;
+            setTotalFocusMinutes(m => m + minutesFocused);
+            setTreeHealth(th => Math.min(100, th + 20));
+            alert(`🛡️ Sessão de foco concluída! (+${minutesFocused} minutos focados. Sua árvore orgânica se fortaleceu)`);
             return activeTimerMode;
           }
           return prev - 1;
@@ -667,840 +300,223 @@ export default function PragmaApp() {
   };
 
   const selectTimerMode = (duration) => {
-    if (timerRunning && skinnerHardcore) {
-      playSound("fail");
-      setXp(prev => Math.max(0, prev - 25));
-      setTreeHealth(prev => Math.max(0, prev - 15));
-      alert("⚠️ Penalidade por Desistência! (-25 XP)");
-    }
     clearInterval(timerIntervalRef.current);
     setTimerRunning(false);
     setActiveTimerMode(duration);
     setTimerSeconds(duration);
   };
 
-  // --- MICRO HÁBITOS ---
-  const toggleHabit = (id) => {
-    playSound("coin");
-    setHabits(prev => prev.map(h => {
-      if (h.id === id) {
-        const completed = !h.completed;
-        if (completed) {
-          addXP(20);
-          healGarden(15);
-        } else {
-          setTreeHealth(th => Math.max(0, th - 15));
-        }
-        return { ...h, completed };
-      }
-      return h;
-    }));
-  };
-
-  // --- TAREFAS SECUNDÁRIAS (TO-DO LIST) ---
-  const handleAddTodo = async () => {
-    if (!todoInputValue.trim()) return;
-    const taskText = todoInputValue.trim();
-
-    if (token) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/todos`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({ text: taskText })
-        });
-        const newTodo = await res.json();
-        setTodoList(prev => [...prev, newTodo]);
-      } catch (e) { console.error(e); }
-    } else {
-      const newTodo = { id: Date.now(), text: taskText, completed: false };
-      setTodoList(prev => [...prev, newTodo]);
-    }
-    setTodoInputValue("");
-  };
-
-  const toggleTodo = async (id, currentCompleted) => {
-    const nextCompleted = !currentCompleted;
-    if (token) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/todos/${id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify({ completed: nextCompleted })
-        });
-        const updated = await res.json();
-        setTodoList(prev => prev.map(t => t.id === id ? updated : t));
-        playSound("coin");
-        if (nextCompleted) addXP(10);
-      } catch (e) { console.error(e); }
-    } else {
-      setTodoList(prev => prev.map(t => {
-        if (t.id === id) {
-          playSound("coin");
-          if (nextCompleted) addXP(10);
-          return { ...t, completed: nextCompleted };
-        }
-        return t;
-      }));
-    }
-  };
-
-  // --- META PRINCIPAL ---
-  const handleCompleteMeta = async () => {
-    if (!currentTask.trim()) return;
-    playSound("coin");
-    triggerConfetti();
-
-    const newTree = {
-      name: projectName,
-      level: level,
-      completed_at: new Date().toLocaleDateString('pt-BR'),
-      theme: theme
-    };
-    
-    if (token) {
-      try {
-        const res = await fetch(`${API_BASE_URL}/forest`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
-          body: JSON.stringify(newTree)
-        });
-        const savedTree = await res.json();
-        setForest(prev => [...prev, savedTree]);
-      } catch (e) { console.error(e); }
-    } else {
-      setForest(prev => [...prev, { ...newTree, id: Date.now(), date: newTree.completed_at }]);
-    }
-    
-    setGems(g => g + 150);
-    setLevel(1);
-    setXp(0);
-    setTreeHealth(100);
-    setTodoList([]);
-    setCurrentTask("");
-
-    alert(`🏆 PARABÉNS! Objetivo "${projectName}" Concluído!\n\nSua árvore foi eternizada no Bosque de Troféus.\nVocê ganhou 💎 150 de recompensa premium.\nPlante sua próxima meta agora!`);
-    setOnboardingActive(true);
-  };
-
-  // --- ANTIFRAUDE & SALVAR RASCUNHO ---
-  const handleSaveDraft = () => {
-    if (!activeTemplateId) {
-      alert("Selecione um tópico de escrita antes de salvar!");
-      return;
-    }
-    const text = editorText.trim();
-    if (text.length < 25) {
-      alert("O texto precisa conter pelo menos 25 caracteres para pontuar.");
-      return;
-    }
-    if (/(.)\1{9,}/.test(text)) {
-      alert("Padrão de escrita inválido.");
-      return;
-    }
-    if (text === (drafts[activeTemplateId] || "").trim()) {
-      alert("Nenhuma alteração detectada no rascunho.");
-      return;
-    }
-
-    setDrafts(prev => ({ ...prev, [activeTemplateId]: text }));
-    playSound("coin");
-    triggerConfetti();
-
-    if (token) {
-      fetch(`${API_BASE_URL}/drafts`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ template_id: activeTemplateId, content: text })
-      });
-    }
-
-    const today = new Date().toDateString();
-    const claimedList = draftsXpClaimedToday[today] || [];
-    if (!claimedList.includes(activeTemplateId)) {
-      setDraftsXpClaimedToday(prev => ({ ...prev, [today]: [...claimedList, activeTemplateId] }));
-      addXP(10);
-      alert("Excelente rascunho de escrita! (+10 XP concedidos)");
-    } else {
-      alert("Rascunho atualizado com sucesso!");
-    }
-  };
-
-  // --- FREEWRITING ---
-  const handleStartFreewriting = () => {
-    setFreewritingActive(true);
-    setFreewritingTimeLeft(180);
-    setFreewritingText("");
-    lastTypingTimeRef.current = Date.now();
-
-    freewritingTimerRef.current = setInterval(() => {
-      setFreewritingTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(freewritingTimerRef.current);
-          clearInterval(typingTimerRef.current);
-          setFreewritingActive(false);
-          playSound("levelup");
-          triggerConfetti();
-          addXP(70);
-          alert("Excelente! Você completou a escrita contínua. (+70 XP)");
-          return 180;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    typingTimerRef.current = setInterval(() => {
-      const diff = Date.now() - lastTypingTimeRef.current;
-      if (diff > 3000) {
-        setFreewritingWarning("DIGITE ALGO! NÃO PARE!");
-      } else {
-        setFreewritingWarning("Fluxo contínuo ativo...");
-      }
-    }, 500);
-  };
-
-  // --- LOJA E INVENTÁRIO (SIMPLIFICADO) ---
-  const buyShopItem = async (item) => {
-    if (gems < item.price) return;
-    
-    if (token) {
-      try {
-        const itemCode = item.id === "potion" ? "potion_vitality" : item.id;
-        await fetch(`${API_BASE_URL}/inventory/${itemCode}/equip`, {
-          method: "PUT",
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-      } catch (e) { console.error(e); }
-    }
-
-    setGems(prev => prev - item.price);
-    playSound("levelup");
-    triggerConfetti();
-
-    if (item.type === "consumable") {
-      setPotionsCount(prev => prev + 1);
-      alert(`${item.title} comprada e enviada ao seu Baú de Itens!`);
-    } else {
-      setItemsOwnedUnlocked(prev => [...prev, item.id]);
-      setItemsOwned(prev => [...prev, item.id]);
-      alert(`${item.icon} ${item.title} adquirido e ativado no Jardim!`);
-    }
-  };
-
-  const usePotion = () => {
-    if (treeHealth >= 100) return;
-    setPotionsCount(prev => Math.max(0, prev - 1));
-    healGarden(50);
-    playSound("coin");
-  };
-
-  const toggleCosmetic = async (id) => {
-    if (token) {
-      try {
-        await fetch(`${API_BASE_URL}/inventory/${id}/equip`, {
-          method: "PUT",
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-      } catch (e) { console.error(e); }
-    }
-
-    if (itemsOwned.includes(id)) {
-      setItemsOwned(prev => prev.filter(x => x !== id));
-    } else {
-      setItemsOwned(prev => [...prev, id]);
-    }
-  };
-
-  const handleSaveCustomJourney = () => {
-    if (!customJourneyName.trim() || customSteps.some(s => !s.title || !s.guide)) {
-      alert("Preencha todos os campos!");
-      return;
-    }
-    const newJ = {
-      id: `journey_${Date.now()}`,
-      name: customJourneyName.trim(),
-      steps: customSteps.map((s, idx) => ({ ...s, id: `custom_${Date.now()}_${idx}` }))
-    };
-    setCustomJourneys(prev => [...prev, newJ]);
-    setJourneySelected(newJ.id);
-    setActiveTemplateId(newJ.steps[0].id);
-    setEditorText("");
-    setCustomJourneyActive(false);
-    playSound("levelup");
-    triggerConfetti();
-  };
-
-  const handleStartOnboard = () => {
-    if (!onboardProject.trim() || !onboardDeadline) {
-      alert("Preencha o objetivo principal e o prazo final!");
-      return;
-    }
-    setProjectName(onboardProject.trim());
-    setProjectDeadline(onboardDeadline);
-    setJourneySelected(onboardJourney);
-    
-    setHabits([
-      { id: 1, text: onboardHabit1.trim() || "Abrir o arquivo e ler uma página", completed: false },
-      { id: 2, text: onboardHabit2.trim() || "Escrever pelo menos uma frase nova", completed: false },
-      { id: 3, text: onboardHabit3.trim() || "Organizar a mesa de trabalho por 2 min", completed: false }
-    ]);
-
-    setTreeHealth(100);
-    setTodoList([]);
-    setOnboardingActive(false);
-    setGems(prev => prev === 0 ? 100 : prev);
-  };
-
-  const handleWaterTree = () => {
-    if (waterUnits <= 0 || treeHealth >= 100) return;
-    setWaterUnits(w => w - 1);
-    healGarden(10);
-    playSound("coin");
-  };
-
-  const getJourneySteps = () => {
-    if (WRITING_JOURNEYS[journeySelected]) return WRITING_JOURNEYS[journeySelected];
-    const custom = customJourneys.find(j => j.id === journeySelected);
-    return custom ? custom.steps : [];
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${mins}:${secs}`;
   };
 
   return (
-    <div className="app-container">
-      <canvas id="confetti-canvas" ref={confettiCanvasRef}></canvas>
+    <div className="min-h-screen bg-[#0a090d] text-[#f4f4f7] flex flex-col font-sans relative overflow-hidden">
+      <canvas id="confetti-canvas" ref={confettiCanvasRef} className="absolute inset-0 pointer-events-none z-50"></canvas>
 
-      {/* Banner de Procrastinação Ociosa */}
-      {idleAlertActive && (
-        <div id="skinner-banner" className="skinner-alert-banner active">
-          <div className="skinner-banner-content">
-            <span className="warning-icon">⚠️</span>
-            <div className="skinner-banner-text">
-              <strong>Alerta de Procrastinação!</strong>
-              <span>Você está ocioso há muito tempo. Inicie uma tarefa ou perderá XP!</span>
-            </div>
-            <button className="skinner-banner-btn" onClick={() => { setIdleAlertActive(false); selectTimerMode(300); handleStartTimer(); }}>Focar Agora (5 min)</button>
-          </div>
-        </div>
-      )}
+      {/* Decorative Glows */}
+      <div className="absolute top-[-10%] left-[-15%] w-[400px] h-[400px] rounded-full bg-[#ff7b00]/5 blur-[100px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-[#ffaa00]/5 blur-[100px] pointer-events-none"></div>
 
-      {/* BARRA LATERAL */}
-      <aside className="sidebar">
-        <div className="brand-section">
-          <div className="brand-logo" id="app-logo">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" strokeWidth="2.5">
+      {/* Header */}
+      <header className="w-full max-w-5xl mx-auto px-6 py-6 flex justify-between items-center border-b border-white/[0.03] z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#ff7b00] to-[#ffaa00] flex items-center justify-center">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0a090d" strokeWidth="2.5">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
           </div>
-          <h1 className="brand-name" id="app-title">
-            {theme === "cajuina" ? "Cajuína Code" : theme === "pragma" ? "Pragma Focus" : "GeraQRCode Foco"}
-          </h1>
+          <span className="font-black text-lg tracking-wider bg-gradient-to-r from-white to-[#a3a3a3] bg-clip-text text-transparent">PRAGMA</span>
         </div>
 
-        {/* Google Login / Perfil Card */}
-        <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[var(--border-radius-md)] mb-4 flex flex-col gap-2">
+        {/* Google Authentication */}
+        <div>
           {!token ? (
-            <div>
-              <div className="text-xs text-[var(--text-muted)] mb-2 text-center">Entre para salvar na nuvem e ver o Rank</div>
-              <div ref={googleBtnContainerRef} id="google-login-btn"></div>
-            </div>
+            <div ref={googleBtnContainerRef} id="google-login-btn"></div>
           ) : (
-            <div className="flex items-center gap-3">
-              {userProfile?.avatar_url ? (
-                <img src={userProfile.avatar_url} className="w-10 h-10 rounded-full border border-[var(--accent-color)]" alt="Avatar" />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-[var(--bg-main)] flex items-center justify-center font-bold">U</div>
+            <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.05] py-1.5 px-3.5 rounded-xl">
+              {userProfile?.avatar_url && (
+                <img src={userProfile.avatar_url} className="w-6 h-6 rounded-full border border-[#ff7b00]/30" alt="Avatar" />
               )}
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold truncate text-[var(--text-main)] flex items-center gap-1.5">
-                  {userProfile?.username}
-                  <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--bg-main)] font-normal text-[var(--text-muted)]">
-                    {userProfile?.country || "BR"}
-                  </span>
-                </div>
-                <div className="text-xs text-[var(--text-muted)] truncate">{userProfile?.email}</div>
-              </div>
-              <button onClick={handleLogout} className="text-xs text-red-400 hover:text-red-300 font-semibold p-1 hover:bg-red-500/10 rounded transition-all">Sair</button>
+              <span className="text-xs font-bold text-white max-w-[120px] truncate">{userProfile?.username}</span>
+              <button onClick={handleLogout} className="text-xs text-red-400 hover:text-red-300 font-bold transition-all ml-1">Sair</button>
             </div>
           )}
-          <button onClick={loadGlobalRanking} className="w-full mt-1.5 py-2 rounded bg-[var(--bg-main)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-main)] border border-[var(--border-color)] transition-all">
-            🏆 Ranking Global Mundial
-          </button>
+        </div>
+      </header>
+
+      {/* Main Focus Area */}
+      <main className="w-full max-w-4xl mx-auto px-6 py-12 flex-1 flex flex-col items-center justify-center z-10 gap-8">
+        
+        {/* Task Input Box */}
+        <div className="w-full max-w-lg bg-white/[0.02] border border-white/[0.04] p-5 rounded-2xl flex flex-col gap-3 relative shadow-2xl">
+          <span className="text-[10px] uppercase font-black tracking-wider text-[#ff7b00]/70">Foco Ativo de Agora</span>
+          <input 
+            type="text" 
+            value={currentTask} 
+            onChange={(e) => setCurrentTask(e.target.value)} 
+            placeholder="Qual o seu único objetivo deste ciclo?"
+            className="w-full bg-transparent text-lg font-bold text-white placeholder-white/20 border-b border-white/5 pb-2 focus:border-[#ff7b00] focus:outline-none transition-all"
+          />
+          <div className="flex justify-between items-center text-xs text-[#8e8d96] mt-1">
+            <span>Prazo: {projectDeadline}</span>
+            <button onClick={() => setSettingsActive(true)} className="hover:text-white transition-all">Definir Prazo</button>
+          </div>
         </div>
 
-        {/* Card de Nível */}
-        <div className="profile-card">
-          <div className="profile-header-row">
-            <div className="level-badge">NÍVEL <span>{level}</span></div>
-            <div className="gems-badge">💎 <span>{gems}</span></div>
+        {/* Timer Box */}
+        <div className="w-full max-w-lg flex flex-col items-center gap-6">
+          <div className="text-[120px] md:text-[140px] font-black leading-none tracking-tighter tabular-nums select-none bg-gradient-to-b from-white to-[#5d5b66] bg-clip-text text-transparent">
+            {formatTimer(timerSeconds)}
           </div>
-          <div className="xp-container">
-            <div className="xp-header">
-              <span>Foco Acumulado</span>
-              <span>{xp} / 100 XP</span>
-            </div>
-            <div className="xp-bar-bg">
-              <div className="xp-bar-fill" style={{ width: `${xp}%` }}></div>
-            </div>
+
+          <div className="flex gap-3">
+            <button 
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeTimerMode === 1500 ? "bg-white text-black border-white" : "bg-white/5 text-[#8e8d96] border-white/5 hover:border-white/15"}`}
+              onClick={() => selectTimerMode(1500)}
+            >
+              Foco (25m)
+            </button>
+            <button 
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeTimerMode === 300 ? "bg-white text-black border-white" : "bg-white/5 text-[#8e8d96] border-white/5 hover:border-white/15"}`}
+              onClick={() => selectTimerMode(300)}
+            >
+              Pausa (5m)
+            </button>
           </div>
-          <div className="streak-badge">🔥 Sequência: <strong>{streak}</strong> dias</div>
+
+          <div className="flex gap-4 w-full max-w-xs mt-2">
+            <button 
+              onClick={handleStartTimer} 
+              className="flex-1 py-4 rounded-2xl bg-gradient-to-r from-[#ff7b00] to-[#ffaa00] text-[#0a090d] font-extrabold text-base tracking-wider hover:shadow-[0_0_25px_rgba(255,123,0,0.35)] active:scale-[0.98] transition-all cursor-pointer text-center"
+            >
+              {timerRunning ? "PAUSAR" : "INICIAR FOCO"}
+            </button>
+            <button 
+              onClick={() => selectTimerMode(activeTimerMode)} 
+              className="px-5 py-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 active:scale-[0.98] transition-all"
+            >
+              🔄
+            </button>
+          </div>
         </div>
 
-        {/* Jardim Virtual */}
-        <div className="garden-card">
-          <div className="garden-header-row">
-            <h3>Jardim de Foco</h3>
-            <div className="water-badge">💧 <span>{waterUnits}</span></div>
+        {/* Tree and Stats Area */}
+        <div className="w-full max-w-lg flex items-center justify-between p-6 bg-white/[0.01] border border-white/[0.03] rounded-2xl mt-4">
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[10px] uppercase font-black tracking-wider text-[#ff7b00]/70">Estatísticas do Dia</span>
+            <div className="text-xl font-black text-white">{totalFocusMinutes} <span className="text-xs font-normal text-[#8e8d96]">min focados</span></div>
+            <div className="text-[10px] text-[#8e8d96]">Saúde da Árvore: {treeHealth}% {treeHealth <= 0 && "(Seca - 50% XP)"}</div>
+            
+            {/* Minimal Progress Bar */}
+            <div className="w-40 h-1 bg-white/5 rounded-full mt-1.5 overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-[#ff7b00] to-[#ffaa00] transition-all duration-500" style={{ width: `${treeHealth}%` }}></div>
+            </div>
           </div>
-          <div className="tree-display">
-            <svg id="garden-tree" className={treeHealth <= 0 ? "murcho" : ""} viewBox="0 0 100 100" width="120" height="120">
-              <g id="tree-aura">
-                {itemsOwned.includes("aura") && treeHealth > 0 && Array.from({ length: 6 }).map((_, i) => (
-                  <circle key={i} className="aura-particle" cx={30 + Math.random() * 40} cy={30 + Math.random() * 40} r={1.5 + Math.random() * 2} style={{ animationDelay: `${i * 0.3}s` }} />
-                ))}
-              </g>
-              <path d="M20,80 Q50,75 80,80" stroke="var(--accent-glow)" strokeWidth="3" fill="none" />
-              <path id="tree-pot" className={itemsOwned.includes("goldpot") ? "golden" : ""} d="M35,80 L65,80 L60,88 L40,88 Z" fill="#1f1e24" stroke="rgba(255,255,255,0.05)" strokeWidth="1.5" />
-              <path id="tree-trunk" d={treeHealth <= 0 ? "M50,80 L50,65 M50,65 Q45,55 42,50 M50,65 Q55,58 58,54" : "M50,80 L50,45"} stroke="var(--text-main)" strokeWidth={level >= 4 ? 6 : level === 3 ? 5 : level === 2 ? 4 : 3} strokeLinecap="round" />
+
+          {/* Minimal Tree SVG */}
+          <div className="w-16 h-16 flex items-center justify-center opacity-85">
+            <svg viewBox="0 0 100 100" className={treeHealth <= 0 ? "grayscale" : ""}>
+              <path d="M20,85 Q50,80 80,85" stroke="var(--text-main)" strokeWidth="2" fill="none" opacity="0.3" />
+              <path d="M50,85 L50,55" stroke="#ff7b00" strokeWidth={treeHealth <= 0 ? "2" : "3.5"} strokeLinecap="round" />
+              {treeHealth > 0 && (
+                <>
+                  <circle cx="50" cy="50" r="10" fill="#ffaa00" opacity="0.4" className="animate-pulse" />
+                  <path d="M50,55 Q42,48 40,42 M50,65 Q58,58 60,52" stroke="#ff7b00" strokeWidth="2.5" strokeLinecap="round" />
+                </>
+              )}
             </svg>
           </div>
-          
-          <div className="vitality-container">
-            <div className="vitality-header">
-              <span>Saúde do Jardim</span>
-              <span>{treeHealth <= 0 ? "Seca (50% XP)" : treeHealth >= 75 ? "Excelente" : treeHealth >= 45 ? "Instável" : "Murchando!"}</span>
-            </div>
-            <div className="vitality-bar-bg">
-              <div className={`vitality-bar-fill ${treeHealth <= 0 || treeHealth < 45 ? "danger" : treeHealth < 75 ? "warning" : ""}`} style={{ width: `${treeHealth}%` }}></div>
-            </div>
-          </div>
-          <button className="water-btn" onClick={handleWaterTree} disabled={waterUnits <= 0 || treeHealth >= 100}>Regar Jardim (+10 Saúde)</button>
         </div>
 
-        {/* Bosque de Troféus */}
-        <div className="forest-card">
-          <h3>Bosque de Troféus</h3>
-          <div className="forest-grid">
-            {forest.length === 0 ? (
-              <p className="empty-forest-msg">Nenhum objetivo eternizado ainda.</p>
-            ) : (
-              forest.map((tree, i) => (
-                <div key={i} className="forest-tree-item" onClick={() => alert(`Objetivo Concluído:\n\n"${tree.name}"\nNível: ${tree.level}\nData: ${tree.completed_at || tree.date}`)}>
-                  <div className="forest-tree-icon">{tree.theme === "pragma" ? "🔮" : tree.theme === "geraqrcode" ? "⚡" : "🌳"}</div>
-                  <div className="forest-tree-details">
-                    <span className="forest-tree-name">{tree.name}</span>
-                    <span className="forest-tree-meta">Nível {tree.level} • {tree.completed_at || tree.date}</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+        {/* Focus Notepad Area */}
+        <div className="w-full max-w-lg flex flex-col gap-2.5 mt-2">
+          <span className="text-[10px] uppercase font-black tracking-wider text-[#ff7b00]/70">Bloco de Notas Temporário (Evite distrações)</span>
+          <textarea 
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Anote ideias ou coisas para resolver depois aqui para não perder o foco do timer atual..."
+            className="w-full h-28 bg-white/[0.01] border border-white/[0.03] hover:border-white/[0.06] focus:border-[#ff7b00]/30 rounded-xl p-4 text-sm text-[#ceced8] placeholder-white/10 focus:outline-none transition-all resize-none"
+          />
         </div>
 
-        {/* Conquistas */}
-        <div className="badges-card">
-          <h3>Conquistas</h3>
-          <div className="badges-grid">
-            {BADGES.map(badge => {
-              const unlocked = forest.length > 0 && badge.id === "projectDone";
-              return (
-                <div key={badge.id} className={`badge-item ${unlocked ? "unlocked" : "locked"}`} data-title={`${badge.title}: ${badge.desc}`}>
-                  {badge.icon}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </aside>
-
-      {/* CONTEÚDO PRINCIPAL */}
-      <main className="main-content">
-        <header className="project-header">
-          <div className="project-info">
-            <span className="project-tag">Projeto Ativo</span>
-            <div className="project-title-wrapper">
-              <h2>{projectName}</h2>
-              <button className="icon-text-btn" onClick={() => setSettingsActive(true)}>✏️</button>
-            </div>
-          </div>
-          <div className="countdown-widget">
-            <div className="countdown-time">
-              <div className="time-block"><span>{timeLeftStr.days}</span><small>dias</small></div>
-              <div className="time-block"><span>{timeLeftStr.hours}</span><small>horas</small></div>
-              <div className="time-block"><span>{timeLeftStr.minutes}</span><small>min</small></div>
-            </div>
-            <div className="countdown-progress">
-              <div className="progress-bar-bg">
-                <div className="progress-bar-fill" style={{ width: `${timeLeftStr.percent}%` }}></div>
-              </div>
-              <span>{timeLeftStr.percent}% do tempo decorrido</span>
-            </div>
-          </div>
-        </header>
-
-        <div className="content-grid">
-          {/* Foco Único e Timer */}
-          <div className="focus-section card">
-            <div className="focus-header">
-              <h3>Foco Único</h3>
-            </div>
-            <div className="single-task-box">
-              <input type="text" value={currentTask} onChange={(e) => setCurrentTask(e.target.value)} placeholder="O que você vai concluir agora?" />
-              <button className="glow-btn" onClick={handleCompleteMeta} disabled={!currentTask.trim()}>Concluir Meta</button>
-            </div>
-            <div className="timer-container">
-              <div className="timer-display">{formatTimer(timerSeconds)}</div>
-              <div className="timer-modes">
-                <button className={`timer-mode-btn ${activeTimerMode === 1500 ? "active" : ""}`} onClick={() => selectTimerMode(1500)}>Pomodoro (25m)</button>
-                <button className={`timer-mode-btn mode-dopamine ${activeTimerMode === 300 ? "active" : ""}`} onClick={() => selectTimerMode(300)}>Só 5 Minutos</button>
-              </div>
-              <div className="timer-controls">
-                <button className="control-btn primary" onClick={handleStartTimer}>{timerRunning ? "Pausar" : "Iniciar"}</button>
-                <button className="control-btn secondary" onClick={() => selectTimerMode(activeTimerMode)}>Reiniciar</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Hábitos e To-Do */}
-          <div className="daily-section card">
-            <div className="section-title">
-              <h3>Micro-Hábitos Diários</h3>
-              <button className="text-btn" onClick={() => setHabitsModalActive(true)}>Editar</button>
-            </div>
-            <div className="habits-list">
-              {habits.map(h => (
-                <div key={h.id} className={`habit-row ${h.completed ? "completed" : ""}`} onClick={() => toggleHabit(h.id)}>
-                  <div className="habit-checkbox"></div>
-                  <span className="habit-text">{h.text}</span>
-                </div>
-              ))}
-            </div>
-            <hr className="divider" />
-            <div className="section-title">
-              <h3>Tarefas Secundárias</h3>
-            </div>
-            <div className="todo-input-row">
-              <input type="text" value={todoInputValue} onChange={(e) => setTodoInputValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAddTodo()} placeholder="Nova tarefa" />
-              <button className="todo-add-btn" onClick={handleAddTodo}>+</button>
-            </div>
-            <div className="todo-list">
-              {todoList.map(todo => (
-                <div key={todo.id} className={`todo-item ${todo.completed ? "completed" : ""}`} onClick={() => toggleTodo(todo.id, todo.completed)}>
-                  <div className="todo-checkbox"></div>
-                  <span className="todo-text">{todo.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Abas e RPG / Escrita */}
-          <div className="writing-section card">
-            <div className="writing-header">
-              <div className="writing-tabs">
-                <button className={`write-tab ${activeTab === "assistant" ? "active" : ""}`} onClick={() => setActiveTab("assistant")}>Assistente de Escrita</button>
-                <button className={`write-tab ${activeTab === "freewriting" ? "active" : ""}`} onClick={() => setActiveTab("freewriting")}>Modo Freewriting</button>
-                <button className={`write-tab write-tab-rpg ${activeTab === "rpg" ? "active" : ""}`} onClick={() => setActiveTab("rpg")}>💎 Loja & Baú RPG</button>
-              </div>
-              {activeTab !== "rpg" && (
-                <div className="journey-selector-container">
-                  <label>Jornada:</label>
-                  <select value={journeySelected} onChange={(e) => { setJourneySelected(e.target.value); setActiveTemplateId(null); }}>
-                    <option value="tcc">Pré-Projeto & TCC</option>
-                    <option value="creative">Escrita Criativa</option>
-                    <option value="code">Tech & Documentação</option>
-                    <option value="general">Planejamento Geral</option>
-                    {customJourneys.map(j => (
-                      <option key={j.id} value={j.id}>{j.name}</option>
-                    ))}
-                  </select>
-                  <button className="add-journey-btn" onClick={() => setCustomJourneyActive(true)}>+</button>
-                </div>
-              )}
-            </div>
-
-            {/* ABA ASSISTENTE */}
-            {activeTab === "assistant" && (
-              <div className="tab-content active">
-                <div className="assistant-layout">
-                  <div className="templates-sidebar">
-                    {getJourneySteps().map(step => (
-                      <button key={step.id} className={`template-nav-btn ${activeTemplateId === step.id ? "active" : ""}`} onClick={() => { setActiveTemplateId(step.id); setEditorText(drafts[step.id] || ""); }}>
-                        {step.title}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="editor-area">
-                    <div className="editor-header">
-                      <h4>{activeTemplateId ? getJourneySteps().find(s => s.id === activeTemplateId)?.title : "Selecione um tópico"}</h4>
-                    </div>
-                    {activeTemplateId && (
-                      <>
-                        <div className="editor-guide">{getJourneySteps().find(s => s.id === activeTemplateId)?.guide}</div>
-                        <textarea value={editorText} onChange={(e) => setEditorText(e.target.value)} placeholder="Comece a escrever aqui..."></textarea>
-                        <div className="editor-actions">
-                          <button className="glow-btn" onClick={handleSaveDraft}>Salvar Rascunho</button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* ABA FREEWRITING */}
-            {activeTab === "freewriting" && (
-              <div className="tab-content active">
-                <div className="freewriting-layout">
-                  {!freewritingActive ? (
-                    <div className="freewriting-intro">
-                      <h4>Vença o Perfeccionismo e o Bloqueio</h4>
-                      <p>O temporizador de 3 minutos começará a rodar. Escreva sem parar de digitar!</p>
-                      <button className="glow-btn" onClick={handleStartFreewriting}>Iniciar Fluxo (3 Minutos)</button>
-                    </div>
-                  ) : (
-                    <div className="freewriting-active-area">
-                      <div className="freewriting-header">
-                        <span>{formatTimer(freewritingTimeLeft)}</span>
-                        <span>{freewritingWarning}</span>
-                      </div>
-                      <textarea value={freewritingText} onChange={(e) => { setFreewritingText(e.target.value); lastTypingTimeRef.current = Date.now(); }} placeholder="Digite sem parar, sem editar e sem apagar..."></textarea>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* ABA RPG (Simplificada em duas colunas) */}
-            {activeTab === "rpg" && (
-              <div className="tab-content active">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
-                  {/* Shop */}
-                  <div className="flex flex-col gap-4">
-                    <h4 className="text-lg font-extrabold text-[var(--accent-color)] border-b border-white/5 pb-2">💎 Loja Pragmática</h4>
-                    <div className="grid grid-cols-1 gap-3">
-                      {SHOP_ITEMS.map(item => {
-                        const owned = itemsOwnedUnlocked.includes(item.id);
-                        const canBuy = gems >= item.price && (item.type === "consumable" || !owned);
-                        return (
-                          <div key={item.id} className="shop-item-card flex items-center justify-between p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl">
-                            <div className="flex items-center gap-3">
-                              <span className="text-2xl">{item.icon}</span>
-                              <div>
-                                <div className="text-sm font-bold text-white">{item.title}</div>
-                                <div className="text-xs text-[var(--text-muted)] max-w-xs">{item.desc}</div>
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end gap-1.5">
-                              <span className="text-xs font-bold text-[var(--accent-color)]">💎 {item.price}</span>
-                              <button className="px-3 py-1.5 rounded-lg bg-[var(--bg-main)] hover:bg-[var(--bg-hover)] text-xs font-bold text-white border border-[var(--border-color)] transition-all cursor-pointer" onClick={() => buyShopItem(item)} disabled={!canBuy}>
-                                {owned && item.type === "cosmetic" ? "Adquirido" : "Comprar"}
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Baú de Itens */}
-                  <div className="flex flex-col gap-4">
-                    <h4 className="text-lg font-extrabold text-[var(--accent-color)] border-b border-white/5 pb-2">🎒 Meu Baú de Itens</h4>
-                    <div className="flex flex-col gap-3">
-                      {potionsCount > 0 && (
-                        <div className="bag-item-card flex items-center justify-between p-3.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl">
-                          <span className="text-sm text-white font-semibold">🧪 Poção de Vitalidade ({potionsCount})</span>
-                          <button className="px-3 py-1.5 rounded-lg bg-[var(--accent-color)] text-[#0f0e13] text-xs font-extrabold cursor-pointer transition-all hover:opacity-90" onClick={usePotion}>Usar (+50 Saúde)</button>
-                        </div>
-                      )}
-                      
-                      {itemsOwnedUnlocked.map(cosId => {
-                        const item = SHOP_ITEMS.find(s => s.id === cosId);
-                        const equipped = itemsOwned.includes(cosId);
-                        return (
-                          <div key={cosId} className="bag-item-card flex items-center justify-between p-3.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl">
-                            <span className="text-sm text-white font-semibold">{item?.icon} {item?.title}</span>
-                            <button className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${equipped ? "bg-white/10 text-white border-white/20" : "bg-[var(--bg-main)] text-[var(--text-muted)] border-[var(--border-color)]"}`} onClick={() => toggleCosmetic(cosId)}>
-                              {equipped ? "Desequipar" : "Equipar"}
-                            </button>
-                          </div>
-                        );
-                      })}
-
-                      {potionsCount === 0 && itemsOwnedUnlocked.length === 0 && (
-                        <div className="text-xs text-[var(--text-muted)] text-center py-8">Seu baú de itens está vazio. Adquira itens na Loja!</div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Global actions */}
+        <div className="w-full max-w-lg flex justify-between items-center text-xs text-[#525159] mt-4 border-t border-white/[0.03] pt-4">
+          <button onClick={loadGlobalRanking} className="hover:text-[#ff7b00] font-bold transition-all">🏆 Ver Ranking Global</button>
+          <span>Faltam {timeLeftStr.days} dias ({timeLeftStr.percent}% do tempo decorrido)</span>
         </div>
       </main>
-
-      {/* MODAL RANKING GLOBAL MUNDIAL */}
-      {rankingActive && (
-        <div className="modal-overlay active">
-          <div className="modal-content max-w-lg">
-            <div className="modal-header">
-              <h3>🏆 Ranking Global Pragma</h3>
-              <button className="close-modal-btn" onClick={() => setRankingActive(false)}>&times;</button>
-            </div>
-            <div className="modal-body">
-              <div className="flex flex-col gap-2 mt-2">
-                {rankingList.map((user, idx) => (
-                  <div key={user.username} className={`flex items-center gap-3 p-3 rounded-lg border ${idx === 0 ? 'bg-yellow-500/10 border-yellow-500/30' : idx === 1 ? 'bg-slate-300/10 border-slate-300/30' : idx === 2 ? 'bg-amber-600/10 border-amber-600/30' : 'bg-[var(--bg-main)] border-[var(--border-color)]'}`}>
-                    <span className="font-extrabold text-sm w-5 text-center text-[var(--text-muted)]">{idx + 1}</span>
-                    {user.avatar_url ? (
-                      <img src={user.avatar_url} className="w-8 h-8 rounded-full" alt="Avatar" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-[var(--bg-card)] flex items-center justify-center font-bold text-xs">U</div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-bold truncate text-[var(--text-main)] flex items-center gap-1.5">
-                        {user.username}
-                        <span className="text-[10px] px-1 py-0.5 rounded bg-[var(--bg-card)] font-normal text-[var(--text-muted)]">
-                          {user.country || "BR"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-bold text-[var(--text-main)]">Nível {user.level}</div>
-                      <div className="text-[10px] text-[var(--text-muted)]">{user.xp} XP</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* MODAL CONFIGURAÇÕES */}
       {settingsActive && (
         <div className="modal-overlay active">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Configurações do Pragma</h3>
+              <h3>Configurar Prazo</h3>
               <button className="close-modal-btn" onClick={() => setSettingsActive(false)}>&times;</button>
             </div>
-            <div className="modal-body">
-              <div className="settings-group">
-                <label>Nome da Meta Principal:</label>
-                <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
-                <label>Data Limite:</label>
-                <input type="date" value={projectDeadline} onChange={(e) => setProjectDeadline(e.target.value)} />
-              </div>
-              <div className="settings-group">
-                <h4>Temas</h4>
-                <div className="theme-selector-grid">
-                  <div className={`theme-option ${theme === "cajuina" ? "active" : ""}`} onClick={() => selectTheme("cajuina")}>Cajuína</div>
-                  <div className={`theme-option ${theme === "pragma" ? "active" : ""}`} onClick={() => selectTheme("pragma")}>Pragma Roxo</div>
-                  <div className={`theme-option ${theme === "geraqrcode" ? "active" : ""}`} onClick={() => selectTheme("geraqrcode")}>GeraQRCode</div>
-                </div>
+            <div className="modal-body flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs text-[#8e8d96]">Data Limite da Meta:</label>
+                <input 
+                  type="date" 
+                  value={projectDeadline} 
+                  onChange={(e) => setProjectDeadline(e.target.value)} 
+                  className="w-full p-3 rounded-lg bg-[var(--bg-main)] border border-[var(--border-color)] text-white focus:outline-none focus:border-[#ff7b00]"
+                />
               </div>
             </div>
             <div className="modal-footer">
-              <button className="glow-btn" onClick={() => { setSettingsActive(false); updateDeadlineCountdown(); }}>Salvar</button>
+              <button className="glow-btn w-full py-3" onClick={() => { setSettingsActive(false); updateDeadlineCountdown(); }}>Salvar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL JORNADA CUSTOMIZADA */}
-      {customJourneyActive && (
+      {/* MODAL RANKING GLOBAL MUNDIAL */}
+      {rankingActive && (
         <div className="modal-overlay active">
-          <div className="modal-content">
+          <div className="modal-content max-w-md">
             <div className="modal-header">
-              <h3>Criar Jornada Customizada</h3>
-              <button className="close-modal-btn" onClick={() => setCustomJourneyActive(false)}>&times;</button>
+              <h3>🏆 Ranking por Minutos Focados</h3>
+              <button className="close-modal-btn" onClick={() => setRankingActive(false)}>&times;</button>
             </div>
-            <div className="modal-body">
-              <label>Nome da Jornada:</label>
-              <input type="text" value={customJourneyName} onChange={(e) => setCustomJourneyName(e.target.value)} placeholder="Ex: Tese de Mestrado" />
-              
-              <div className="section-title">
-                <h5>Passos da Escrita:</h5>
-                <button className="text-btn" onClick={() => setCustomSteps(prev => [...prev, { title: "", guide: "" }])}>+ Adicionar</button>
-              </div>
-              <div className="custom-steps-builder">
-                {customSteps.map((step, idx) => (
-                  <div key={idx} className="custom-step-builder-row">
-                    <input type="text" value={step.title} onChange={(e) => {
-                      const next = [...customSteps];
-                      next[idx].title = e.target.value;
-                      setCustomSteps(next);
-                    }} placeholder="Título do Passo" />
-                    <textarea value={step.guide} onChange={(e) => {
-                      const next = [...customSteps];
-                      next[idx].guide = e.target.value;
-                      setCustomSteps(next);
-                    }} placeholder="Instruções de Escrita"></textarea>
+            <div className="modal-body flex flex-col gap-2 mt-2">
+              {rankingList.map((user, idx) => (
+                <div key={user.username} className={`flex items-center gap-3 p-3 rounded-lg border ${idx === 0 ? 'bg-[#ff7b00]/10 border-[#ff7b00]/30' : idx === 1 ? 'bg-white/5 border-white/10' : 'bg-[#0a090d] border-white/5'}`}>
+                  <span className="font-extrabold text-sm w-5 text-center text-[#ff7b00]">{idx + 1}</span>
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} className="w-8 h-8 rounded-full border border-white/10" alt="Avatar" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center font-bold text-xs text-[#8e8d96]">U</div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold truncate text-white flex items-center gap-1.5">
+                      {user.username}
+                      <span className="text-[10px] px-1 py-0.5 rounded bg-white/5 font-normal text-[#8e8d96]">
+                        {user.country || "BR"}
+                      </span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button className="glow-btn" onClick={handleSaveCustomJourney}>Salvar Jornada</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL ONBOARDING */}
-      {onboardingActive && (
-        <div className="modal-overlay active">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Defina Seu Próximo Grande Objetivo</h3>
-            </div>
-            <div className="modal-body">
-              <label>Qual é o seu objetivo principal?</label>
-              <input type="text" value={onboardProject} onChange={(e) => setOnboardProject(e.target.value)} placeholder="Ex: Terminar Pré-Projeto de TCC" />
-              <label>Qual é o seu prazo final?</label>
-              <input type="date" value={onboardDeadline} onChange={(e) => setOnboardDeadline(e.target.value)} />
-              
-              <label>Jornada de Escrita:</label>
-              <select value={onboardJourney} onChange={(e) => setOnboardJourney(e.target.value)}>
-                <option value="tcc">Pré-Projeto & TCC</option>
-                <option value="creative">Escrita Criativa</option>
-                <option value="code">Tech & Documentação</option>
-                <option value="general">Planejamento Geral</option>
-              </select>
-
-              <label>3 Hábitos Diários:</label>
-              <input type="text" value={onboardHabit1} onChange={(e) => setOnboardHabit1(e.target.value)} placeholder="Hábito 1" />
-              <input type="text" value={onboardHabit2} onChange={(e) => setOnboardHabit2(e.target.value)} placeholder="Hábito 2" />
-              <input type="text" value={onboardHabit3} onChange={(e) => setOnboardHabit3(e.target.value)} placeholder="Hábito 3" />
-            </div>
-            <div className="modal-footer">
-              <button className="glow-btn" onClick={handleStartOnboard}>Iniciar Jornada</button>
+                  <div className="text-right">
+                    <div className="text-xs font-bold text-white">{user.level} min</div>
+                  </div>
+                </div>
+              ))}
+              {rankingList.length === 0 && (
+                <div className="text-xs text-[#8e8d96] text-center py-6">Nenhum jogador no ranking ainda.</div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* LEVEL UP MODAL */}
-      {levelupActive && (
-        <div className="modal-overlay active levelup-overlay">
-          <div className="levelup-content">
-            <h2>SUBIU DE NÍVEL!</h2>
-            <div className="levelup-number">{level}</div>
-            <p>Seu foco está se tornando imparável.</p>
-            <button className="glow-btn" onClick={() => setLevelupActive(false)}>Reivindicar</button>
-          </div>
-        </div>
-      )}
+      {/* Footer */}
+      <footer className="w-full py-6 text-center text-[10px] text-[#3e3d43] border-t border-white/[0.02]">
+        Pragma Focus System &bull; Simplicidade é o segredo do foco.
+      </footer>
     </div>
   );
 }
