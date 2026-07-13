@@ -10,31 +10,14 @@ const BADGES = [
   { id: 'focus', icon: '🛡️', title: 'Foco de Aço', desc: 'Completou um timer Pomodoro (25 min).' },
   { id: 'freewriter', icon: '✍️', title: 'Escritor Veloz', desc: 'Concluiu uma sessão de Freewriting.' },
   { id: 'level5', icon: '👑', title: 'Mestre do Foco', desc: 'Alcançou o nível 5 de produtividade.' },
-  { id: 'streak3', icon: '🔥', title: 'Hábito Consistente', desc: 'Manteve 3 dias seguidos de hábitos.' },
   { id: 'projectDone', icon: '🏆', title: 'Entregador Pragmático', desc: 'Concluiu uma meta principal de foco.' }
 ];
 
-// Definições de itens do Shop
+// Definições de itens do Shop (Simplificado)
 const SHOP_ITEMS = [
-  { id: 'potion', icon: '🧪', title: 'Poção de Vitalidade', desc: 'Cura +50 de saúde do Jardim de Foco.', price: 100, type: 'consumable' },
-  { id: 'revive', icon: '⚡', title: 'Poção de Reviver', desc: 'Revive uma árvore morta com 50% de vitalidade.', price: 150, type: 'consumable' },
-  { id: 'goldpot', icon: '🏺', title: 'Vaso de Ouro', desc: 'Transforma o vaso da árvore em ouro brilhante (cosmético).', price: 250, type: 'cosmetic' },
-  { id: 'aura', icon: '✨', title: 'Aura de Foco', desc: 'Adiciona partículas de luz flutuantes ao redor da árvore (cosmético).', price: 400, type: 'cosmetic' }
-];
-
-// Definições das Habilidades
-const SKILLS = [
-  { id: 'resistance', icon: '🛡️', title: 'Resistência Comportamental', desc: 'Reduz todas as penalidades de XP e saúde do jardim por inatividade ou desistência em 50%.', cost: 1 },
-  { id: 'extra', icon: '💰', title: 'Ganhos Amplificados', desc: 'Aumenta permanentemente o recebimento de XP e Gemas em +25%.', cost: 1 },
-  { id: 'efficiency', icon: '⚡', title: 'Escritor Eficiente', desc: 'Sessões de Freewriting dão o dobro de XP e o alerta de tremor de escrita é suavizado de 3s para 5s.', cost: 2 }
-];
-
-// Definições das Receitas de Alquimia
-const RECIPES = [
-  { id: 'nutritiva', name: 'Mistura Nutritiva', desc: 'Restaura +15 de Saúde do Jardim.', cost: { mudas: 1, adubos: 1, essencias: 0 } },
-  { id: 'focosimpl', name: 'Poção de Foco Simples', desc: 'Restaura +25 de Saúde do Jardim.', cost: { mudas: 2, adubos: 0, essencias: 0 } },
-  { id: 'superadub', name: 'Super Adubo Químico', desc: 'Restaura +60 de Saúde do Jardim.', cost: { mudas: 1, adubos: 0, essencias: 1 } },
-  { id: 'elixirvit', name: 'Elixir da Vitalidade', desc: 'Restaura 100% de saúde e concede +50 XP.', cost: { mudas: 1, adubos: 1, essencias: 1 } }
+  { id: 'potion', icon: '🧪', title: 'Poção de Vitalidade', desc: 'Cura +50 de saúde do Jardim de Foco.', price: 80, type: 'consumable' },
+  { id: 'goldpot', icon: '🏺', title: 'Vaso de Ouro', desc: 'Transforma o vaso da árvore em ouro brilhante (cosmético).', price: 200, type: 'cosmetic' },
+  { id: 'aura', icon: '✨', title: 'Aura de Foco', desc: 'Adiciona partículas de luz flutuantes ao redor da árvore (cosmético).', price: 350, type: 'cosmetic' }
 ];
 
 // Definições de Jornadas
@@ -48,7 +31,7 @@ const WRITING_JOURNEYS = {
   creative: [
     { id: 'cre_concept', title: '1. Premissa', guide: 'Escreva a ideia central em uma frase: Quem é o protagonista, qual é o conflito principal e qual o cenário?' },
     { id: 'cre_chars', title: '2. Protagonista', guide: 'Defina o que o seu personagem principal quer mais do que tudo e qual o seu maior defeito que o impede.' },
-    { id: 'cre_plot', title: '3. Estrutura Rápida', guide: 'Esboce in tópicos: O Gancho Inicial, a Mudança no Meio e o Clímax da sua história.' }
+    { id: 'cre_plot', title: '3. Estrutura Rápida', guide: 'Esboce em tópicos: O Gancho Inicial, a Mudança no Meio e o Clímax da sua história.' }
   ],
   code: [
     { id: 'code_overview', title: '1. README Geral', guide: 'Explique o que é o software de forma simples para alguém que nunca ouviu falar. Qual problema ele resolve?' },
@@ -68,7 +51,7 @@ const MOTIVATIONAL_PHRASES = [
   "Só 5 minutos. Você consegue começar por 5 minutos.",
   "A inércia é o maior inimigo. Você já deu o primeiro passo.",
   "1% melhor a cada dia. Foco pragmático.",
-  "Você vai mesmo deixar sua árvore de foco morrer hoje?",
+  "Você vai mesmo deixar sua árvore de foco murchar hoje?",
   "A cobrança diária é dura, mas a aprovação é doce."
 ];
 
@@ -92,23 +75,15 @@ export default function PragmaApp() {
   const [skinnerHardcore, setSkinnerHardcore] = useState(false);
   const [skinnerIdleAlert, setSkinnerIdleAlert] = useState(true);
   const [treeHealth, setTreeHealth] = useState(100);
-  const [treeDead, setTreeDead] = useState(false);
   const [currentTask, setCurrentTask] = useState("");
   
-  // RPG
+  // RPG (Gemas e Água)
   const [gems, setGems] = useState(100);
-  const [skillPoints, setSkillPoints] = useState(0);
-  const [skillsPurchased, setSkillsPurchased] = useState([]);
   const [itemsOwned, setItemsOwned] = useState([]);
   const [itemsOwnedUnlocked, setItemsOwnedUnlocked] = useState([]);
   const [waterUnits, setWaterUnits] = useState(0);
   const [forest, setForest] = useState([]);
-  
-  // Alquimia e Inventário Físico
-  const [mudas, setMudas] = useState(0);
-  const [adubos, setAdubos] = useState(0);
-  const [essencias, setEssencias] = useState(0);
-  const [potions, setPotions] = useState({ potion: 0, revive: 0 });
+  const [potionsCount, setPotionsCount] = useState(0);
   const [todoList, setTodoList] = useState([]);
 
   // Jornadas customizadas e Antifraude
@@ -180,7 +155,6 @@ export default function PragmaApp() {
 
   // --- CARREGAMENTO INICIAL E SINCRONIZAÇÃO DE REDE ---
   useEffect(() => {
-    // Carrega dados salvos locais caso não esteja logado
     const savedToken = localStorage.getItem("pragma_token");
     if (savedToken) {
       setToken(savedToken);
@@ -190,7 +164,6 @@ export default function PragmaApp() {
     }
   }, []);
 
-  // Inicializa o botão de login do Google One Tap e botão visível
   useEffect(() => {
     if (typeof window !== "undefined" && !token) {
       const initGoogle = () => {
@@ -235,10 +208,7 @@ export default function PragmaApp() {
         if (data.skinnerHardcore !== undefined) setSkinnerHardcore(data.skinnerHardcore);
         if (data.skinnerIdleAlert !== undefined) setSkinnerIdleAlert(data.skinnerIdleAlert);
         if (data.treeHealth !== undefined) setTreeHealth(data.treeHealth);
-        if (data.treeDead !== undefined) setTreeDead(data.treeDead);
         if (data.gems !== undefined) setGems(data.gems);
-        if (data.skillPoints !== undefined) setSkillPoints(data.skillPoints);
-        if (data.skillsPurchased !== undefined) setSkillsPurchased(data.skillsPurchased);
         if (data.itemsOwned !== undefined) setItemsOwned(data.itemsOwned);
         if (data.itemsOwnedUnlocked !== undefined) setItemsOwnedUnlocked(data.itemsOwnedUnlocked);
         if (data.waterUnits !== undefined) setWaterUnits(data.waterUnits);
@@ -247,10 +217,7 @@ export default function PragmaApp() {
         if (data.habits !== undefined) setHabits(data.habits);
         
         if (data.inventory !== undefined) {
-          if (data.inventory.mudas !== undefined) setMudas(data.inventory.mudas);
-          if (data.inventory.adubos !== undefined) setAdubos(data.inventory.adubos);
-          if (data.inventory.essencias !== undefined) setEssencias(data.inventory.essencias);
-          if (data.inventory.potions !== undefined) setPotions(data.inventory.potions);
+          if (data.inventory.potions !== undefined) setPotionsCount(data.inventory.potions.potion || 0);
         }
         if (data.customJourneys !== undefined) setCustomJourneys(data.customJourneys);
         if (data.draftsXpClaimedToday !== undefined) setDraftsXpClaimedToday(data.draftsXpClaimedToday);
@@ -265,7 +232,6 @@ export default function PragmaApp() {
     }
   };
 
-  // Carrega dados da VPS via token JWT
   const fetchUserData = async (jwtToken) => {
     try {
       const res = await fetch(`${API_BASE_URL}/users/me`, {
@@ -282,23 +248,15 @@ export default function PragmaApp() {
       setGems(data.gems);
       setStreak(data.streak);
       setWaterUnits(data.water_units);
-      setSkillPoints(data.skill_points);
       setTreeHealth(data.tree_health);
-      setTreeDead(data.tree_dead);
-      setMudas(data.mudas);
-      setAdubos(data.adubos);
-      setEssencias(data.essencias);
       setLastStreakDate(data.last_streak_date);
       setLastActivityDate(data.last_activity_date);
 
-      // Carrega To-Dos da VPS
       fetchTodos(jwtToken);
-      // Carrega Bosque da VPS
       fetchForest(jwtToken);
-      // Carrega Inventário da VPS
       fetchInventory(jwtToken);
     } catch (e) {
-      console.error("Erro ao conectar com a API do backend na VPS.", e);
+      console.error("Erro ao conectar com a API do backend.", e);
       loadStateLocal();
     }
   };
@@ -330,14 +288,12 @@ export default function PragmaApp() {
       });
       const data = await res.json();
       
-      // Mapeia os itens equipados e quantidades
       const ownedIds = [];
       const ownedUnlocked = [];
-      const potionCounts = { potion: 0, revive: 0 };
+      let potionCountVal = 0;
       
       data.forEach(item => {
-        if (item.item_id === "potion_vitality") potionCounts.potion = item.quantity;
-        else if (item.item_id === "potion_revive") potionCounts.revive = item.quantity;
+        if (item.item_id === "potion_vitality") potionCountVal = item.quantity;
         else {
           ownedUnlocked.push(item.item_id);
           if (item.equipped) ownedIds.push(item.item_id);
@@ -346,11 +302,10 @@ export default function PragmaApp() {
 
       setItemsOwned(ownedIds);
       setItemsOwnedUnlocked(ownedUnlocked);
-      setPotions(potionCounts);
+      setPotionsCount(potionCountVal);
     } catch (e) { console.error(e); }
   };
 
-  // Callback de Resposta do login com Google no front
   const handleGoogleLoginResponse = async (googleResponse) => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/google`, {
@@ -365,7 +320,7 @@ export default function PragmaApp() {
         fetchUserData(data.access_token);
       }
     } catch (e) {
-      alert("Falha ao logar com o Google API na VPS.");
+      alert("Falha ao logar com o Google.");
     }
   };
 
@@ -376,7 +331,6 @@ export default function PragmaApp() {
     loadStateLocal();
   };
 
-  // Sincroniza o estado de gamificação no backend (Anti-Cheat auditado)
   const syncWithBackend = async () => {
     if (!token) return;
     try {
@@ -394,12 +348,12 @@ export default function PragmaApp() {
           gems,
           streak,
           water_units: waterUnits,
-          skill_points: skillPoints,
+          skill_points: 0,
           tree_health: treeHealth,
-          tree_dead: treeDead,
-          mudas,
-          adubos,
-          essencias,
+          tree_dead: treeHealth <= 0,
+          mudas: 0,
+          adubos: 0,
+          essencias: 0,
           last_streak_date: lastStreakDate,
           last_activity_date: lastActivityDate
         })
@@ -409,27 +363,24 @@ export default function PragmaApp() {
     }
   };
 
-  // Sincroniza local e remoto a cada mudança significativa
   useEffect(() => {
     if (token) {
       syncWithBackend();
     } else {
       const stateObj = {
         xp, level, streak, lastStreakDate, lastActivityDate, projectName, projectDeadline, theme,
-        soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, treeDead, gems, skillPoints,
-        skillsPurchased, itemsOwned, itemsOwnedUnlocked, waterUnits, forest, todoList, habits,
-        inventory: { mudas, adubos, essencias, potions }, customJourneys, draftsXpClaimedToday, drafts,
+        soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, treeDead: treeHealth <= 0, gems, skillPoints: 0,
+        skillsPurchased: [], itemsOwned, itemsOwnedUnlocked, waterUnits, forest, todoList, habits,
+        inventory: { potions: { potion: potionsCount } }, customJourneys, draftsXpClaimedToday, drafts,
         weeklyXp, weeklyQuestCompleted
       };
       localStorage.setItem("pragma_state", JSON.stringify(stateObj));
     }
   }, [xp, level, streak, lastStreakDate, lastActivityDate, projectName, projectDeadline, theme,
-      soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, treeDead, gems, skillPoints,
-      skillsPurchased, itemsOwned, itemsOwnedUnlocked, waterUnits, forest, todoList, habits,
-      mudas, adubos, essencias, potions, customJourneys, draftsXpClaimedToday, drafts,
+      soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, gems, itemsOwned, itemsOwnedUnlocked, 
+      waterUnits, forest, todoList, habits, potionsCount, customJourneys, draftsXpClaimedToday, drafts,
       weeklyXp, weeklyQuestCompleted]);
 
-  // Carrega Ranking Global
   const loadGlobalRanking = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/ranking`);
@@ -441,7 +392,6 @@ export default function PragmaApp() {
     }
   };
 
-  // Executa monitoramento de ociosidade e contagem regressiva
   useEffect(() => {
     updateDeadlineCountdown();
     const deadlineInterval = setInterval(updateDeadlineCountdown, 60000);
@@ -456,23 +406,15 @@ export default function PragmaApp() {
     window.addEventListener("click", resetIdleTime);
 
     const idleInterval = setInterval(() => {
-      if (!timerRunning && skinnerIdleAlert && !treeDead) {
+      if (!timerRunning && skinnerIdleAlert) {
         idleTimeRef.current++;
-        if (idleTimeRef.current >= 600) { // 10 minutos ocioso
+        if (idleTimeRef.current >= 600) { 
           setIdleAlertActive(true);
           playSound("beep");
           
           if (idleTimeRef.current % 30 === 0) {
-            const factor = skillsPurchased.includes("resistance") ? 0.5 : 1;
-            setXp(prev => Math.max(0, prev - Math.round(5 * factor)));
-            setTreeHealth(prev => {
-              const nextVal = Math.max(0, prev - Math.round(3 * factor));
-              if (nextVal <= 0) {
-                setTreeDead(true);
-                setIdleAlertActive(false);
-              }
-              return nextVal;
-            });
+            setXp(prev => Math.max(0, prev - 5));
+            setTreeHealth(prev => Math.max(0, prev - 3));
           }
         }
       } else {
@@ -487,24 +429,21 @@ export default function PragmaApp() {
       window.removeEventListener("keydown", resetIdleTime);
       window.removeEventListener("click", resetIdleTime);
     };
-  }, [timerRunning, skinnerIdleAlert, treeDead, skillsPurchased]);
+  }, [timerRunning, skinnerIdleAlert]);
 
-  // --- ENGINE DE AUDIO WEB API ---
+  // --- ENGINE DE AUDIO ---
   const playSound = (type) => {
     if (!soundEnabled) return;
     if (!audioCtxRef.current) {
       audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
     }
     const audioCtx = audioCtxRef.current;
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
+    if (audioCtx.state === "suspended") audioCtx.resume();
 
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     const now = audioCtx.currentTime;
 
     if (type === "coin") {
@@ -555,12 +494,10 @@ export default function PragmaApp() {
     }
   };
 
-  // --- ENGINE DE CONFETES NATIVO ---
   const triggerConfetti = () => {
     const canvas = confettiCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     
@@ -585,28 +522,24 @@ export default function PragmaApp() {
         p.x += p.speedX;
         p.y += p.speedY;
         p.rotation += p.rotationSpeed;
-        
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(p.rotation * Math.PI / 180);
         ctx.fillStyle = p.color;
         ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
         ctx.restore();
-        
         if (p.y < canvas.height) active = true;
       });
-      if (active) {
-        requestAnimationFrame(animate);
-      }
+      if (active) requestAnimationFrame(animate);
     };
     animate();
   };
 
   // --- CONTADORES E PONTOS ---
   const addXP = (amount) => {
-    if (treeDead) return;
-    const factor = skillsPurchased.includes("extra") ? 1.25 : 1;
-    const finalXp = Math.round(amount * factor);
+    // Se a árvore estiver murcha (health = 0), recebe apenas 50% do XP (Penalidade estritamente visual/reforço)
+    const penaltyFactor = treeHealth <= 0 ? 0.5 : 1.0;
+    const finalXp = Math.round(amount * penaltyFactor);
     
     if (!weeklyQuestCompleted) {
       setWeeklyXp(prev => {
@@ -622,7 +555,7 @@ export default function PragmaApp() {
       });
     }
 
-    const gemsEarned = Math.round(amount * 0.2 * factor);
+    const gemsEarned = Math.round(amount * 0.2);
     if (gemsEarned > 0) setGems(g => g + gemsEarned);
 
     setXp(prev => {
@@ -631,7 +564,6 @@ export default function PragmaApp() {
         nextXp -= 100;
         setLevel(lvl => {
           const nextLvl = lvl + 1;
-          setSkillPoints(sp => sp + 1);
           setGems(g => g + 50);
           setLevelupActive(true);
           playSound("levelup");
@@ -644,7 +576,6 @@ export default function PragmaApp() {
   };
 
   const healGarden = (amount) => {
-    if (treeDead) return;
     setTreeHealth(prev => Math.min(100, prev + amount));
   };
 
@@ -659,7 +590,6 @@ export default function PragmaApp() {
     applyThemeClass(themeName);
   };
 
-  // --- ATUALIZAR PRAZO CONTADOR ---
   const updateDeadlineCountdown = () => {
     if (!projectDeadline) return;
     const target = new Date(`${projectDeadline}T23:59:59`);
@@ -688,24 +618,20 @@ export default function PragmaApp() {
     });
   };
 
-  // --- TIMER DE FOCO ---
-  const handleStartTimer = () => {
-    if (treeDead) {
-      alert("💀 Sua árvore está morta! Use uma Poção de Reviver no seu Inventário (RPG) para voltar a focar.");
-      return;
-    }
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const secs = (seconds % 60).toString().padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
 
+  // --- TIMER DE FOCO (Livre para ser usado sempre) ---
+  const handleStartTimer = () => {
     if (timerRunning) {
       if (skinnerHardcore) {
-        const factor = skillsPurchased.includes("resistance") ? 0.5 : 1;
         playSound("fail");
-        setXp(prev => Math.max(0, prev - Math.round(25 * factor)));
-        setTreeHealth(prev => {
-          const nextVal = Math.max(0, prev - Math.round(15 * factor));
-          if (nextVal <= 0) setTreeDead(true);
-          return nextVal;
-        });
-        alert(`⚠️ Penalidade por Desistência! (-${Math.round(25 * factor)} XP e -${Math.round(15 * factor)} de saúde)`);
+        setXp(prev => Math.max(0, prev - 25));
+        setTreeHealth(prev => Math.max(0, prev - 15));
+        alert("⚠️ Penalidade por Desistência! (-25 XP e -15 de saúde da árvore)");
       }
       clearInterval(timerIntervalRef.current);
       setTimerRunning(false);
@@ -719,19 +645,16 @@ export default function PragmaApp() {
             playSound("alarm");
             triggerConfetti();
             
-            if (activeTimerMode === 1500) { // Pomodoro 25 min
+            if (activeTimerMode === 1500) { 
               addXP(100);
               healGarden(40);
               setWaterUnits(w => w + 5);
-              setMudas(m => m + 1);
-              setEssencias(e => e + 1);
-              alert("🛡️ Pomodoro concluído! (+100 XP, +5💧 Água, +1 🧪 Essência e +1 🌿 Muda)");
-            } else if (activeTimerMode === 300) { // Só 5 minutos
+              alert("🛡️ Pomodoro concluído! (+100 XP e +5💧 Água para o Regador)");
+            } else if (activeTimerMode === 300) { 
               addXP(50);
               healGarden(20);
               setWaterUnits(w => w + 1);
-              setMudas(m => m + 1);
-              alert("🚀 Foco rápido concluído! (+50 XP, +1💧 Água, +1 🌿 Muda)");
+              alert("🚀 Foco rápido concluído! (+50 XP e +1💧 Água para o Regador)");
             } else {
               addXP(10);
             }
@@ -745,15 +668,10 @@ export default function PragmaApp() {
 
   const selectTimerMode = (duration) => {
     if (timerRunning && skinnerHardcore) {
-      const factor = skillsPurchased.includes("resistance") ? 0.5 : 1;
       playSound("fail");
-      setXp(prev => Math.max(0, prev - Math.round(25 * factor)));
-      setTreeHealth(prev => {
-        const nextVal = Math.max(0, prev - Math.round(15 * factor));
-        if (nextVal <= 0) setTreeDead(true);
-        return nextVal;
-      });
-      alert(`⚠️ Penalidade por Desistência! (-${Math.round(25 * factor)} XP)`);
+      setXp(prev => Math.max(0, prev - 25));
+      setTreeHealth(prev => Math.max(0, prev - 15));
+      alert("⚠️ Penalidade por Desistência! (-25 XP)");
     }
     clearInterval(timerIntervalRef.current);
     setTimerRunning(false);
@@ -761,18 +679,8 @@ export default function PragmaApp() {
     setTimerSeconds(duration);
   };
 
-  const formatTimer = (seconds) => {
-    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
-    const secs = (seconds % 60).toString().padStart(2, '0');
-    return `${mins}:${secs}`;
-  };
-
   // --- MICRO HÁBITOS ---
   const toggleHabit = (id) => {
-    if (treeDead) {
-      alert("💀 Sua árvore está morta! Use uma Poção de Reviver antes de marcar hábitos.");
-      return;
-    }
     playSound("coin");
     setHabits(prev => prev.map(h => {
       if (h.id === id) {
@@ -780,7 +688,6 @@ export default function PragmaApp() {
         if (completed) {
           addXP(20);
           healGarden(15);
-          setMudas(m => m + 1);
         } else {
           setTreeHealth(th => Math.max(0, th - 15));
         }
@@ -790,7 +697,7 @@ export default function PragmaApp() {
     }));
   };
 
-  // --- TAREFAS SECUNDÁRIAS (TO-DO LIST COM API DA VPS) ---
+  // --- TAREFAS SECUNDÁRIAS (TO-DO LIST) ---
   const handleAddTodo = async () => {
     if (!todoInputValue.trim()) return;
     const taskText = todoInputValue.trim();
@@ -816,9 +723,7 @@ export default function PragmaApp() {
   };
 
   const toggleTodo = async (id, currentCompleted) => {
-    if (treeDead) return;
     const nextCompleted = !currentCompleted;
-    
     if (token) {
       try {
         const res = await fetch(`${API_BASE_URL}/todos/${id}`, {
@@ -832,23 +737,13 @@ export default function PragmaApp() {
         const updated = await res.json();
         setTodoList(prev => prev.map(t => t.id === id ? updated : t));
         playSound("coin");
-        if (nextCompleted) {
-          addXP(5);
-          setAdubos(a => a + 1);
-        } else {
-          setAdubos(a => Math.max(0, a - 1));
-        }
+        if (nextCompleted) addXP(10);
       } catch (e) { console.error(e); }
     } else {
       setTodoList(prev => prev.map(t => {
         if (t.id === id) {
           playSound("coin");
-          if (nextCompleted) {
-            addXP(5);
-            setAdubos(a => a + 1);
-          } else {
-            setAdubos(a => Math.max(0, a - 1));
-          }
+          if (nextCompleted) addXP(10);
           return { ...t, completed: nextCompleted };
         }
         return t;
@@ -856,10 +751,9 @@ export default function PragmaApp() {
     }
   };
 
-  // --- CORTAR ÁRVORE E META PRINCIPAL ---
+  // --- META PRINCIPAL ---
   const handleCompleteMeta = async () => {
-    if (treeDead || !currentTask.trim()) return;
-    
+    if (!currentTask.trim()) return;
     playSound("coin");
     triggerConfetti();
 
@@ -887,34 +781,30 @@ export default function PragmaApp() {
       setForest(prev => [...prev, { ...newTree, id: Date.now(), date: newTree.completed_at }]);
     }
     
-    setGems(g => g + 200);
+    setGems(g => g + 150);
     setLevel(1);
     setXp(0);
     setTreeHealth(100);
-    setTreeDead(false);
     setTodoList([]);
     setCurrentTask("");
 
-    alert(`🏆 PARABÉNS! Objetivo "${projectName}" Concluído!\n\nSua árvore foi eternizada no Bosque de Troféus.\nVocê ganhou 💎 200 de recompensa premium.\nPlante sua próxima meta agora!`);
+    alert(`🏆 PARABÉNS! Objetivo "${projectName}" Concluído!\n\nSua árvore foi eternizada no Bosque de Troféus.\nVocê ganhou 💎 150 de recompensa premium.\nPlante sua próxima meta agora!`);
     setOnboardingActive(true);
   };
 
   // --- ANTIFRAUDE & SALVAR RASCUNHO ---
   const handleSaveDraft = () => {
-    if (treeDead) return;
     if (!activeTemplateId) {
       alert("Selecione um tópico de escrita antes de salvar!");
       return;
     }
-
     const text = editorText.trim();
-    
     if (text.length < 25) {
       alert("O texto precisa conter pelo menos 25 caracteres para pontuar.");
       return;
     }
     if (/(.)\1{9,}/.test(text)) {
-      alert("Padrão de escrita inválido (caracteres repetidos).");
+      alert("Padrão de escrita inválido.");
       return;
     }
     if (text === (drafts[activeTemplateId] || "").trim()) {
@@ -926,7 +816,6 @@ export default function PragmaApp() {
     playSound("coin");
     triggerConfetti();
 
-    // Sincroniza rascunho com a VPS se logado
     if (token) {
       fetch(`${API_BASE_URL}/drafts`, {
         method: "PUT",
@@ -940,19 +829,17 @@ export default function PragmaApp() {
 
     const today = new Date().toDateString();
     const claimedList = draftsXpClaimedToday[today] || [];
-
-    if (claimedList.includes(activeTemplateId)) {
-      alert("Rascunho atualizado com sucesso! (Você já recebeu o XP de rascunho para este tópico hoje)");
-    } else {
+    if (!claimedList.includes(activeTemplateId)) {
       setDraftsXpClaimedToday(prev => ({ ...prev, [today]: [...claimedList, activeTemplateId] }));
       addXP(10);
       alert("Excelente rascunho de escrita! (+10 XP concedidos)");
+    } else {
+      alert("Rascunho atualizado com sucesso!");
     }
   };
 
   // --- FREEWRITING ---
   const handleStartFreewriting = () => {
-    if (treeDead) return;
     setFreewritingActive(true);
     setFreewritingTimeLeft(180);
     setFreewritingText("");
@@ -966,19 +853,17 @@ export default function PragmaApp() {
           setFreewritingActive(false);
           playSound("levelup");
           triggerConfetti();
-          addXP(75);
-          setMudas(m => m + 2);
-          alert("Excelente! Você completou a escrita contínua. (+75 XP, +2 🌿 Mudas)");
+          addXP(70);
+          alert("Excelente! Você completou a escrita contínua. (+70 XP)");
           return 180;
         }
         return prev - 1;
       });
     }, 1000);
 
-    const allowed = skillsPurchased.includes("efficiency") ? 5000 : 3000;
     typingTimerRef.current = setInterval(() => {
       const diff = Date.now() - lastTypingTimeRef.current;
-      if (diff > allowed) {
+      if (diff > 3000) {
         setFreewritingWarning("DIGITE ALGO! NÃO PARE!");
       } else {
         setFreewritingWarning("Fluxo contínuo ativo...");
@@ -986,14 +871,13 @@ export default function PragmaApp() {
     }, 500);
   };
 
-  // --- LOJA E INVENTÁRIO (BAÚ DE ITENS) ---
+  // --- LOJA E INVENTÁRIO (SIMPLIFICADO) ---
   const buyShopItem = async (item) => {
     if (gems < item.price) return;
     
-    // Se logado na VPS, atualiza inventário no BD
     if (token) {
       try {
-        const itemCode = item.id === "potion" ? "potion_vitality" : item.id === "revive" ? "potion_revive" : item.id;
+        const itemCode = item.id === "potion" ? "potion_vitality" : item.id;
         await fetch(`${API_BASE_URL}/inventory/${itemCode}/equip`, {
           method: "PUT",
           headers: { "Authorization": `Bearer ${token}` }
@@ -1006,12 +890,7 @@ export default function PragmaApp() {
     triggerConfetti();
 
     if (item.type === "consumable") {
-      setPotions(prev => {
-        const next = { ...prev };
-        if (item.id === "potion") next.potion += 1;
-        if (item.id === "revive") next.revive += 1;
-        return next;
-      });
+      setPotionsCount(prev => prev + 1);
       alert(`${item.title} comprada e enviada ao seu Baú de Itens!`);
     } else {
       setItemsOwnedUnlocked(prev => [...prev, item.id]);
@@ -1020,35 +899,13 @@ export default function PragmaApp() {
     }
   };
 
-  const usePotion = (type) => {
-    if (type === "potion") {
-      if (treeDead) {
-        alert("💀 Esta poção cura vitalidade, mas não pode reviver uma árvore morta!");
-        return;
-      }
-      if (treeHealth >= 100) return;
-      setPotions(prev => ({ ...prev, potion: prev.potion - 1 }));
-      healGarden(50);
-      playSound("coin");
-    } else if (type === "revive") {
-      if (!treeDead) return;
-      setPotions(prev => ({ ...prev, revive: prev.revive - 1 }));
-      setTreeDead(false);
-      setTreeHealth(50);
-      playSound("levelup");
-      triggerConfetti();
-    }
+  const usePotion = () => {
+    if (treeHealth >= 100) return;
+    setPotionsCount(prev => Math.max(0, prev - 1));
+    healGarden(50);
+    playSound("coin");
   };
 
-  const handleEmergencyRevive = () => {
-    if (!treeDead) return;
-    setTreeDead(false);
-    setTreeHealth(15);
-    setGems(0); // Zera gemas como taxa
-    playSound("levelup");
-    triggerConfetti();
-    alert("✨ O templo ouviu suas preces! Sua árvore foi revivida com 15% de saúde, mas sua carteira de gemas foi zerada.");
-  };
   const toggleCosmetic = async (id) => {
     if (token) {
       try {
@@ -1066,36 +923,6 @@ export default function PragmaApp() {
     }
   };
 
-  // --- ALQUIMIA CRAFTING ---
-  const craftRecipe = (recipe) => {
-    if (treeDead) return;
-    setMudas(m => m - recipe.cost.mudas);
-    setAdubos(a => a - recipe.cost.adubos);
-    setEssencias(e => e - recipe.cost.essencias);
-
-    playSound("coin");
-    triggerConfetti();
-
-    if (recipe.id === "nutritiva") healGarden(15);
-    if (recipe.id === "focosimpl") healGarden(25);
-    if (recipe.id === "superadub") healGarden(60);
-    if (recipe.id === "elixirvit") {
-      healGarden(100);
-      addXP(50);
-    }
-    alert(`🧪 Sucesso! Você preparou e consumiu: ${recipe.name}.`);
-  };
-
-  // --- HABILIDADES ---
-  const buySkill = (skill) => {
-    if (skillPoints < skill.cost) return;
-    setSkillPoints(prev => prev - skill.cost);
-    setSkillsPurchased(prev => [...prev, skill.id]);
-    playSound("levelup");
-    triggerConfetti();
-  };
-
-  // --- SUBMISSÃO DE JORNADA CUSTOMIZADA ---
   const handleSaveCustomJourney = () => {
     if (!customJourneyName.trim() || customSteps.some(s => !s.title || !s.guide)) {
       alert("Preencha todos os campos!");
@@ -1115,7 +942,6 @@ export default function PragmaApp() {
     triggerConfetti();
   };
 
-  // --- ONBOARDING INICIAL ---
   const handleStartOnboard = () => {
     if (!onboardProject.trim() || !onboardDeadline) {
       alert("Preencha o objetivo principal e o prazo final!");
@@ -1131,7 +957,6 @@ export default function PragmaApp() {
       { id: 3, text: onboardHabit3.trim() || "Organizar a mesa de trabalho por 2 min", completed: false }
     ]);
 
-    setTreeDead(false);
     setTreeHealth(100);
     setTodoList([]);
     setOnboardingActive(false);
@@ -1139,7 +964,7 @@ export default function PragmaApp() {
   };
 
   const handleWaterTree = () => {
-    if (waterUnits <= 0 || treeHealth >= 100 || treeDead) return;
+    if (waterUnits <= 0 || treeHealth >= 100) return;
     setWaterUnits(w => w - 1);
     healGarden(10);
     playSound("coin");
@@ -1238,28 +1063,28 @@ export default function PragmaApp() {
             <div className="water-badge">💧 <span>{waterUnits}</span></div>
           </div>
           <div className="tree-display">
-            <svg id="garden-tree" className={treeDead ? "dead" : treeHealth < 50 ? "murcho" : ""} viewBox="0 0 100 100" width="120" height="120">
+            <svg id="garden-tree" className={treeHealth <= 0 ? "murcho" : ""} viewBox="0 0 100 100" width="120" height="120">
               <g id="tree-aura">
-                {itemsOwned.includes("aura") && treeHealth >= 50 && !treeDead && Array.from({ length: 6 }).map((_, i) => (
+                {itemsOwned.includes("aura") && treeHealth > 0 && Array.from({ length: 6 }).map((_, i) => (
                   <circle key={i} className="aura-particle" cx={30 + Math.random() * 40} cy={30 + Math.random() * 40} r={1.5 + Math.random() * 2} style={{ animationDelay: `${i * 0.3}s` }} />
                 ))}
               </g>
               <path d="M20,80 Q50,75 80,80" stroke="var(--accent-glow)" strokeWidth="3" fill="none" />
               <path id="tree-pot" className={itemsOwned.includes("goldpot") ? "golden" : ""} d="M35,80 L65,80 L60,88 L40,88 Z" fill="#1f1e24" stroke="rgba(255,255,255,0.05)" strokeWidth="1.5" />
-              <path id="tree-trunk" d={treeDead ? "M50,80 L50,65 M50,65 Q45,55 42,50 M50,65 Q55,58 58,54" : "M50,80 L50,45"} stroke="var(--text-main)" strokeWidth={level >= 4 ? 6 : level === 3 ? 5 : level === 2 ? 4 : 3} strokeLinecap="round" />
+              <path id="tree-trunk" d={treeHealth <= 0 ? "M50,80 L50,65 M50,65 Q45,55 42,50 M50,65 Q55,58 58,54" : "M50,80 L50,45"} stroke="var(--text-main)" strokeWidth={level >= 4 ? 6 : level === 3 ? 5 : level === 2 ? 4 : 3} strokeLinecap="round" />
             </svg>
           </div>
           
           <div className="vitality-container">
             <div className="vitality-header">
               <span>Saúde do Jardim</span>
-              <span>{treeDead ? "Morta" : treeHealth >= 75 ? "Excelente" : treeHealth >= 45 ? "Instável" : "Murchando!"}</span>
+              <span>{treeHealth <= 0 ? "Seca (50% XP)" : treeHealth >= 75 ? "Excelente" : treeHealth >= 45 ? "Instável" : "Murchando!"}</span>
             </div>
             <div className="vitality-bar-bg">
-              <div className={`vitality-bar-fill ${treeDead || treeHealth < 45 ? "danger" : treeHealth < 75 ? "warning" : ""}`} style={{ width: `${treeHealth}%` }}></div>
+              <div className={`vitality-bar-fill ${treeHealth <= 0 || treeHealth < 45 ? "danger" : treeHealth < 75 ? "warning" : ""}`} style={{ width: `${treeHealth}%` }}></div>
             </div>
           </div>
-          <button className="water-btn" onClick={handleWaterTree} disabled={waterUnits <= 0 || treeHealth >= 100 || treeDead}>Regar Jardim (+10 Saúde)</button>
+          <button className="water-btn" onClick={handleWaterTree} disabled={waterUnits <= 0 || treeHealth >= 100}>Regar Jardim (+10 Saúde)</button>
         </div>
 
         {/* Bosque de Troféus */}
@@ -1331,7 +1156,7 @@ export default function PragmaApp() {
             </div>
             <div className="single-task-box">
               <input type="text" value={currentTask} onChange={(e) => setCurrentTask(e.target.value)} placeholder="O que você vai concluir agora?" />
-              <button className="glow-btn" onClick={handleCompleteMeta} disabled={!currentTask.trim() || treeDead}>Concluir Meta</button>
+              <button className="glow-btn" onClick={handleCompleteMeta} disabled={!currentTask.trim()}>Concluir Meta</button>
             </div>
             <div className="timer-container">
               <div className="timer-display">{formatTimer(timerSeconds)}</div>
@@ -1365,7 +1190,7 @@ export default function PragmaApp() {
               <h3>Tarefas Secundárias</h3>
             </div>
             <div className="todo-input-row">
-              <input type="text" value={todoInputValue} onChange={(e) => setTodoInputValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAddTodo()} placeholder="Nova tarefa (Ganha Adubo 🍂)" />
+              <input type="text" value={todoInputValue} onChange={(e) => setTodoInputValue(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleAddTodo()} placeholder="Nova tarefa" />
               <button className="todo-add-btn" onClick={handleAddTodo}>+</button>
             </div>
             <div className="todo-list">
@@ -1373,7 +1198,6 @@ export default function PragmaApp() {
                 <div key={todo.id} className={`todo-item ${todo.completed ? "completed" : ""}`} onClick={() => toggleTodo(todo.id, todo.completed)}>
                   <div className="todo-checkbox"></div>
                   <span className="todo-text">{todo.text}</span>
-                  <span className="todo-reward-tag">🍂 +1 Adubo</span>
                 </div>
               ))}
             </div>
@@ -1385,7 +1209,7 @@ export default function PragmaApp() {
               <div className="writing-tabs">
                 <button className={`write-tab ${activeTab === "assistant" ? "active" : ""}`} onClick={() => setActiveTab("assistant")}>Assistente de Escrita</button>
                 <button className={`write-tab ${activeTab === "freewriting" ? "active" : ""}`} onClick={() => setActiveTab("freewriting")}>Modo Freewriting</button>
-                <button className={`write-tab write-tab-rpg ${activeTab === "rpg" ? "active" : ""}`} onClick={() => setActiveTab("rpg")}>💎 RPG, Loja & Alquimia</button>
+                <button className={`write-tab write-tab-rpg ${activeTab === "rpg" ? "active" : ""}`} onClick={() => setActiveTab("rpg")}>💎 Loja & Baú RPG</button>
               </div>
               {activeTab !== "rpg" && (
                 <div className="journey-selector-container">
@@ -1456,25 +1280,29 @@ export default function PragmaApp() {
               </div>
             )}
 
-            {/* ABA RPG, SHOP, ALQUIMIA */}
+            {/* ABA RPG (Simplificada em duas colunas) */}
             {activeTab === "rpg" && (
               <div className="tab-content active">
-                <div className="rpg-layout-three">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4">
                   {/* Shop */}
-                  <div className="rpg-column">
-                    <h4>💎 Loja Virtual</h4>
-                    <div className="shop-grid-vertical">
+                  <div className="flex flex-col gap-4">
+                    <h4 className="text-lg font-extrabold text-[var(--accent-color)] border-b border-white/5 pb-2">💎 Loja Pragmática</h4>
+                    <div className="grid grid-cols-1 gap-3">
                       {SHOP_ITEMS.map(item => {
                         const owned = itemsOwnedUnlocked.includes(item.id);
                         const canBuy = gems >= item.price && (item.type === "consumable" || !owned);
                         return (
-                          <div key={item.id} className="shop-item-card">
-                            <div className="shop-item-icon">{item.icon}</div>
-                            <div className="shop-item-title">{item.title}</div>
-                            <div className="shop-item-desc">{item.desc}</div>
-                            <div className="shop-item-buy-row">
-                              <span className="shop-item-price">💎 {item.price}</span>
-                              <button className="shop-buy-btn" onClick={() => buyShopItem(item)} disabled={!canBuy}>
+                          <div key={item.id} className="shop-item-card flex items-center justify-between p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{item.icon}</span>
+                              <div>
+                                <div className="text-sm font-bold text-white">{item.title}</div>
+                                <div className="text-xs text-[var(--text-muted)] max-w-xs">{item.desc}</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-1.5">
+                              <span className="text-xs font-bold text-[var(--accent-color)]">💎 {item.price}</span>
+                              <button className="px-3 py-1.5 rounded-lg bg-[var(--bg-main)] hover:bg-[var(--bg-hover)] text-xs font-bold text-white border border-[var(--border-color)] transition-all cursor-pointer" onClick={() => buyShopItem(item)} disabled={!canBuy}>
                                 {owned && item.type === "cosmetic" ? "Adquirido" : "Comprar"}
                               </button>
                             </div>
@@ -1484,91 +1312,33 @@ export default function PragmaApp() {
                     </div>
                   </div>
 
-                  {/* Alquimia & Baú */}
-                  <div className="rpg-column">
-                    <h4>🧪 Alquimia & Inventário</h4>
-                    <div className="alchemy-box">
-                      <div className="ingredients-inventory">
-                        <div className="ing-item"><span>🌿</span><small>Mudas</small><strong>{mudas}</strong></div>
-                        <div className="ing-item"><span>🍂</span><small>Adubos</small><strong>{adubos}</strong></div>
-                        <div className="ing-item"><span>🧪</span><small>Essências</small><strong>{essencias}</strong></div>
-                      </div>
-                      <h5 className="alchemy-sub-title">Criação</h5>
-                      <div className="recipes-list">
-                        {RECIPES.map(recipe => {
-                          const canCraft = mudas >= recipe.cost.mudas && adubos >= recipe.cost.adubos && essencias >= recipe.cost.essencias;
-                          return (
-                            <div key={recipe.id} className="recipe-card">
-                              <div className="recipe-header-row">
-                                <span className="recipe-title">{recipe.name}</span>
-                                <button className="recipe-craft-btn" onClick={() => craftRecipe(recipe)} disabled={!canCraft}>Criar</button>
-                              </div>
-                              <div className="recipe-desc">{recipe.desc}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      <hr className="divider" />
-                      <h5 className="alchemy-sub-title">🎒 Meu Baú de Itens</h5>
-                      <div className="bag-inventory-list">
-                        {treeDead && potions.revive === 0 && gems < 150 && (
-                          <div className="bag-item-card bg-red-950/20 border-red-500/30 p-3 rounded-lg flex flex-col gap-2 w-full">
-                            <span className="text-xs text-red-400 font-bold">🚨 Emergência (Sem Recursos)</span>
-                            <p className="text-[10px] text-[var(--text-muted)]">Sua árvore está morta e você não tem poções ou gemas suficientes.</p>
-                            <button className="w-full py-1.5 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all cursor-pointer" onClick={handleEmergencyRevive}>
-                              Preces ao Templo (Reviver com 15% Saúde)
-                            </button>
-                          </div>
-                        )}
-                        {potions.potion > 0 && (
-                          <div className="bag-item-card">
-                            <span>🧪 Poção de Vitalidade ({potions.potion})</span>
-                            <button className="bag-item-use-btn" onClick={() => usePotion("potion")}>Usar</button>
-                          </div>
-                        )}
-                        {potions.revive > 0 && (
-                          <div className="bag-item-card">
-                            <span>⚡ Poção de Reviver ({potions.revive})</span>
-                            <button className="bag-item-use-btn" onClick={() => usePotion("revive")}>Usar</button>
-                          </div>
-                        )}
-                        {itemsOwnedUnlocked.map(cosId => {
-                          const item = SHOP_ITEMS.find(s => s.id === cosId);
-                          const equipped = itemsOwned.includes(cosId);
-                          return (
-                            <div key={cosId} className="bag-item-card">
-                              <span>{item?.icon} {item?.title}</span>
-                              <button className={`bag-item-use-btn ${equipped ? "active-equipped" : ""}`} onClick={() => toggleCosmetic(cosId)}>
-                                {equipped ? "Equipado" : "Equipar"}
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Habilidades */}
-                  <div className="rpg-column">
-                    <h4>🌳 Habilidades (Disponíveis: {skillPoints})</h4>
-                    <div className="skills-tree-container">
-                      {SKILLS.map(skill => {
-                        const purchased = skillsPurchased.includes(skill.id);
-                        const canBuy = skillPoints >= skill.cost && !purchased;
+                  {/* Baú de Itens */}
+                  <div className="flex flex-col gap-4">
+                    <h4 className="text-lg font-extrabold text-[var(--accent-color)] border-b border-white/5 pb-2">🎒 Meu Baú de Itens</h4>
+                    <div className="flex flex-col gap-3">
+                      {potionsCount > 0 && (
+                        <div className="bag-item-card flex items-center justify-between p-3.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl">
+                          <span className="text-sm text-white font-semibold">🧪 Poção de Vitalidade ({potionsCount})</span>
+                          <button className="px-3 py-1.5 rounded-lg bg-[var(--accent-color)] text-[#0f0e13] text-xs font-extrabold cursor-pointer transition-all hover:opacity-90" onClick={usePotion}>Usar (+50 Saúde)</button>
+                        </div>
+                      )}
+                      
+                      {itemsOwnedUnlocked.map(cosId => {
+                        const item = SHOP_ITEMS.find(s => s.id === cosId);
+                        const equipped = itemsOwned.includes(cosId);
                         return (
-                          <div key={skill.id} className={`skill-node ${purchased ? "active-skill" : canBuy ? "available" : "locked"}`}>
-                            <div className="skill-icon">{skill.icon}</div>
-                            <div className="skill-info">
-                              <div className="skill-title">{skill.title}</div>
-                              <div className="skill-desc">{skill.desc}</div>
-                            </div>
-                            <button className="skill-status-tag" onClick={() => buySkill(skill)} disabled={!canBuy}>
-                              {purchased ? "Ativo" : `Desbloquear (${skill.cost})`}
+                          <div key={cosId} className="bag-item-card flex items-center justify-between p-3.5 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-xl">
+                            <span className="text-sm text-white font-semibold">{item?.icon} {item?.title}</span>
+                            <button className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${equipped ? "bg-white/10 text-white border-white/20" : "bg-[var(--bg-main)] text-[var(--text-muted)] border-[var(--border-color)]"}`} onClick={() => toggleCosmetic(cosId)}>
+                              {equipped ? "Desequipar" : "Equipar"}
                             </button>
                           </div>
                         );
                       })}
+
+                      {potionsCount === 0 && itemsOwnedUnlocked.length === 0 && (
+                        <div className="text-xs text-[var(--text-muted)] text-center py-8">Seu baú de itens está vazio. Adquira itens na Loja!</div>
+                      )}
                     </div>
                   </div>
                 </div>
