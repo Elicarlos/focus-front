@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
+
 // Definições de Badges
 const BADGES = [
   { id: 'inertia', icon: '🚀', title: 'Adeus Inércia', desc: 'Completou um timer de 5 minutos.' },
@@ -46,7 +48,7 @@ const WRITING_JOURNEYS = {
   creative: [
     { id: 'cre_concept', title: '1. Premissa', guide: 'Escreva a ideia central em uma frase: Quem é o protagonista, qual é o conflito principal e qual o cenário?' },
     { id: 'cre_chars', title: '2. Protagonista', guide: 'Defina o que o seu personagem principal quer mais do que tudo e qual o seu maior defeito que o impede.' },
-    { id: 'cre_plot', title: '3. Estrutura Rápida', guide: 'Esboce em tópicos: O Gancho Inicial, a Mudança no Meio e o Clímax da sua história.' }
+    { id: 'cre_plot', title: '3. Estrutura Rápida', guide: 'Esboce in tópicos: O Gancho Inicial, a Mudança no Meio e o Clímax da sua história.' }
   ],
   code: [
     { id: 'code_overview', title: '1. README Geral', guide: 'Explique o que é o software de forma simples para alguém que nunca ouviu falar. Qual problema ele resolve?' },
@@ -71,6 +73,12 @@ const MOTIVATIONAL_PHRASES = [
 ];
 
 export default function PragmaApp() {
+  // --- AUTENTICAÇÃO E DADOS DA VPS ---
+  const [token, setToken] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+  const [rankingList, setRankingList] = useState([]);
+  const [rankingActive, setRankingActive] = useState(false);
+
   // --- ESTADOS DO JOGO ---
   const [xp, setXp] = useState(0);
   const [level, setLevel] = useState(1);
@@ -153,6 +161,7 @@ export default function PragmaApp() {
   const idleTimeRef = useRef(0);
   const lastTypingTimeRef = useRef(Date.now());
   const confettiCanvasRef = useRef(null);
+  const googleBtnContainerRef = useRef(null);
 
   // Onboarding dinâmico
   const [onboardProject, setOnboardProject] = useState("");
@@ -169,9 +178,44 @@ export default function PragmaApp() {
   // --- CONTADORES DE PRAZO ---
   const [timeLeftStr, setTimeLeftStr] = useState({ days: "00", hours: "00", minutes: "00", percent: 0 });
 
-  // --- CARREGAMENTO INICIAL E EVENTOS ---
+  // --- CARREGAMENTO INICIAL E SINCRONIZAÇÃO DE REDE ---
   useEffect(() => {
-    // Carrega dados salvos do localStorage
+    // Carrega dados salvos locais caso não esteja logado
+    const savedToken = localStorage.getItem("pragma_token");
+    if (savedToken) {
+      setToken(savedToken);
+      fetchUserData(savedToken);
+    } else {
+      loadStateLocal();
+    }
+  }, []);
+
+  // Inicializa o botão de login do Google One Tap e botão visível
+  useEffect(() => {
+    if (typeof window !== "undefined" && !token) {
+      const initGoogle = () => {
+        if (window.google && window.google.accounts) {
+          window.google.accounts.id.initialize({
+            client_id: "274648341216-k3s64mlubsm394u5ephef4hopiv887ng.apps.googleusercontent.com",
+            callback: handleGoogleLoginResponse
+          });
+          
+          if (googleBtnContainerRef.current) {
+            window.google.accounts.id.renderButton(
+              googleBtnContainerRef.current,
+              { theme: "outline", size: "large", width: "100%" }
+            );
+          }
+          window.google.accounts.id.prompt();
+        } else {
+          setTimeout(initGoogle, 500);
+        }
+      };
+      initGoogle();
+    }
+  }, [token, activeTab]);
+
+  const loadStateLocal = () => {
     const saved = localStorage.getItem("pragma_state");
     if (saved) {
       try {
@@ -208,42 +252,200 @@ export default function PragmaApp() {
           if (data.inventory.essencias !== undefined) setEssencias(data.inventory.essencias);
           if (data.inventory.potions !== undefined) setPotions(data.inventory.potions);
         }
-
         if (data.customJourneys !== undefined) setCustomJourneys(data.customJourneys);
         if (data.draftsXpClaimedToday !== undefined) setDraftsXpClaimedToday(data.draftsXpClaimedToday);
         if (data.drafts !== undefined) setDrafts(data.drafts);
         if (data.weeklyXp !== undefined) setWeeklyXp(data.weeklyXp);
         if (data.weeklyQuestCompleted !== undefined) setWeeklyQuestCompleted(data.weeklyQuestCompleted);
       } catch (e) {
-        console.error("Erro ao ler dados.", e);
+        console.error("Erro ao ler dados locais.", e);
       }
     } else {
       setOnboardingActive(true);
     }
-  }, []);
+  };
 
-  // Salva no localStorage em toda modificação significativa do estado
+  // Carrega dados da VPS via token JWT
+  const fetchUserData = async (jwtToken) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: { "Authorization": `Bearer ${jwtToken}` }
+      });
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+      const data = await res.json();
+      setUserProfile(data);
+      setXp(data.xp);
+      setLevel(data.level);
+      setGems(data.gems);
+      setStreak(data.streak);
+      setWaterUnits(data.water_units);
+      setSkillPoints(data.skill_points);
+      setTreeHealth(data.tree_health);
+      setTreeDead(data.tree_dead);
+      setMudas(data.mudas);
+      setAdubos(data.adubos);
+      setEssencias(data.essencias);
+      setLastStreakDate(data.last_streak_date);
+      setLastActivityDate(data.last_activity_date);
+
+      // Carrega To-Dos da VPS
+      fetchTodos(jwtToken);
+      // Carrega Bosque da VPS
+      fetchForest(jwtToken);
+      // Carrega Inventário da VPS
+      fetchInventory(jwtToken);
+    } catch (e) {
+      console.error("Erro ao conectar com a API do backend na VPS.", e);
+      loadStateLocal();
+    }
+  };
+
+  const fetchTodos = async (jwtToken) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/todos`, {
+        headers: { "Authorization": `Bearer ${jwtToken}` }
+      });
+      const data = await res.json();
+      setTodoList(data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchForest = async (jwtToken) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/forest`, {
+        headers: { "Authorization": `Bearer ${jwtToken}` }
+      });
+      const data = await res.json();
+      setForest(data);
+    } catch (e) { console.error(e); }
+  };
+
+  const fetchInventory = async (jwtToken) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/inventory`, {
+        headers: { "Authorization": `Bearer ${jwtToken}` }
+      });
+      const data = await res.json();
+      
+      // Mapeia os itens equipados e quantidades
+      const ownedIds = [];
+      const ownedUnlocked = [];
+      const potionCounts = { potion: 0, revive: 0 };
+      
+      data.forEach(item => {
+        if (item.item_id === "potion_vitality") potionCounts.potion = item.quantity;
+        else if (item.item_id === "potion_revive") potionCounts.revive = item.quantity;
+        else {
+          ownedUnlocked.push(item.item_id);
+          if (item.equipped) ownedIds.push(item.item_id);
+        }
+      });
+
+      setItemsOwned(ownedIds);
+      setItemsOwnedUnlocked(ownedUnlocked);
+      setPotions(potionCounts);
+    } catch (e) { console.error(e); }
+  };
+
+  // Callback de Resposta do login com Google no front
+  const handleGoogleLoginResponse = async (googleResponse) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential_token: googleResponse.credential })
+      });
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem("pragma_token", data.access_token);
+        setToken(data.access_token);
+        fetchUserData(data.access_token);
+      }
+    } catch (e) {
+      alert("Falha ao logar com o Google API na VPS.");
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("pragma_token");
+    setToken(null);
+    setUserProfile(null);
+    loadStateLocal();
+  };
+
+  // Sincroniza o estado de gamificação no backend (Anti-Cheat auditado)
+  const syncWithBackend = async () => {
+    if (!token) return;
+    try {
+      await fetch(`${API_BASE_URL}/users/me/sync`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          email: userProfile.email,
+          username: userProfile.username,
+          xp,
+          level,
+          gems,
+          streak,
+          water_units: waterUnits,
+          skill_points: skillPoints,
+          tree_health: treeHealth,
+          tree_dead: treeDead,
+          mudas,
+          adubos,
+          essencias,
+          last_streak_date: lastStreakDate,
+          last_activity_date: lastActivityDate
+        })
+      });
+    } catch (e) {
+      console.error("Erro ao sincronizar dados com o servidor.", e);
+    }
+  };
+
+  // Sincroniza local e remoto a cada mudança significativa
   useEffect(() => {
-    const stateObj = {
-      xp, level, streak, lastStreakDate, lastActivityDate, projectName, projectDeadline, theme,
-      soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, treeDead, gems, skillPoints,
-      skillsPurchased, itemsOwned, itemsOwnedUnlocked, waterUnits, forest, todoList, habits,
-      inventory: { mudas, adubos, essencias, potions }, customJourneys, draftsXpClaimedToday, drafts,
-      weeklyXp, weeklyQuestCompleted
-    };
-    localStorage.setItem("pragma_state", JSON.stringify(stateObj));
+    if (token) {
+      syncWithBackend();
+    } else {
+      const stateObj = {
+        xp, level, streak, lastStreakDate, lastActivityDate, projectName, projectDeadline, theme,
+        soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, treeDead, gems, skillPoints,
+        skillsPurchased, itemsOwned, itemsOwnedUnlocked, waterUnits, forest, todoList, habits,
+        inventory: { mudas, adubos, essencias, potions }, customJourneys, draftsXpClaimedToday, drafts,
+        weeklyXp, weeklyQuestCompleted
+      };
+      localStorage.setItem("pragma_state", JSON.stringify(stateObj));
+    }
   }, [xp, level, streak, lastStreakDate, lastActivityDate, projectName, projectDeadline, theme,
       soundEnabled, skinnerHardcore, skinnerIdleAlert, treeHealth, treeDead, gems, skillPoints,
       skillsPurchased, itemsOwned, itemsOwnedUnlocked, waterUnits, forest, todoList, habits,
       mudas, adubos, essencias, potions, customJourneys, draftsXpClaimedToday, drafts,
       weeklyXp, weeklyQuestCompleted]);
 
+  // Carrega Ranking Global
+  const loadGlobalRanking = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/ranking`);
+      const data = await res.json();
+      setRankingList(data);
+      setRankingActive(true);
+    } catch (e) {
+      alert("Erro ao obter o ranking global.");
+    }
+  };
+
   // Executa monitoramento de ociosidade e contagem regressiva
   useEffect(() => {
     updateDeadlineCountdown();
     const deadlineInterval = setInterval(updateDeadlineCountdown, 60000);
 
-    // Monitoramento de mouse/teclado para alerta de procrastinação
     const resetIdleTime = () => {
       idleTimeRef.current = 0;
       setIdleAlertActive(false);
@@ -260,7 +462,6 @@ export default function PragmaApp() {
           setIdleAlertActive(true);
           playSound("beep");
           
-          // Aplica pequena penalidade a cada 30 segundos
           if (idleTimeRef.current % 30 === 0) {
             const factor = skillsPurchased.includes("resistance") ? 0.5 : 1;
             setXp(prev => Math.max(0, prev - Math.round(5 * factor)));
@@ -407,7 +608,6 @@ export default function PragmaApp() {
     const factor = skillsPurchased.includes("extra") ? 1.25 : 1;
     const finalXp = Math.round(amount * factor);
     
-    // Atualiza Quest Semanal
     if (!weeklyQuestCompleted) {
       setWeeklyXp(prev => {
         const nextVal = Math.min(300, prev + finalXp);
@@ -422,7 +622,6 @@ export default function PragmaApp() {
       });
     }
 
-    // Gemas obtidas por XP
     const gemsEarned = Math.round(amount * 0.2 * factor);
     if (gemsEarned > 0) setGems(g => g + gemsEarned);
 
@@ -497,7 +696,6 @@ export default function PragmaApp() {
     }
 
     if (timerRunning) {
-      // Pausa e aplica penalidade caso Hardcore esteja ativo
       if (skinnerHardcore) {
         const factor = skillsPurchased.includes("resistance") ? 0.5 : 1;
         playSound("fail");
@@ -521,7 +719,6 @@ export default function PragmaApp() {
             playSound("alarm");
             triggerConfetti();
             
-            // Recompensas baseadas no modo concluído
             if (activeTimerMode === 1500) { // Pomodoro 25 min
               addXP(100);
               healGarden(40);
@@ -593,34 +790,74 @@ export default function PragmaApp() {
     }));
   };
 
-  // --- TAREFAS SECUNDÁRIAS (TO-DO LIST) ---
-  const handleAddTodo = () => {
+  // --- TAREFAS SECUNDÁRIAS (TO-DO LIST COM API DA VPS) ---
+  const handleAddTodo = async () => {
     if (!todoInputValue.trim()) return;
-    const newTodo = { id: Date.now(), text: todoInputValue.trim(), completed: false };
-    setTodoList(prev => [...prev, newTodo]);
+    const taskText = todoInputValue.trim();
+
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/todos`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ text: taskText })
+        });
+        const newTodo = await res.json();
+        setTodoList(prev => [...prev, newTodo]);
+      } catch (e) { console.error(e); }
+    } else {
+      const newTodo = { id: Date.now(), text: taskText, completed: false };
+      setTodoList(prev => [...prev, newTodo]);
+    }
     setTodoInputValue("");
   };
 
-  const toggleTodo = (id) => {
+  const toggleTodo = async (id, currentCompleted) => {
     if (treeDead) return;
-    playSound("coin");
-    setTodoList(prev => prev.map(t => {
-      if (t.id === id) {
-        const completed = !t.completed;
-        if (completed) {
+    const nextCompleted = !currentCompleted;
+    
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/todos/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ completed: nextCompleted })
+        });
+        const updated = await res.json();
+        setTodoList(prev => prev.map(t => t.id === id ? updated : t));
+        playSound("coin");
+        if (nextCompleted) {
           addXP(5);
           setAdubos(a => a + 1);
         } else {
           setAdubos(a => Math.max(0, a - 1));
         }
-        return { ...t, completed };
-      }
-      return t;
-    }));
+      } catch (e) { console.error(e); }
+    } else {
+      setTodoList(prev => prev.map(t => {
+        if (t.id === id) {
+          playSound("coin");
+          if (nextCompleted) {
+            addXP(5);
+            setAdubos(a => a + 1);
+          } else {
+            setAdubos(a => Math.max(0, a - 1));
+          }
+          return { ...t, completed: nextCompleted };
+        }
+        return t;
+      }));
+    }
   };
 
   // --- CORTAR ÁRVORE E META PRINCIPAL ---
-  const handleCompleteMeta = () => {
+  const handleCompleteMeta = async () => {
     if (treeDead || !currentTask.trim()) return;
     
     playSound("coin");
@@ -629,11 +866,27 @@ export default function PragmaApp() {
     const newTree = {
       name: projectName,
       level: level,
-      date: new Date().toLocaleDateString('pt-BR'),
+      completed_at: new Date().toLocaleDateString('pt-BR'),
       theme: theme
     };
     
-    setForest(prev => [...prev, newTree]);
+    if (token) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/forest`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(newTree)
+        });
+        const savedTree = await res.json();
+        setForest(prev => [...prev, savedTree]);
+      } catch (e) { console.error(e); }
+    } else {
+      setForest(prev => [...prev, { ...newTree, id: Date.now(), date: newTree.completed_at }]);
+    }
+    
     setGems(g => g + 200);
     setLevel(1);
     setXp(0);
@@ -656,7 +909,6 @@ export default function PragmaApp() {
 
     const text = editorText.trim();
     
-    // Validação antifraude
     if (text.length < 25) {
       alert("O texto precisa conter pelo menos 25 caracteres para pontuar.");
       return;
@@ -674,7 +926,18 @@ export default function PragmaApp() {
     playSound("coin");
     triggerConfetti();
 
-    // Controle diário de XP por template
+    // Sincroniza rascunho com a VPS se logado
+    if (token) {
+      fetch(`${API_BASE_URL}/drafts`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ template_id: activeTemplateId, content: text })
+      });
+    }
+
     const today = new Date().toDateString();
     const claimedList = draftsXpClaimedToday[today] || [];
 
@@ -724,8 +987,20 @@ export default function PragmaApp() {
   };
 
   // --- LOJA E INVENTÁRIO (BAÚ DE ITENS) ---
-  const buyShopItem = (item) => {
+  const buyShopItem = async (item) => {
     if (gems < item.price) return;
+    
+    // Se logado na VPS, atualiza inventário no BD
+    if (token) {
+      try {
+        const itemCode = item.id === "potion" ? "potion_vitality" : item.id === "revive" ? "potion_revive" : item.id;
+        await fetch(`${API_BASE_URL}/inventory/${itemCode}/equip`, {
+          method: "PUT",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+      } catch (e) { console.error(e); }
+    }
+
     setGems(prev => prev - item.price);
     playSound("levelup");
     triggerConfetti();
@@ -765,7 +1040,16 @@ export default function PragmaApp() {
     }
   };
 
-  const toggleCosmetic = (id) => {
+  const toggleCosmetic = async (id) => {
+    if (token) {
+      try {
+        await fetch(`${API_BASE_URL}/inventory/${id}/equip`, {
+          method: "PUT",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+      } catch (e) { console.error(e); }
+    }
+
     if (itemsOwned.includes(id)) {
       setItemsOwned(prev => prev.filter(x => x !== id));
     } else {
@@ -845,7 +1129,6 @@ export default function PragmaApp() {
     setGems(prev => prev === 0 ? 100 : prev);
   };
 
-  // Regar árvore gastando unidades de água obtidas ao focar
   const handleWaterTree = () => {
     if (waterUnits <= 0 || treeHealth >= 100 || treeDead) return;
     setWaterUnits(w => w - 1);
@@ -888,6 +1171,37 @@ export default function PragmaApp() {
           <h1 className="brand-name" id="app-title">
             {theme === "cajuina" ? "Cajuína Code" : theme === "pragma" ? "Pragma Focus" : "GeraQRCode Foco"}
           </h1>
+        </div>
+
+        {/* Google Login / Perfil Card */}
+        <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-[var(--border-radius-md)] mb-4 flex flex-col gap-2">
+          {!token ? (
+            <div>
+              <div className="text-xs text-[var(--text-muted)] mb-2 text-center">Entre para salvar na nuvem e ver o Rank</div>
+              <div ref={googleBtnContainerRef} id="google-login-btn"></div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              {userProfile?.avatar_url ? (
+                <img src={userProfile.avatar_url} className="w-10 h-10 rounded-full border border-[var(--accent-color)]" alt="Avatar" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-[var(--bg-main)] flex items-center justify-center font-bold">U</div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-bold truncate text-[var(--text-main)] flex items-center gap-1.5">
+                  {userProfile?.username}
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--bg-main)] font-normal text-[var(--text-muted)]">
+                    {userProfile?.country || "BR"}
+                  </span>
+                </div>
+                <div className="text-xs text-[var(--text-muted)] truncate">{userProfile?.email}</div>
+              </div>
+              <button onClick={handleLogout} className="text-xs text-red-400 hover:text-red-300 font-semibold p-1 hover:bg-red-500/10 rounded transition-all">Sair</button>
+            </div>
+          )}
+          <button onClick={loadGlobalRanking} className="w-full mt-1.5 py-2 rounded bg-[var(--bg-main)] hover:bg-[var(--bg-hover)] text-xs font-bold text-[var(--text-main)] border border-[var(--border-color)] transition-all">
+            🏆 Ranking Global Mundial
+          </button>
         </div>
 
         {/* Card de Nível */}
@@ -947,11 +1261,11 @@ export default function PragmaApp() {
               <p className="empty-forest-msg">Nenhum objetivo eternizado ainda.</p>
             ) : (
               forest.map((tree, i) => (
-                <div key={i} className="forest-tree-item" onClick={() => alert(`Objetivo Concluído:\n\n"${tree.name}"\nNível: ${tree.level}\nData: ${tree.date}`)}>
+                <div key={i} className="forest-tree-item" onClick={() => alert(`Objetivo Concluído:\n\n"${tree.name}"\nNível: ${tree.level}\nData: ${tree.completed_at || tree.date}`)}>
                   <div className="forest-tree-icon">{tree.theme === "pragma" ? "🔮" : tree.theme === "geraqrcode" ? "⚡" : "🌳"}</div>
                   <div className="forest-tree-details">
                     <span className="forest-tree-name">{tree.name}</span>
-                    <span className="forest-tree-meta">Nível {tree.level} • {tree.date}</span>
+                    <span className="forest-tree-meta">Nível {tree.level} • {tree.completed_at || tree.date}</span>
                   </div>
                 </div>
               ))
@@ -964,7 +1278,7 @@ export default function PragmaApp() {
           <h3>Conquistas</h3>
           <div className="badges-grid">
             {BADGES.map(badge => {
-              const unlocked = forest.length > 0 && badge.id === "projectDone"; // etc.
+              const unlocked = forest.length > 0 && badge.id === "projectDone";
               return (
                 <div key={badge.id} className={`badge-item ${unlocked ? "unlocked" : "locked"}`} data-title={`${badge.title}: ${badge.desc}`}>
                   {badge.icon}
@@ -1047,7 +1361,7 @@ export default function PragmaApp() {
             </div>
             <div className="todo-list">
               {todoList.map(todo => (
-                <div key={todo.id} className={`todo-item ${todo.completed ? "completed" : ""}`} onClick={() => toggleTodo(todo.id)}>
+                <div key={todo.id} className={`todo-item ${todo.completed ? "completed" : ""}`} onClick={() => toggleTodo(todo.id, todo.completed)}>
                   <div className="todo-checkbox"></div>
                   <span className="todo-text">{todo.text}</span>
                   <span className="todo-reward-tag">🍂 +1 Adubo</span>
@@ -1246,6 +1560,44 @@ export default function PragmaApp() {
         </div>
       </main>
 
+      {/* MODAL RANKING GLOBAL MUNDIAL */}
+      {rankingActive && (
+        <div className="modal-overlay active">
+          <div className="modal-content max-w-lg">
+            <div className="modal-header">
+              <h3>🏆 Ranking Global Pragma</h3>
+              <button className="close-modal-btn" onClick={() => setRankingActive(false)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              <div className="flex flex-col gap-2 mt-2">
+                {rankingList.map((user, idx) => (
+                  <div key={user.username} className={`flex items-center gap-3 p-3 rounded-lg border ${idx === 0 ? 'bg-yellow-500/10 border-yellow-500/30' : idx === 1 ? 'bg-slate-300/10 border-slate-300/30' : idx === 2 ? 'bg-amber-600/10 border-amber-600/30' : 'bg-[var(--bg-main)] border-[var(--border-color)]'}`}>
+                    <span className="font-extrabold text-sm w-5 text-center text-[var(--text-muted)]">{idx + 1}</span>
+                    {user.avatar_url ? (
+                      <img src={user.avatar_url} className="w-8 h-8 rounded-full" alt="Avatar" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-[var(--bg-card)] flex items-center justify-center font-bold text-xs">U</div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-bold truncate text-[var(--text-main)] flex items-center gap-1.5">
+                        {user.username}
+                        <span className="text-[10px] px-1 py-0.5 rounded bg-[var(--bg-card)] font-normal text-[var(--text-muted)]">
+                          {user.country || "BR"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-bold text-[var(--text-main)]">Nível {user.level}</div>
+                      <div className="text-[10px] text-[var(--text-muted)]">{user.xp} XP</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* MODAL CONFIGURAÇÕES */}
       {settingsActive && (
         <div className="modal-overlay active">
@@ -1254,7 +1606,7 @@ export default function PragmaApp() {
               <h3>Configurações do Pragma</h3>
               <button className="close-modal-btn" onClick={() => setSettingsActive(false)}>&times;</button>
             </div>
-            <div class="modal-body">
+            <div className="modal-body">
               <div className="settings-group">
                 <label>Nome da Meta Principal:</label>
                 <input type="text" value={projectName} onChange={(e) => setProjectName(e.target.value)} />
@@ -1293,7 +1645,7 @@ export default function PragmaApp() {
                 <h5>Passos da Escrita:</h5>
                 <button className="text-btn" onClick={() => setCustomSteps(prev => [...prev, { title: "", guide: "" }])}>+ Adicionar</button>
               </div>
-              <div class="custom-steps-builder">
+              <div className="custom-steps-builder">
                 {customSteps.map((step, idx) => (
                   <div key={idx} className="custom-step-builder-row">
                     <input type="text" value={step.title} onChange={(e) => {
