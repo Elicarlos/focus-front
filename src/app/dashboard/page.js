@@ -13,8 +13,7 @@ import {
   Activity, 
   X, 
   Check, 
-  Sparkles,
-  ArrowRight
+  Sparkles
 } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
@@ -361,7 +360,7 @@ export default function PragmaDashboard() {
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-black truncate text-[#3c3c3c] flex items-center gap-1">
                   {userProfile?.username}
-                  <span className="text-[9px] px-1 py-0.25 rounded bg-[#e5e5e5] font-normal text-[#3c3c3c]">
+                  <span className="text-[9px] px-1 py-0.25 rounded bg-[#e5e5e5] font-normal text-[#3c3c3c] border border-[#e5e5e5]">
                     {userProfile?.country || "BR"}
                   </span>
                 </div>
@@ -393,7 +392,7 @@ export default function PragmaDashboard() {
         </div>
       </aside>
 
-      {/* Conteúdo Principal */}
+      {/* Área de Conteúdo Principal */}
       <main className="flex-1 px-6 py-8 flex flex-col md:flex-row items-stretch justify-center gap-8 z-10 max-w-5xl mx-auto w-full">
         
         {/* Coluna Esquerda: Objetivo & Timer */}
@@ -467,7 +466,7 @@ export default function PragmaDashboard() {
                   Focar (25m)
                 </button>
                 <button 
-                  className={`flex-grow py-2.5 rounded-2xl text-xs font-black transition-all border-b-4 ${activeTimerMode === 300 ? "btn-duo-blue" : "btn-duo-white"}`}
+                  className={`flex-grow py-2.5 rounded-2xl text-xs font-black transition-all border-b-4 ${activeTimerMode === 300 ? "btn-duo-green opacity-90" : "btn-duo-white"}`}
                   onClick={() => selectTimerMode(300)}
                 >
                   Intervalo (5m)
@@ -644,4 +643,3 @@ export default function PragmaDashboard() {
     </div>
   );
 }
-
