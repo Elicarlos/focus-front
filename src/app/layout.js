@@ -9,8 +9,8 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "Pragma | Central de Foco & Produtividade",
-  description: "Gerencie suas metas, hábitos e timers com gamificação avançada de RPG e Alquimia.",
+  title: "Grove | Foco & Crescimento",
+  description: "Timer Pomodoro com mascote que cresce com você. Anti-procrastinação baseado em ciência.",
 };
 
 export default function RootLayout({ children }) {

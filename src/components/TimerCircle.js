@@ -1,85 +1,113 @@
 "use client";
 
-import { Activity, RefreshCw } from "lucide-react";
+import { RotateCcw, Zap, Flame, Circle } from "lucide-react";
 
-export default function TimerCircle({
-  timerSeconds,
-  timerRunning,
-  activeTimerMode,
-  handleStartTimer,
-  selectTimerMode,
-  formatTimer,
-  strokeDashoffset,
-  circumference
-}) {
+const MODE_FOCUS = 1500;
+const MODE_BREAK = 300;
+const MAX_SESSIONS = 4;
+
+export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMode, handleStartTimer, selectTimerMode, formatTimer, sessionsToday = 0 }) {
+  const isFocus = activeTimerMode === MODE_FOCUS;
+  const progress = timerSeconds / activeTimerMode;
+  const isUrgent = progress < 0.15 && timerRunning;
+
+  const arcColor = isUrgent ? "#f97316" : isFocus ? "#4ade80" : "#60a5fa";
+  const glowColor = isUrgent ? "rgba(249,115,22,0.3)" : isFocus ? "rgba(74,222,128,0.25)" : "rgba(96,165,250,0.25)";
+  const btnBg = isFocus ? "#22c55e" : "#3b82f6";
+  const btnHoverBg = isFocus ? "#16a34a" : "#2563eb";
+  const btnLabel = timerRunning ? (isFocus ? "Pausar Foco" : "Pausar Pausa") : (isFocus ? "Iniciar Foco" : "Iniciar Pausa");
+
   return (
-    <div className="bg-white border border-[#e5e0d8] p-6 md:p-8 rounded-2xl relative overflow-hidden flex flex-col items-center justify-center gap-6 md:gap-8 shadow-sm">
-      
-      {/* Timer Circular */}
-      <div className="relative flex items-center justify-center w-[190px] h-[190px] md:w-[240px] md:h-[240px] z-10">
-        <svg className="absolute w-full h-full transform -rotate-90">
-          <circle
-            cx="50%"
-            cy="50%"
-            r="80"
-            className="stroke-[#efebe4]"
-            strokeWidth="6"
-            fill="transparent"
-          />
-          <circle
-            cx="50%"
-            cy="50%"
-            r="80"
-            className="stroke-[#2d5a27] transition-all duration-300"
-            strokeWidth="6"
-            fill="transparent"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-          />
-        </svg>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: "100%", maxWidth: 480 }}>
 
-        <div className="absolute flex flex-col items-center justify-center text-center">
-          <span className="text-4xl md:text-5xl font-black tracking-tight tabular-nums text-[#1b2d2a]">
-            {formatTimer(timerSeconds)}
-          </span>
-          <span className="text-[9px] uppercase font-bold tracking-widest text-[#1b2d2a] mt-2 bg-[#efebe4] px-3.5 py-0.5 rounded-full flex items-center gap-1">
-            <Activity className="w-2.5 h-2.5 text-[#2d5a27]" /> {activeTimerMode === 1500 ? "Foco" : "Intervalo"}
-          </span>
-        </div>
+      {/* Sessões dots */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#4b5563" }}>Sessões hoje:</span>
+        {Array.from({ length: MAX_SESSIONS }).map((_, i) => (
+          <div key={i} style={{
+            width: 10, height: 10, borderRadius: "50%",
+            background: i < sessionsToday ? "#4ade80" : "#21262d",
+            boxShadow: i < sessionsToday ? "0 0 6px rgba(74,222,128,0.6)" : "none",
+            transform: i === sessionsToday - 1 ? "scale(1.3)" : "scale(1)",
+            transition: "all 0.5s"
+          }} />
+        ))}
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#4b5563" }}>{sessionsToday}/{MAX_SESSIONS}</span>
       </div>
 
-      {/* Controles do Timer */}
-      <div className="w-full max-w-sm flex flex-col gap-4 z-10">
-        <div className="flex gap-3 justify-center">
-          <button 
-            className={`flex-grow py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${activeTimerMode === 1500 ? "bg-[#1b2d2a] text-white border-transparent" : "btn-studio-secondary"}`}
-            onClick={() => selectTimerMode(1500)}
-          >
-            Focar (25m)
-          </button>
-          <button 
-            className={`flex-grow py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${activeTimerMode === 300 ? "bg-[#1b2d2a] text-white border-transparent" : "btn-studio-secondary"}`}
-            onClick={() => selectTimerMode(300)}
-          >
-            Intervalo (5m)
-          </button>
-        </div>
+      {/* Número grande */}
+      <div style={timerRunning ? { filter: `drop-shadow(0 0 40px ${glowColor})` } : {}}>
+        <span style={{
+          fontSize: 112,
+          fontWeight: 900,
+          fontVariantNumeric: "tabular-nums",
+          lineHeight: 1,
+          letterSpacing: "-0.04em",
+          color: timerRunning ? arcColor : "#e6edf3",
+          transition: "color 0.3s",
+          fontFamily: "Outfit, sans-serif",
+          userSelect: "none"
+        }}>
+          {formatTimer(timerSeconds)}
+        </span>
+      </div>
 
-        <div className="flex gap-3">
-          <button 
-            onClick={handleStartTimer} 
-            className="flex-grow py-3.5 rounded-xl btn-studio-primary text-xs font-bold tracking-wider active:scale-[0.98] transition-all cursor-pointer text-center"
-          >
-            {timerRunning ? "PAUSAR SESSÃO" : "INICIAR SESSÃO"}
+      {/* Badge modo */}
+      <div style={{
+        fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em",
+        padding: "6px 16px", borderRadius: 99,
+        color: arcColor, border: `1px solid ${arcColor}40`, background: `${arcColor}12`,
+        marginTop: -12
+      }}>
+        {isUrgent
+          ? <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Flame size={12} fill={arcColor} color={arcColor} /> Quase lá!</span>
+          : <span style={{ display: "flex", alignItems: "center", gap: 6 }}><Circle size={8} fill={arcColor} color={arcColor} /> {isFocus ? "Foco" : "Pausa"}</span>
+        }
+      </div>
+
+      {/* Seletores de modo */}
+      <div style={{ display: "flex", gap: 10 }}>
+        {[
+          { mode: MODE_FOCUS, label: "Pomodoro · 25m", active: isFocus, color: "#4ade80" },
+          { mode: MODE_BREAK, label: "Pausa Curta · 5m", active: !isFocus, color: "#60a5fa" },
+        ].map(({ mode, label, active, color }) => (
+          <button key={mode} onClick={() => selectTimerMode(mode)} style={{
+            padding: "10px 20px", borderRadius: 10, fontSize: 13, fontWeight: 900, cursor: "pointer",
+            fontFamily: "Outfit, sans-serif",
+            border: active ? `1px solid ${color}50` : "1px solid #30363d",
+            background: active ? `${color}15` : "transparent",
+            color: active ? color : "#6b7280",
+            transition: "all 0.2s"
+          }}>
+            {label}
           </button>
-          <button 
-            onClick={() => selectTimerMode(activeTimerMode)} 
-            className="px-5 py-3.5 rounded-xl btn-studio-secondary transition-all cursor-pointer flex items-center justify-center"
-          >
-            <RefreshCw className="w-4 h-4 text-[#556965]" />
-          </button>
-        </div>
+        ))}
+      </div>
+
+      {/* Botões Iniciar + Reiniciar */}
+      <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 380 }}>
+        <button onClick={handleStartTimer} style={{
+          flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          padding: "16px 24px", borderRadius: 14, fontSize: 15, fontWeight: 900,
+          background: btnBg, color: "white", border: "none", cursor: "pointer",
+          fontFamily: "Outfit, sans-serif", transition: "background 0.2s"
+        }}
+          onMouseEnter={e => e.currentTarget.style.background = btnHoverBg}
+          onMouseLeave={e => e.currentTarget.style.background = btnBg}
+        >
+          <Zap size={18} fill="white" /> {btnLabel}
+        </button>
+        <button onClick={() => selectTimerMode(activeTimerMode)} style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+          padding: "16px 20px", borderRadius: 14, fontSize: 13, fontWeight: 900,
+          background: "#161b22", color: "#8b949e", border: "1px solid #30363d", cursor: "pointer",
+          fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
+        }}
+          onMouseEnter={e => { e.currentTarget.style.background = "#21262d"; e.currentTarget.style.color = "white"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = "#161b22"; e.currentTarget.style.color = "#8b949e"; }}
+        >
+          <RotateCcw size={15} /> Reiniciar
+        </button>
       </div>
     </div>
   );

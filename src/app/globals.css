@@ -1,120 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
-/* DESIGN SYSTEM: PRAGMA STUDIO (MINIMALISTA, CALMO E SOFISTICADO) */
-
-:root {
-    --font-primary: 'Outfit', sans-serif;
-    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Paleta Cromática Zen Studio */
-    --bg-main: #f8f7f4;        /* Areia papel super suave */
-    --studio-navy: #1b2d2a;    /* Verde floresta quase preto para texto e elementos escuros */
-    --studio-green: #2d5a27;   /* Verde sálvia floresta */
-    --studio-cream: #efebe4;   /* Creme de contraste */
-    --border-subtle: #e5e0d8;  /* Linha fina cor de pedra */
-    
-    --border-radius-studio: 16px;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    background-color: var(--bg-main);
-    color: var(--studio-navy);
-    font-family: var(--font-primary);
-    -webkit-font-smoothing: antialiased;
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #0d1117;
+  color: #e6edf3;
 }
 
-/* Botões Planos e Elegantes (Sem 3D ou infantilidades) */
-.btn-studio-primary {
-    background-color: var(--studio-navy);
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 0.03em;
-    padding: 12px 24px;
-    border-radius: var(--border-radius-studio);
-    transition: var(--transition-smooth);
+/* ====== TIMER RING PULSE ====== */
+@keyframes ringPulse {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(74,222,128,0.2)); }
+  50%       { filter: drop-shadow(0 0 20px rgba(74,222,128,0.6)); }
 }
-.btn-studio-primary:hover {
-    background-color: var(--studio-green);
-    transform: translateY(-1px);
+.ring-pulse { animation: ringPulse 2s ease-in-out infinite; }
+
+/* ====== ÁRVORE BALANÇA ====== */
+@keyframes sway {
+  0%, 100% { transform: rotate(0deg); }
+  35%       { transform: rotate(2deg); }
+  70%       { transform: rotate(-2deg); }
 }
-.btn-studio-primary:active {
-    transform: translateY(0);
+.tree-sway { animation: sway 5s ease-in-out infinite; transform-origin: 50% 95%; }
+
+/* ====== +XP FLUTUANTE ====== */
+@keyframes floatUp {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  70%  { opacity: 1; transform: translateY(-40px) scale(1.15); }
+  100% { opacity: 0; transform: translateY(-70px) scale(1); }
+}
+.xp-float { animation: floatUp 1.6s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ====== FOCO DIM ====== */
+.focus-dim { opacity: 0.25; transition: opacity 0.8s ease; pointer-events: none; }
+.focus-bright { opacity: 1; transition: opacity 0.8s ease; }
+
+/* ====== FOGO STREAK ====== */
+@keyframes fire {
+  0%, 100% { transform: scale(1) rotate(-4deg); }
+  50%       { transform: scale(1.2) rotate(4deg); }
+}
+.fire-anim { animation: fire 0.55s ease-in-out infinite; display: inline-block; }
+
+/* ====== NÚMERO XP BRILHA ====== */
+@keyframes xpBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.xp-blink { animation: xpBlink 2s ease-in-out infinite; }
+
+/* ====== ENTRADA ====== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/* ====== MODAL ====== */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
 }
 
-.btn-studio-secondary {
-    background-color: #ffffff;
-    border: 1.5px solid var(--border-subtle);
-    color: var(--studio-navy);
-    font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 0.03em;
-    padding: 12px 24px;
-    border-radius: var(--border-radius-studio);
-    transition: var(--transition-smooth);
+/* ====== SHAKE (campo vazio) ====== */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-6px); }
+  40%       { transform: translateX(6px); }
+  60%       { transform: translateX(-4px); }
+  80%       { transform: translateX(4px); }
 }
-.btn-studio-secondary:hover {
-    background-color: var(--bg-main);
-    border-color: var(--studio-navy);
-    transform: translateY(-1px);
-}
+.shake { animation: shake 0.4s ease-in-out; }
 
-/* Cards com sombras longas e suaves */
-.card-studio {
-    background-color: #ffffff;
-    border: 1.5px solid var(--border-subtle);
-    border-radius: var(--border-radius-studio);
-    box-shadow: 0 10px 30px -10px rgba(27, 45, 42, 0.04);
-    transition: var(--transition-smooth);
-}
-
-.card-studio:hover {
-    box-shadow: 0 20px 40px -15px rgba(27, 45, 42, 0.08);
-}
-
-/* Modais minimalistas */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background-color: rgba(27, 45, 42, 0.2);
-    backdrop-filter: blur(8px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-content {
-    background-color: #ffffff;
-    border: 1.5px solid var(--border-subtle);
-    border-radius: var(--border-radius-studio);
-    box-shadow: 0 30px 60px -15px rgba(27, 45, 42, 0.1);
-    width: 90%;
-    max-width: 400px;
-    padding: 28px;
-}
-
-.close-modal-btn {
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: var(--studio-navy);
-    opacity: 0.4;
-    cursor: pointer;
-    line-height: 1;
-    transition: var(--transition-smooth);
-}
-
-.close-modal-btn:hover {
-    opacity: 1;
-}
+/* ====== SCROLLBAR ====== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 99px; }
+::-webkit-scrollbar-track { background: transparent; }
