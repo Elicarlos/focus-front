@@ -1,22 +1,24 @@
 @import "tailwindcss";
 
-/* DESIGN SYSTEM: PRAGMA ORGANIC MINT (INSPIRADO EM CORES SÓLIDAS E CONTRASTE ORGÂNICO) */
+/* DESIGN SYSTEM: PRAGMA CLEAN DUOLINGO-LIKE CORES VIVAS & FUNDO LIMPO */
 
 :root {
     --font-primary: 'Outfit', sans-serif;
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     
-    /* Paleta Cromática Autoral */
-    --bg-main: #f0f6f3; /* Gelo esverdeado suave */
-    --navy-deep: #0a2540; /* Azul escuro estável */
-    --mint-vibrant: #2ec4b6; /* Verde menta da marca */
-    --mint-soft: #cbf3f0;
+    /* Cores Duolingo-inspired */
+    --bg-main: #f7faf7;       /* Fundo quase branco super limpo */
+    --navy-deep: #3c3c3c;     /* Cinza Duolingo escuro e suave */
+    --duo-green: #58cc02;     /* Verde icônico de sucesso e ação */
+    --duo-green-border: #46a302;
+    --duo-blue: #1899d6;      /* Azul para botões alternativos */
+    --duo-blue-border: #147da0;
+    --duo-orange: #ff9600;    /* Laranja para metas, prazos e avisos */
+    --duo-orange-border: #e07b00;
     
-    --border-radius-xl: 32px;
-    --border-radius-lg: 24px;
-    --border-radius-md: 16px;
-    
-    --shadow-premium: 0 20px 40px -10px rgba(10, 37, 64, 0.05), 0 2px 10px rgba(10, 37, 64, 0.02);
+    --border-radius-xl: 20px;
+    --border-radius-lg: 16px;
+    --border-radius-md: 12px;
 }
 
 * {
@@ -32,21 +34,56 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* Transições suaves globais para botões */
-button {
+/* Efeito de botão gordinho com profundidade 3D Flat */
+.btn-duo-green {
+    background-color: var(--duo-green);
+    border-bottom: 4px solid var(--duo-green-border);
+    color: #ffffff;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     transition: var(--transition-smooth);
 }
-
-button:active {
-    transform: scale(0.96);
+.btn-duo-green:active {
+    border-bottom-width: 0px;
+    transform: translateY(4px);
 }
 
-/* Modais elegantes e leves */
+.btn-duo-blue {
+    background-color: var(--duo-blue);
+    border-bottom: 4px solid var(--duo-blue-border);
+    color: #ffffff;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: var(--transition-smooth);
+}
+.btn-duo-blue:active {
+    border-bottom-width: 0px;
+    transform: translateY(4px);
+}
+
+.btn-duo-white {
+    background-color: #ffffff;
+    border: 2px solid #e5e5e5;
+    border-bottom: 4px solid #e5e5e5;
+    color: #afafaf;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: var(--transition-smooth);
+}
+.btn-duo-white:active {
+    border-bottom-width: 2px;
+    transform: translateY(2px);
+}
+
+/* Modais elegantes e limpos */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(10, 37, 64, 0.25);
-    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -59,23 +96,24 @@ button:active {
 
 .modal-content {
     background-color: #ffffff;
-    border-radius: var(--border-radius-lg);
-    box-shadow: 0 30px 60px -15px rgba(10, 37, 64, 0.15);
+    border: 2px solid #e5e5e5;
+    border-radius: var(--border-radius-xl);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     width: 90%;
     max-width: 420px;
-    padding: 32px;
+    padding: 24px;
 }
 
 .close-modal-btn {
     background: none;
     border: none;
-    font-size: 28px;
-    color: var(--navy-deep);
-    opacity: 0.4;
+    font-size: 24px;
+    color: #afafaf;
     cursor: pointer;
     line-height: 1;
 }
 
 .close-modal-btn:hover {
-    opacity: 1;
+    color: var(--navy-deep);
 }
+
