@@ -51,50 +51,64 @@ export function SettingsModal({ active, onClose, projectDeadline, setProjectDead
   );
 }
 
-export function RankingModal({ active, onClose, rankingList }) {
+export function RankingModal({ active, onClose, rankingList, currentUser }) {
   if (!active) return null;
-  const medalColors = ["#f59e0b", "#9ca3af", "#b45309"];
+
+  const medalEmoji = ["🥇", "🥈", "🥉"];
+
   return (
     <div style={backdrop}>
-      <div style={card}>
-        <div style={modalHeader}>
+      <div style={{ ...card, maxWidth: 380, padding: "20px" }}>
+
+        {/* Header simples */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
-            <h3 style={{ fontWeight: 900, color: "white", fontSize: 16, margin: "0 0 3px", display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif" }}>
-              <Trophy size={16} color="#4ade80" /> Ranking de Foco
+            <h3 style={{ fontWeight: 900, color: "white", fontSize: 18, margin: 0, fontFamily: "Outfit, sans-serif" }}>
+              🏆 Ranking
             </h3>
-            <p style={{ fontSize: 10, color: "#4b5563", margin: 0, fontFamily: "Outfit, sans-serif" }}>Ordenado por minutos focados</p>
+            <p style={{ fontSize: 11, color: "#4b5563", margin: "4px 0 0", fontFamily: "Outfit, sans-serif" }}>
+              {rankingList.length} jogadores
+            </p>
           </div>
-          <button onClick={onClose} style={closeBtn}><X size={15} /></button>
+          <button onClick={onClose} style={closeBtn}><X size={16} /></button>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 380, overflowY: "auto" }}>
-          {rankingList.map((user, idx) => (
-            <div key={user.username} style={{
-              display: "flex", alignItems: "center", gap: 12, padding: 12, borderRadius: 12,
-              background: idx === 0 ? "rgba(120,53,15,0.3)" : "#0d1117",
-              border: idx === 0 ? "1px solid rgba(120,53,15,0.5)" : "1px solid #21262d"
-            }}>
-              <span style={{ width: 24, textAlign: "center", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {idx < 3
-                  ? <Medal size={16} color={medalColors[idx]} fill={medalColors[idx]} />
-                  : <span style={{ fontSize: 12, fontWeight: 700, color: "#6b7280" }}>{idx + 1}</span>
+
+        {/* Lista limpa */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 360, overflowY: "auto" }}>
+          {rankingList.map((user, idx) => {
+            const isMe = currentUser && user.username === currentUser.username;
+            return (
+              <div key={user.username} style={{
+                display: "flex", alignItems: "center", gap: 12,
+                padding: "10px 14px", borderRadius: 12,
+                background: isMe ? "rgba(74,222,128,0.12)" : idx === 0 ? "rgba(245,158,11,0.08)" : "#0d1117",
+                border: isMe ? "1px solid rgba(74,222,128,0.3)" : "1px solid #21262d",
+              }}>
+                <span style={{ width: 28, textAlign: "center", flexShrink: 0, fontSize: idx < 3 ? 18 : 13, fontWeight: 900, color: idx < 3 ? "white" : "#6b7280" }}>
+                  {idx < 3 ? medalEmoji[idx] : idx + 1}
+                </span>
+                {user.avatar_url
+                  ? <img src={user.avatar_url} style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0 }} alt="" />
+                  : <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#166534", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, flexShrink: 0 }}>{user.username?.[0]?.toUpperCase() || "U"}</div>
                 }
-              </span>
-              {user.avatar_url
-                ? <img src={user.avatar_url} style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0 }} alt="" />
-                : <div style={{ width: 32, height: 32, borderRadius: "50%", background: "#166534", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 12, flexShrink: 0 }}>{user.username?.[0]?.toUpperCase() || "U"}</div>
-              }
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "Outfit, sans-serif" }}>{user.username}</div>
-                <div style={{ fontSize: 10, color: "#4b5563", fontFamily: "Outfit, sans-serif" }}>{user.country || "BR"}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 900, color: isMe ? "#4ade80" : "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontFamily: "Outfit, sans-serif" }}>
+                    {user.username} {isMe && <span style={{ fontSize: 10, color: "#4ade80", opacity: 0.7 }}>(você)</span>}
+                  </div>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: "#4ade80", flexShrink: 0, fontFamily: "Outfit, sans-serif" }}>
+                  {user.xp ?? user.level}
+                  <span style={{ fontSize: 10, color: "#4b5563", marginLeft: 2 }}>XP</span>
+                </div>
               </div>
-              <div style={{ textAlign: "right", flexShrink: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 900, color: "#4ade80", fontFamily: "Outfit, sans-serif" }}>{user.xp ?? user.level}</div>
-                <div style={{ fontSize: 10, color: "#4b5563", fontFamily: "Outfit, sans-serif" }}>min</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
+
           {rankingList.length === 0 && (
-            <p style={{ fontSize: 13, color: "#4b5563", textAlign: "center", padding: "32px 0", margin: 0, fontFamily: "Outfit, sans-serif" }}>Ranking indisponível no momento.</p>
+            <div style={{ padding: "40px 0", textAlign: "center" }}>
+              <p style={{ fontSize: 14, color: "#6b7280", margin: 0 }}>🏆</p>
+              <p style={{ fontSize: 13, color: "#6b7280", margin: "8px 0 0" }}>Ninguém ainda</p>
+            </div>
           )}
         </div>
       </div>
