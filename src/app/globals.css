@@ -81,3 +81,23 @@ body {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 99px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .sidebar-mobile {
+    position: fixed !important;
+    z-index: 50 !important;
+    height: 100vh !important;
+  }
+  .sidebar-overlay {
+    display: block !important;
+  }
+}
+
+/* ====== TIMER RING RESPONSIVE ====== */
+@media (max-width: 480px) {
+  .timer-ring-container {
+    transform: scale(0.7);
+    transform-origin: center center;
+  }
+}

@@ -1,10 +1,11 @@
 "use client";
 
-import { Target, Timer, Trophy, Zap, Flame, Award } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Target, Timer, Trophy, Zap, Flame, Award, X } from "lucide-react";
 import MascotTree from "@/components/MascotTree";
 
 const S = {
-  aside: { width: 240, flexShrink: 0, background: "#161b22", borderRight: "1px solid #21262d", display: "flex", flexDirection: "column", padding: 20, gap: 16, minHeight: "100vh", position: "sticky", top: 0, overflowY: "auto", overflowX: "hidden", transition: "width 0.3s ease, opacity 0.3s ease, padding 0.3s ease" },
+  aside: { width: 240, flexShrink: 0, background: "#161b22", borderRight: "1px solid #21262d", display: "flex", flexDirection: "column", padding: 20, gap: 16, overflowY: "auto", overflowX: "hidden", transition: "width 0.3s ease, padding 0.3s ease" },
   logo: { display: "flex", alignItems: "center", gap: 10 },
   logoIcon: { width: 36, height: 36, borderRadius: 10, background: "#22c55e", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 },
   logoText: { fontWeight: 900, fontSize: 20, color: "white", letterSpacing: "-0.03em" },
@@ -17,10 +18,52 @@ const S = {
   avatarFallback: { width: 36, height: 36, borderRadius: "50%", background: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, flexShrink: 0 },
 };
 
-export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, streak = 0, treeHealth, totalFocusMinutes, xpGain, timerRunning = false, open = true }) {
-  const opacity = timerRunning ? 0.2 : open ? 1 : 0;
-  const pointerEvents = (timerRunning || !open) ? "none" : "auto";
+export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, streak = 0, treeHealth, totalFocusMinutes, xpGain, timerRunning = false, open = true, onClose }) {
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const opacity = timerRunning ? 0.2 : 1;
+  const pointerEvents = timerRunning ? "none" : "auto";
+
+  // Mobile: overlay sidebar
+  if (isMobile) {
+    if (!open) return null;
+    return (
+      <>
+        {/* Overlay backdrop */}
+        <div
+          onClick={onClose}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+            zIndex: 40, cursor: "pointer"
+          }}
+        />
+        {/* Sidebar */}
+        <aside style={{
+          ...S.aside,
+          position: "fixed", top: 0, left: 0, height: "100vh", zIndex: 50,
+          width: 260, padding: 20,
+          boxShadow: "4px 0 24px rgba(0,0,0,0.5)",
+        }}>
+          {/* Botão fechar */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: -8 }}>
+            <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "#8b949e", padding: 4 }}>
+              <X size={20} />
+            </button>
+          </div>
+          <SidebarContent token={token} userProfile={userProfile} onLogout={onLogout} onOpenRanking={onOpenRanking} onOpenAchievements={onOpenAchievements} streak={streak} treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} />
+        </aside>
+      </>
+    );
+  }
+
+  // Desktop
   return (
     <aside style={{
       ...S.aside,
@@ -29,8 +72,17 @@ export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, o
       opacity,
       pointerEvents,
       overflow: "hidden",
+      minHeight: "100vh",
+      position: "sticky",
+      top: 0,
     }}>
+      <SidebarContent token={token} userProfile={userProfile} onLogout={onLogout} onOpenRanking={onOpenRanking} onOpenAchievements={onOpenAchievements} streak={streak} treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} />
+    </aside>
+  );
+}
 
+function SidebarContent({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, streak, treeHealth, totalFocusMinutes, xpGain }) {
+  return (<>
       {/* Logo */}
       <div style={S.logo}>
         <div style={S.logoIcon}><Target size={16} color="white" strokeWidth={2.5} /></div>
@@ -98,6 +150,6 @@ export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, o
           </div>
         )}
       </div>
-    </aside>
+    </>
   );
 }

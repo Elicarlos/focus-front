@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { RotateCcw, Zap, Flame, Circle, Timer } from "lucide-react";
 
 const MODE_FOCUS = 1500;
@@ -21,6 +22,15 @@ function getHeatGlow(progress) {
 }
 
 export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMode, handleStartTimer, selectTimerMode, formatTimer, sessionsToday = 0, onStartQuick }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 480);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   const isFocus = activeTimerMode === MODE_FOCUS;
   const progress = timerSeconds / activeTimerMode;
   const isUrgent = progress < 0.15 && timerRunning;
@@ -32,9 +42,10 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
   const btnHoverBg = isFocus ? "#16a34a" : "#2563eb";
   const btnLabel = timerRunning ? (isFocus ? "Pausar Foco" : "Pausar Pausa") : (isFocus ? "Iniciar Foco" : "Iniciar Pausa");
 
-  // SVG progress ring
-  const ringRadius = 140;
-  const ringStroke = 6;
+  // SVG progress ring - responsive
+  const ringRadius = isMobile ? 90 : 140;
+  const ringStroke = isMobile ? 5 : 6;
+  const timerFontSize = isMobile ? 56 : 96;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - progress);
 
@@ -93,7 +104,7 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
         {/* Número do timer */}
         <div style={{ position: "relative", zIndex: 1 }}>
           <span style={{
-            fontSize: 96,
+            fontSize: timerFontSize,
             fontWeight: 900,
             fontVariantNumeric: "tabular-nums",
             lineHeight: 1,
@@ -142,40 +153,40 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
       </div>
 
       {/* Botões Iniciar + Reiniciar + Rápido */}
-      <div style={{ display: "flex", gap: 10, width: "100%", maxWidth: 420 }}>
+      <div style={{ display: "flex", gap: isMobile ? 6 : 10, width: "100%", maxWidth: 420, flexWrap: isMobile ? "wrap" : "nowrap" }}>
         <button onClick={handleStartTimer} style={{
           flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-          padding: "16px 24px", borderRadius: 14, fontSize: 15, fontWeight: 900,
+          padding: isMobile ? "14px 16px" : "16px 24px", borderRadius: 14, fontSize: isMobile ? 13 : 15, fontWeight: 900,
           background: btnBg, color: "white", border: "none", cursor: "pointer",
           fontFamily: "Outfit, sans-serif", transition: "background 0.2s"
         }}
           onMouseEnter={e => e.currentTarget.style.background = btnHoverBg}
           onMouseLeave={e => e.currentTarget.style.background = btnBg}
         >
-          <Zap size={18} fill="white" /> {btnLabel}
+          <Zap size={isMobile ? 16 : 18} fill="white" /> {btnLabel}
         </button>
         <button onClick={() => selectTimerMode(activeTimerMode)} style={{
           display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-          padding: "16px 20px", borderRadius: 14, fontSize: 13, fontWeight: 900,
+          padding: isMobile ? "14px 14px" : "16px 20px", borderRadius: 14, fontSize: isMobile ? 11 : 13, fontWeight: 900,
           background: "#161b22", color: "#8b949e", border: "1px solid #30363d", cursor: "pointer",
           fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
         }}
           onMouseEnter={e => { e.currentTarget.style.background = "#21262d"; e.currentTarget.style.color = "white"; }}
           onMouseLeave={e => { e.currentTarget.style.background = "#161b22"; e.currentTarget.style.color = "#8b949e"; }}
         >
-          <RotateCcw size={15} /> Reiniciar
+          <RotateCcw size={isMobile ? 13 : 15} /> {isMobile ? "Reset" : "Reiniciar"}
         </button>
         {isFocus && !timerRunning && (
           <button onClick={onStartQuick} title="Sessão rápida de 5 minutos" style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-            padding: "16px 16px", borderRadius: 14, fontSize: 12, fontWeight: 900,
+            padding: isMobile ? "14px 12px" : "16px 16px", borderRadius: 14, fontSize: isMobile ? 11 : 12, fontWeight: 900,
             background: "#161b22", color: "#f59e0b", border: "1px solid #92400e", cursor: "pointer",
             fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
           }}
             onMouseEnter={e => { e.currentTarget.style.background = "#78350f"; e.currentTarget.style.color = "#fbbf24"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "#161b22"; e.currentTarget.style.color = "#f59e0b"; }}
           >
-            <Timer size={15} /> 5min
+            <Timer size={isMobile ? 13 : 15} /> 5min
           </button>
         )}
       </div>
