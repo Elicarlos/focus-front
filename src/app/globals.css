@@ -1,30 +1,19 @@
 @import "tailwindcss";
 
-/* DESIGN SYSTEM: PRAGMA SAGE & PETROL (HARMONIA ANÁLOGA COM ACENTO DOPAMINÉRGICO) */
+/* DESIGN SYSTEM: PRAGMA STUDIO (MINIMALISTA, CALMO E SOFISTICADO) */
 
 :root {
     --font-primary: 'Outfit', sans-serif;
-    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     
-    /* Paleta de Cores de Alta Performance Cognitiva */
-    --bg-main: #f2f6f4;        /* Verde Sálvia Claríssimo - Reduz fadiga visual */
-    --navy-deep: #0f2d4a;      /* Azul Petróleo Profundo - Estabilidade e leitura confortável */
+    /* Paleta Cromática Zen Studio */
+    --bg-main: #f8f7f4;        /* Areia papel super suave */
+    --studio-navy: #1b2d2a;    /* Verde floresta quase preto para texto e elementos escuros */
+    --studio-green: #2d5a27;   /* Verde sálvia floresta */
+    --studio-cream: #efebe4;   /* Creme de contraste */
+    --border-subtle: #e5e0d8;  /* Linha fina cor de pedra */
     
-    /* Verde Esmeralda/Menta - Ação Positiva */
-    --duo-green: #10b981;     
-    --duo-green-border: #059669;
-    
-    /* Azul Oceano - Navegação e Intervalos */
-    --duo-blue: #0284c7;      
-    --duo-blue-border: #0369a1;
-    
-    /* Laranja Açafrão - Gatilho de Atenção e Dopamina (Prazos/Timers) */
-    --duo-orange: #f97316;    
-    --duo-orange-border: #ea580c;
-    
-    --border-radius-xl: 20px;
-    --border-radius-lg: 16px;
-    --border-radius-md: 12px;
+    --border-radius-studio: 16px;
 }
 
 * {
@@ -35,103 +24,66 @@
 
 body {
     background-color: var(--bg-main);
-    color: var(--navy-deep);
+    color: var(--studio-navy);
     font-family: var(--font-primary);
     -webkit-font-smoothing: antialiased;
 }
 
-/* Efeito de botão gordinho com profundidade 3D Flat */
-.btn-duo-green {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 24px;
-    border-radius: 16px;
-    background-color: var(--duo-green);
-    border-bottom: 4px solid var(--duo-green-border);
+/* Botões Planos e Elegantes (Sem 3D ou infantilidades) */
+.btn-studio-primary {
+    background-color: var(--studio-navy);
     color: #ffffff;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-weight: 600;
     font-size: 13px;
-    cursor: pointer;
+    letter-spacing: 0.03em;
+    padding: 12px 24px;
+    border-radius: var(--border-radius-studio);
     transition: var(--transition-smooth);
 }
-.btn-duo-green:active {
-    border-bottom-width: 0px;
-    transform: translateY(4px);
+.btn-studio-primary:hover {
+    background-color: var(--studio-green);
+    transform: translateY(-1px);
+}
+.btn-studio-primary:active {
+    transform: translateY(0);
 }
 
-.btn-duo-blue {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 24px;
-    border-radius: 16px;
-    background-color: var(--duo-blue);
-    border-bottom: 4px solid var(--duo-blue-border);
-    color: #ffffff;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 13px;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-}
-.btn-duo-blue:active {
-    border-bottom-width: 0px;
-    transform: translateY(4px);
-}
-
-.btn-duo-orange {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 24px;
-    border-radius: 16px;
-    background-color: var(--duo-orange);
-    border-bottom: 4px solid var(--duo-orange-border);
-    color: #ffffff;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 13px;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-}
-.btn-duo-orange:active {
-    border-bottom-width: 0px;
-    transform: translateY(4px);
-}
-
-.btn-duo-white {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 22px; /* Ligeiramente menor por causa da borda de 2px lateral */
-    border-radius: 16px;
+.btn-studio-secondary {
     background-color: #ffffff;
-    border: 2px solid #d9e2ec;
-    border-bottom: 4px solid #d9e2ec;
-    color: #627d98;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    border: 1.5px solid var(--border-subtle);
+    color: var(--studio-navy);
+    font-weight: 600;
     font-size: 13px;
-    cursor: pointer;
+    letter-spacing: 0.03em;
+    padding: 12px 24px;
+    border-radius: var(--border-radius-studio);
     transition: var(--transition-smooth);
 }
-.btn-duo-white:active {
-    border-bottom-width: 2px;
-    transform: translateY(2px);
+.btn-studio-secondary:hover {
+    background-color: var(--bg-main);
+    border-color: var(--studio-navy);
+    transform: translateY(-1px);
 }
 
-/* Modais */
+/* Cards com sombras longas e suaves */
+.card-studio {
+    background-color: #ffffff;
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--border-radius-studio);
+    box-shadow: 0 10px 30px -10px rgba(27, 45, 42, 0.04);
+    transition: var(--transition-smooth);
+}
+
+.card-studio:hover {
+    box-shadow: 0 20px 40px -15px rgba(27, 45, 42, 0.08);
+}
+
+/* Modais minimalistas */
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(15, 45, 74, 0.3);
-    backdrop-filter: blur(4px);
+    background-color: rgba(27, 45, 42, 0.2);
+    backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
@@ -144,24 +96,25 @@ body {
 
 .modal-content {
     background-color: #ffffff;
-    border: 2px solid #d9e2ec;
-    border-radius: var(--border-radius-xl);
-    box-shadow: 0 20px 40px rgba(15, 45, 74, 0.06);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--border-radius-studio);
+    box-shadow: 0 30px 60px -15px rgba(27, 45, 42, 0.1);
     width: 90%;
-    max-width: 420px;
-    padding: 24px;
+    max-width: 400px;
+    padding: 28px;
 }
 
 .close-modal-btn {
     background: none;
     border: none;
     font-size: 24px;
-    color: #9fb3c8;
+    color: var(--studio-navy);
+    opacity: 0.4;
     cursor: pointer;
     line-height: 1;
     transition: var(--transition-smooth);
 }
 
 .close-modal-btn:hover {
-    color: var(--navy-deep);
+    opacity: 1;
 }

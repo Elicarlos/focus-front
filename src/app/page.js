@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Target, Trophy, FileText, ArrowRight } from "lucide-react";
+import { Target, Trophy, Calendar, FileText, ArrowRight } from "lucide-react";
 
 export const metadata = {
-  title: "Pragma | Simplifique seus Objetivos com Foco",
-  description: "Diga adeus à procrastinação e distrações com uma central de foco limpa e gamificada baseada em micro-hábitos e timers amigáveis.",
+  title: "Pragma | Espaço de Foco Minimalista",
+  description: "Organize seus objetivos e timers em uma central de produtividade calma e sem distrações visuais.",
   openGraph: {
     title: "Pragma | Central de Foco & Produtividade",
-    description: "SaaS de produtividade amigável e gamificada para ajudar você a manter o foco sem esforço.",
+    description: "SaaS de produtividade calmo para organizar suas metas acadêmicas, profissionais e escritas.",
     url: "https://geraqrcode.com.br",
     siteName: "Pragma Focus",
     locale: "pt_BR",
@@ -16,89 +16,108 @@ export const metadata = {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#f2f6f4] text-[#0f2d4a] flex flex-col font-sans antialiased selection:bg-[#10b981] selection:text-white">
+    <div className="min-h-screen bg-[#f8f7f4] text-[#1b2d2a] flex flex-col font-sans antialiased selection:bg-[#2d5a27] selection:text-white">
       
-      {/* Header */}
-      <header className="w-full bg-white border-b-2 border-[#d9e2ec] sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-6 h-16 md:h-20 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#10b981] flex items-center justify-center shadow-[0_3px_0_#059669]">
-              <Target className="w-5 h-5 text-white" strokeWidth={3} />
+      {/* Header Minimalista */}
+      <header className="w-full bg-transparent border-b border-[#e5e0d8] sticky top-0 z-50 backdrop-blur-md">
+        <div className="max-w-5xl mx-auto px-8 h-16 md:h-20 flex justify-between items-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded bg-[#1b2d2a] flex items-center justify-center">
+              <Target className="w-4 h-4 text-[#f8f7f4]" strokeWidth={2.5} />
             </div>
-            <span className="font-black text-2xl tracking-wider text-[#0f2d4a]">PRAGMA</span>
+            <span className="font-extrabold text-lg tracking-wider text-[#1b2d2a]">PRAGMA</span>
           </div>
-          <Link href="/dashboard" className="px-5 py-2.5 rounded-2xl btn-duo-blue text-xs text-center border-b-4 hover:brightness-105 active:scale-95 transition-all">
+          <Link href="/dashboard" className="btn-studio-secondary py-2 px-4 text-xs">
             Entrar no App
           </Link>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="flex-grow flex flex-col justify-center items-center max-w-4xl mx-auto px-6 py-16 md:py-24 text-center">
+      <main className="max-w-5xl mx-auto px-8 py-16 md:py-24 flex-grow flex flex-col gap-24">
         
-        {/* Badge */}
-        <span className="px-4 py-2 rounded-2xl bg-[#10b981]/10 text-[#059669] text-xs font-black uppercase tracking-wider mb-8 border-2 border-[#10b981]/20">
-          Produtividade sem complicações
-        </span>
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          {/* Texto Hero */}
+          <div className="flex flex-col items-start text-left">
+            <span className="text-[10px] font-black uppercase tracking-widest text-[#2d5a27] mb-4">
+              Silêncio Visual & Foco
+            </span>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-6 text-[#1b2d2a]">
+              Sua mente precisa <br />
+              <span className="text-[#2d5a27] italic font-normal font-serif">de espaço</span> para focar.
+            </h1>
+            <p className="text-base md:text-lg text-[#556965] mb-8 font-medium leading-relaxed max-w-md">
+              Pragma é uma central de foco simplificada projetada para eliminar o ruído digital, organizar objetivos e acompanhar o seu progresso diário de forma calma e natural.
+            </p>
 
-        {/* Headline */}
-        <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-tight mb-8 text-[#0f2d4a]">
-          Mantenha o foco de um jeito <br className="hidden md:inline" />
-          <span className="text-[#10b981] relative">
-            divertido e leve!
-          </span>
-        </h1>
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+              <Link href="/dashboard" className="btn-studio-primary text-center flex-grow flex items-center justify-center gap-1.5">
+                Começar a Focar <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a href="#features" className="btn-studio-secondary text-center flex-grow">
+                Conhecer a Ideia
+              </a>
+            </div>
+          </div>
 
-        {/* Subtitle */}
-        <p className="text-base md:text-lg text-[#627d98] max-w-xl mx-auto mb-10 font-bold leading-relaxed">
-          Sem telas pretas ou relatórios complicados. Cultive seu mascotinho de árvore, complete sessões curtas de foco e afaste as distrações com simplicidade.
-        </p>
+          {/* Ilustração Premium: Linha Contínua Orgânica em SVG */}
+          <div className="flex items-center justify-center bg-white border border-[#e5e0d8] rounded-[24px] shadow-sm p-12 h-[300px] md:h-[400px]">
+            <svg viewBox="0 0 100 100" className="w-40 h-40 opacity-80">
+              {/* Single line art de uma planta minimalista */}
+              <path 
+                d="M50,90 Q50,70 50,40 Q45,25 35,25 Q45,20 50,30 Q55,20 65,25 Q55,25 50,40 M50,60 Q40,55 35,50 Q45,45 50,55 M50,75 Q60,70 65,65 Q55,60 50,70" 
+                stroke="#1b2d2a" 
+                strokeWidth="2.5" 
+                fill="none" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+              />
+              <circle cx="50" cy="90" r="1.5" fill="#1b2d2a" />
+            </svg>
+          </div>
+        </section>
 
-        {/* Call to Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md mb-20">
-          <Link href="/dashboard" className="px-8 py-4 rounded-2xl btn-duo-green text-sm text-center flex-1 hover:brightness-105 transition-all flex items-center justify-center gap-2">
-            Começar Grátis <ArrowRight className="w-4 h-4" />
-          </Link>
-          <a href="#features" className="px-8 py-4 rounded-2xl btn-duo-white text-sm text-center flex-1 border border-[#d9e2ec] text-[#0f2d4a] hover:bg-[#fafafa] transition-all">
-            Como funciona
-          </a>
-        </div>
-
-        {/* Features Section */}
-        <section id="features" className="w-full pt-12 border-t-2 border-[#d9e2ec]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+        {/* Recursos em Cards Precisos */}
+        <section id="features" className="w-full pt-16 border-t border-[#e5e0d8]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
-            {/* Feature 1 */}
-            <div className="p-6 rounded-2xl bg-white border-2 border-[#d9e2ec] border-b-4 hover:translate-y-[-2px] transition-all duration-200">
-              <div className="w-12 h-12 rounded-2xl bg-[#10b981]/10 text-2xl flex items-center justify-center mb-5 font-black text-[#10b981] border border-[#10b981]/20">
-                🌳
+            {/* Card 1 */}
+            <div className="card-studio p-8 flex flex-col gap-5">
+              <div className="w-10 h-10 rounded bg-[#f0f6f3] flex items-center justify-center text-[#2d5a27]">
+                <Target className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-black mb-2 text-[#0f2d4a]">Mascotinho de Foco</h3>
-              <p className="text-[#627d98] text-sm font-bold leading-relaxed">
-                Escreva o que vai fazer e inicie o timer. A sua plantinha reage à sua dedicação e fica feliz ao ver seu foco.
-              </p>
+              <div>
+                <h3 className="text-lg font-bold mb-2 text-[#1b2d2a]">Metas Claras</h3>
+                <p className="text-[#556965] text-sm leading-relaxed">
+                  Defina um único objetivo prioritário de cada vez. Mantenha a atenção onde ela realmente importa, sem listas infinitas de tarefas.
+                </p>
+              </div>
             </div>
 
-            {/* Feature 2 */}
-            <div className="p-6 rounded-2xl bg-white border-2 border-[#d9e2ec] border-b-4 hover:translate-y-[-2px] transition-all duration-200">
-              <div className="w-12 h-12 rounded-2xl bg-[#0284c7]/10 text-2xl flex items-center justify-center mb-5 font-black text-[#0284c7] border border-[#0284c7]/20">
-                🏆
+            {/* Card 2 */}
+            <div className="card-studio p-8 flex flex-col gap-5">
+              <div className="w-10 h-10 rounded bg-[#f0f6f3] flex items-center justify-center text-[#2d5a27]">
+                <Trophy className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-black mb-2 text-[#0f2d4a]">Ranking Semanal</h3>
-              <p className="text-[#627d98] text-sm font-bold leading-relaxed">
-                Acumule minutos focados e dispute posições no ranking semanal global com outros usuários focados.
-              </p>
+              <div>
+                <h3 className="text-lg font-bold mb-2 text-[#1b2d2a]">Medição Silenciosa</h3>
+                <p className="text-[#556965] text-sm leading-relaxed">
+                  Acompanhe seus minutos focados sem gamificações infantis. A evolução da árvore reflete o seu progresso de maneira estética.
+                </p>
+              </div>
             </div>
 
-            {/* Feature 3 */}
-            <div className="p-6 rounded-2xl bg-white border-2 border-[#d9e2ec] border-b-4 hover:translate-y-[-2px] transition-all duration-200">
-              <div className="w-12 h-12 rounded-2xl bg-[#f97316]/10 text-2xl flex items-center justify-center mb-5 font-black text-[#f97316] border border-[#f97316]/20">
-                ✍️
+            {/* Card 3 */}
+            <div className="card-studio p-8 flex flex-col gap-5">
+              <div className="w-10 h-10 rounded bg-[#f0f6f3] flex items-center justify-center text-[#2d5a27]">
+                <FileText className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-black mb-2 text-[#0f2d4a]">Limpeza Mental</h3>
-              <p className="text-[#627d98] text-sm font-bold leading-relaxed">
-                Use o espaço de notas temporárias para descarregar distrações e preocupações, mantendo seu cérebro focado.
-              </p>
+              <div>
+                <h3 className="text-lg font-bold mb-2 text-[#1b2d2a]">Espaço de Notas</h3>
+                <p className="text-[#556965] text-sm leading-relaxed">
+                  Um bloco de rascunhos em tempo real para esvaziar a mente de ideias intrusivas, salvaguardando a sua atenção durante as sessões.
+                </p>
+              </div>
             </div>
 
           </div>
@@ -106,11 +125,11 @@ export default function LandingPage() {
 
       </main>
 
-      {/* Footer */}
-      <footer className="w-full bg-white border-t-2 border-[#d9e2ec] py-8 text-center text-xs font-black text-[#9fb3c8] mt-auto">
-        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <span>&copy; {new Date().getFullYear()} Pragma Focus.</span>
-          <span className="text-[#627d98]">A central de foco mais divertida do mundo.</span>
+      {/* Footer Minimalista */}
+      <footer className="w-full bg-white border-t border-[#e5e0d8] py-8 text-xs font-semibold text-[#9fb3c8]">
+        <div className="max-w-5xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <span>&copy; {new Date().getFullYear()} Pragma Studio.</span>
+          <span className="text-[#556965]">Desenvolvido para criar foco calmo e poético.</span>
         </div>
       </footer>
     </div>
