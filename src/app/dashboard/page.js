@@ -1,6 +1,21 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { 
+  Trophy, 
+  Target, 
+  Timer, 
+  RefreshCw, 
+  Settings, 
+  LogOut, 
+  Calendar, 
+  FileText, 
+  Activity, 
+  X, 
+  Check, 
+  Sparkles,
+  ArrowRight
+} from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
 
@@ -218,15 +233,15 @@ export default function PragmaDashboard() {
       osc.type = "sine";
       osc.frequency.setValueAtTime(587.33, now);
       osc.frequency.setValueAtTime(880, now + 0.1);
-      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.setValueAtTime(0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
       osc.start(now);
       osc.stop(now + 0.3);
     } else if (type === "alarm") {
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(880, now);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(660, now);
       osc.frequency.linearRampToValueAtTime(440, now + 0.2);
-      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.setValueAtTime(0.08, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
       osc.start(now);
       osc.stop(now + 0.4);
@@ -240,16 +255,16 @@ export default function PragmaDashboard() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     let particles = [];
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 70; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * -canvas.height - 20,
-        size: Math.random() * 6 + 4,
-        color: `hsl(${Math.random() * 360}, 70%, 50%)`,
-        speedX: Math.random() * 4 - 2,
-        speedY: Math.random() * 4 + 3,
+        size: Math.random() * 6 + 3,
+        color: `hsl(${Math.random() * 360}, 65%, 55%)`,
+        speedX: Math.random() * 3 - 1.5,
+        speedY: Math.random() * 3 + 3,
         rotation: Math.random() * 360,
-        rotationSpeed: Math.random() * 4 - 2
+        rotationSpeed: Math.random() * 3 - 1.5
       });
     }
     const animate = () => {
@@ -290,7 +305,6 @@ export default function PragmaDashboard() {
             const minutesFocused = activeTimerMode === 1500 ? 25 : 5;
             setTotalFocusMinutes(m => m + minutesFocused);
             setTreeHealth(th => Math.min(100, th + 20));
-            alert(`🛡️ Sessão de foco concluída! (+${minutesFocused} minutos focados)`);
             return activeTimerMode;
           }
           return prev - 1;
@@ -312,202 +326,222 @@ export default function PragmaDashboard() {
     return `${mins}:${secs}`;
   };
 
-  // Porcentagem do círculo
+  // Círculo progress
   const radius = 90;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (timerSeconds / activeTimerMode) * circumference;
 
   return (
-    <div className="min-h-screen bg-[#050406] text-[#f4f4f7] flex flex-col font-sans relative overflow-hidden select-none">
+    <div className="min-h-screen bg-[#f0f6f3] text-[#0a2540] flex flex-col md:flex-row font-sans relative overflow-hidden select-none">
       <canvas id="confetti-canvas" ref={confettiCanvasRef} className="absolute inset-0 pointer-events-none z-50"></canvas>
 
-      {/* Background Dopamine Glows */}
-      <div className="absolute top-[-25%] left-[-15%] w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#ff3c00]/10 to-[#ffaa00]/10 blur-[130px] pointer-events-none"></div>
-      <div className="absolute bottom-[-15%] right-[-15%] w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-[#7b2cbf]/10 to-[#ff007f]/10 blur-[130px] pointer-events-none"></div>
-
-      {/* Header */}
-      <header className="w-full max-w-6xl mx-auto px-8 py-6 flex justify-between items-center border-b border-white/[0.02] z-10">
+      {/* Sidebar Esquerda (Tailwind Clean Design) */}
+      <aside className="w-full md:w-[260px] bg-white border-r border-[#cbdccb]/50 flex flex-col p-6 z-10 gap-8">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#ff3c00] to-[#ffaa00] flex items-center justify-center shadow-lg shadow-[#ff3c00]/25">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#050406" strokeWidth="2.5">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
+          <div className="w-9 h-9 rounded-2xl bg-[#0a2540] flex items-center justify-center shadow-md">
+            <Target className="w-5 h-5 text-[#2ec4b6]" strokeWidth={3} />
           </div>
-          <span className="font-black text-xl tracking-widest bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">PRAGMA</span>
+          <span className="font-black text-xl tracking-wider text-[#0a2540]">PRAGMA</span>
         </div>
 
-        {/* Authentication Widget */}
-        <div className="z-20">
+        {/* Perfil & Login do Google One Tap */}
+        <div className="p-4 bg-[#e5f0e7] border border-[#cbdccb]/40 rounded-2xl flex flex-col gap-2">
           {!token ? (
-            <div ref={googleBtnContainerRef} id="google-login-btn"></div>
+            <div>
+              <div className="text-[10px] font-black text-[#0a2540] mb-2 text-center uppercase tracking-wider">Entrar na Conta</div>
+              <div ref={googleBtnContainerRef} id="google-login-btn"></div>
+            </div>
           ) : (
-            <div className="flex items-center gap-3 bg-white/[0.02] border border-white/[0.04] py-2 px-4 rounded-2xl backdrop-blur-xl">
-              {userProfile?.avatar_url && (
-                <img src={userProfile.avatar_url} className="w-7 h-7 rounded-full border border-[#ff3c00]/40" alt="Avatar" />
+            <div className="flex items-center gap-3">
+              {userProfile?.avatar_url ? (
+                <img src={userProfile.avatar_url} className="w-8 h-8 rounded-full border border-[#2ec4b6]" alt="Avatar" />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-xs text-[#0a2540]">U</div>
               )}
-              <span className="text-xs font-black text-white max-w-[120px] truncate">{userProfile?.username}</span>
-              <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-400 font-extrabold transition-all ml-1.5 cursor-pointer">Sair</button>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-black truncate text-[#0a2540] flex items-center gap-1">
+                  {userProfile?.username}
+                  <span className="text-[9px] px-1 py-0.25 rounded bg-white font-normal text-[#0a2540]">
+                    {userProfile?.country || "BR"}
+                  </span>
+                </div>
+                <div className="text-[10px] text-[#0a2540]/70 truncate">{userProfile?.email}</div>
+              </div>
+              <button onClick={handleLogout} className="text-[10px] text-red-600 hover:text-red-700 font-extrabold cursor-pointer transition-all">Sair</button>
             </div>
           )}
         </div>
-      </header>
 
-      {/* Main Container */}
-      <main className="w-full max-w-5xl mx-auto px-6 py-8 flex-1 flex flex-col md:flex-row items-center justify-center gap-12 z-10">
+        {/* Links de navegação simples */}
+        <nav className="flex flex-col gap-2 flex-1">
+          <button className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-[#0a2540] text-white font-black text-sm text-left transition-all shadow-sm">
+            <Timer className="w-4 h-4 text-[#2ec4b6]" /> Dashboard Foco
+          </button>
+          <button onClick={loadGlobalRanking} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[#0a2540] hover:bg-[#e5f0e7] font-bold text-sm text-left transition-all cursor-pointer">
+            <Trophy className="w-4 h-4 text-[#0a2540]/60" /> Ranking Mundial
+          </button>
+          <button onClick={() => setSettingsActive(true)} className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-[#0a2540] hover:bg-[#e5f0e7] font-bold text-sm text-left transition-all cursor-pointer">
+            <Calendar className="w-4 h-4 text-[#0a2540]/60" /> Configurar Prazo
+          </button>
+        </nav>
+
+        <div className="text-[10px] text-[#0a2540]/50 text-center font-bold">
+          Pragma &bull; Design Autoral
+        </div>
+      </aside>
+
+      {/* Conteúdo Principal */}
+      <main className="flex-1 px-8 py-10 flex flex-col md:flex-row items-stretch justify-center gap-8 z-10 max-w-5xl mx-auto w-full">
         
-        {/* Left Column: Timer & Target */}
-        <div className="flex-1 flex flex-col items-center justify-center gap-8 w-full">
+        {/* Coluna Esquerda: Objetivo & Timer */}
+        <div className="flex-[1.2] flex flex-col gap-6 w-full">
           
-          {/* Active Target Input */}
-          <div className="w-full max-w-md bg-white/[0.01] border border-white/[0.03] p-6 rounded-3xl relative shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-            <span className="text-[10px] uppercase font-black tracking-widest text-[#ff3c00] block mb-1">Foco Ativo</span>
-            <input 
-              type="text" 
-              value={currentTask} 
-              onChange={(e) => setCurrentTask(e.target.value)} 
-              placeholder="Qual o seu único objetivo deste ciclo?"
-              className="w-full bg-transparent text-xl font-black text-white placeholder-white/[0.08] border-b border-white/[0.05] pb-2 focus:border-[#ff3c00] focus:outline-none transition-all"
-            />
-            <div className="flex justify-between items-center text-xs text-[#8e8d96] mt-3">
-              <span>Prazo final: {projectDeadline}</span>
-              <button onClick={() => setSettingsActive(true)} className="hover:text-white font-bold transition-all cursor-pointer">Alterar</button>
+          {/* Card Objetivo Ativo */}
+          <div className="bg-white border border-[#cbdccb]/50 p-6 rounded-[24px] shadow-sm flex flex-col gap-4 relative overflow-hidden">
+            <div className="absolute right-[-20px] top-[-20px] w-24 h-24 rounded-full bg-[#2ec4b6]/5 pointer-events-none"></div>
+
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] uppercase font-black tracking-widest text-[#2ec4b6]">No que você vai focar agora?</span>
+              <input 
+                type="text" 
+                value={currentTask} 
+                onChange={(e) => setCurrentTask(e.target.value)} 
+                placeholder="Ex: Concluir rascunho da introdução..."
+                className="w-full bg-transparent text-xl font-black text-[#0a2540] placeholder-[#0a2540]/15 border-b border-[#cbdccb]/40 pb-2 focus:border-[#2ec4b6] focus:outline-none transition-all"
+              />
+            </div>
+            
+            <div className="flex justify-between items-center text-xs font-bold text-[#0a2540]/60">
+              <span className="cursor-pointer hover:text-[#2ec4b6] transition-all flex items-center gap-1.5" onClick={() => setSettingsActive(true)}>
+                <Calendar className="w-3.5 h-3.5 text-[#2ec4b6]" /> Prazo: {projectDeadline}
+              </span>
+              <span>Faltam {timeLeftStr.days} dias ({timeLeftStr.percent}% decorrido)</span>
             </div>
           </div>
 
-          {/* Giant Circular Timer (High Dopamine) */}
-          <div className="relative flex items-center justify-center w-[280px] h-[280px] md:w-[320px] md:h-[320px]">
-            <svg className="w-full h-full transform -rotate-90">
-              {/* Back Circle */}
-              <circle
-                cx="50%"
-                cy="50%"
-                r={radius}
-                className="stroke-white/[0.02]"
-                strokeWidth="12"
-                fill="transparent"
-              />
-              {/* Glowing Active Ring */}
-              <circle
-                cx="50%"
-                cy="50%"
-                r={radius}
-                className="stroke-[url(#neon-gradient)] transition-all duration-300"
-                strokeWidth="12"
-                fill="transparent"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                strokeLinecap="round"
-                style={{ filter: "drop-shadow(0px 0px 12px rgba(255, 60, 0, 0.4))" }}
-              />
-              <defs>
-                <linearGradient id="neon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ff3c00" />
-                  <stop offset="100%" stopColor="#ffaa00" />
-                </linearGradient>
-              </defs>
+          {/* Card do Timer (Navy e Bold) */}
+          <div className="bg-[#0a2540] text-white p-8 rounded-[32px] shadow-lg relative overflow-hidden flex flex-col items-center justify-center gap-8">
+            
+            {/* Curvas Orgânicas Vetoriais Decorativas */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path d="M0,40 C30,50 70,20 100,40 L100,100 L0,100 Z" fill="#2ec4b6" />
+              <path d="M0,60 C40,40 60,80 100,60 L100,100 L0,100 Z" fill="#cbf3f0" />
             </svg>
 
-            {/* Time Text inside Circle */}
-            <div className="absolute flex flex-col items-center justify-center text-center">
-              <span className="text-6xl md:text-7xl font-black tracking-tighter tabular-nums text-white bg-gradient-to-b from-white to-white/70 bg-clip-text">
-                {formatTimer(timerSeconds)}
-              </span>
-              <span className="text-[10px] uppercase font-black tracking-widest text-[#8e8d96] mt-1.5">
-                {activeTimerMode === 1500 ? "Trabalho" : "Pausa"}
-              </span>
-            </div>
-          </div>
+            {/* Timer Circular */}
+            <div className="relative flex items-center justify-center w-[220px] h-[220px] md:w-[240px] md:h-[240px] z-10">
+              <svg className="absolute w-full h-full transform -rotate-90">
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="90"
+                  className="stroke-white/[0.04]"
+                  strokeWidth="8"
+                  fill="transparent"
+                />
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="90"
+                  className="stroke-[#2ec4b6] transition-all duration-300"
+                  strokeWidth="8"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 90}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                />
+              </svg>
 
-          {/* Quick Controls */}
-          <div className="flex flex-col gap-4 w-full max-w-sm">
-            <div className="flex gap-2.5 justify-center">
-              <button 
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border ${activeTimerMode === 1500 ? "bg-white text-black border-white shadow-lg" : "bg-white/[0.02] text-[#8e8d96] border-white/[0.03] hover:border-white/[0.1] hover:text-white"}`}
-                onClick={() => selectTimerMode(1500)}
-              >
-                Foco (25 min)
-              </button>
-              <button 
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all border ${activeTimerMode === 300 ? "bg-white text-black border-white shadow-lg" : "bg-white/[0.02] text-[#8e8d96] border-white/[0.03] hover:border-white/[0.1] hover:text-white"}`}
-                onClick={() => selectTimerMode(300)}
-              >
-                Pausa (5 min)
-              </button>
+              <div className="absolute flex flex-col items-center justify-center text-center">
+                <span className="text-5xl md:text-6xl font-black tracking-tight tabular-nums text-white">
+                  {formatTimer(timerSeconds)}
+                </span>
+                <span className="text-[9px] uppercase font-black tracking-widest text-[#2ec4b6] mt-1.5 bg-white/10 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                  <Activity className="w-2.5 h-2.5" /> {activeTimerMode === 1500 ? "Focar" : "Pausa"}
+                </span>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              <button 
-                onClick={handleStartTimer} 
-                className="flex-grow py-4 rounded-2xl bg-gradient-to-r from-[#ff3c00] to-[#ffaa00] text-[#050406] font-black text-sm tracking-widest hover:shadow-[0_0_35px_rgba(255,60,0,0.45)] active:scale-[0.97] transition-all cursor-pointer text-center"
-              >
-                {timerRunning ? "PAUSAR FOCO" : "INICIAR FOCO"}
-              </button>
-              <button 
-                onClick={() => selectTimerMode(activeTimerMode)} 
-                className="px-5 py-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.06] active:scale-[0.97] hover:border-white/[0.15] transition-all cursor-pointer text-center text-sm"
-              >
-                🔄
-              </button>
+            {/* Controles de Foco */}
+            <div className="w-full max-w-sm flex flex-col gap-4 z-10">
+              <div className="flex gap-2.5 justify-center">
+                <button 
+                  className={`flex-grow py-2.5 rounded-2xl text-xs font-black transition-all border ${activeTimerMode === 1500 ? "bg-[#2ec4b6] text-[#0a2540] border-[#2ec4b6]" : "bg-white/5 text-white/70 border-white/10 hover:border-white/20"}`}
+                  onClick={() => selectTimerMode(1500)}
+                >
+                  Foco (25m)
+                </button>
+                <button 
+                  className={`flex-grow py-2.5 rounded-2xl text-xs font-black transition-all border ${activeTimerMode === 300 ? "bg-[#2ec4b6] text-[#0a2540] border-[#2ec4b6]" : "bg-white/5 text-white/70 border-white/10 hover:border-white/20"}`}
+                  onClick={() => selectTimerMode(300)}
+                >
+                  Pausa (5m)
+                </button>
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleStartTimer} 
+                  className="flex-grow py-4 rounded-2xl bg-[#2ec4b6] hover:bg-[#25ab9e] text-[#0a2540] font-black text-sm tracking-wider active:scale-[0.98] transition-all cursor-pointer text-center"
+                >
+                  {timerRunning ? "PAUSAR" : "INICIAR SESSÃO"}
+                </button>
+                <button 
+                  onClick={() => selectTimerMode(activeTimerMode)} 
+                  className="px-5 py-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer flex items-center justify-center"
+                >
+                  <RefreshCw className="w-4 h-4 text-white" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Crystal Tree & Stats & Notes */}
-        <div className="w-full max-w-sm flex flex-col gap-6">
+        {/* Coluna Direita: Jardim de Foco & Notas */}
+        <div className="flex-[0.8] flex flex-col gap-6 w-full">
           
-          {/* Crystal Tree Card (Passiva & Visual) */}
-          <div className="p-6 bg-white/[0.01] border border-white/[0.03] rounded-3xl relative shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-between backdrop-blur-xl">
-            <div className="flex flex-col gap-2">
-              <span className="text-[10px] uppercase font-black tracking-widest text-[#ff3c00]">Jardim Estético</span>
-              <div className="text-2xl font-black text-white leading-none">
-                {totalFocusMinutes} <span className="text-xs font-medium text-[#8e8d96]">min focados</span>
+          {/* Card: Jardim de Hábitos */}
+          <div className="p-6 bg-gradient-to-br from-[#2ec4b6] to-[#0a2540] text-white rounded-[24px] shadow-md flex items-center justify-between relative overflow-hidden">
+            <div className="flex flex-col gap-2 z-10">
+              <span className="text-[10px] uppercase font-black tracking-widest text-[#cbf3f0]">Tempo Focado</span>
+              <div className="text-3xl font-black text-white leading-none">
+                {totalFocusMinutes} <span className="text-xs font-medium text-[#cbf3f0]">minutos</span>
               </div>
-              <span className="text-[10px] text-[#8e8d96]">Saúde da Árvore: {treeHealth}%</span>
+              <span className="text-[10px] font-bold text-white/80">Saúde do Jardim: {treeHealth}%</span>
               
-              {/* Micro Progress Bar */}
-              <div className="w-32 h-1.5 bg-white/5 rounded-full mt-1 overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#ff3c00] to-[#ffaa00] transition-all duration-500" style={{ width: `${treeHealth}%` }}></div>
+              {/* Barra de progresso */}
+              <div className="w-28 h-1.5 bg-white/10 rounded-full overflow-hidden mt-1.5">
+                <div className="h-full bg-white transition-all duration-500" style={{ width: `${treeHealth}%` }}></div>
               </div>
             </div>
 
-            {/* Glowing Minimal SVG Tree */}
-            <div className="w-20 h-20 flex items-center justify-center">
-              <svg viewBox="0 0 100 100" className={`w-full h-full transition-all duration-500 ${treeHealth <= 0 ? "opacity-30 filter grayscale" : "opacity-100"}`}>
-                <path d="M20,85 Q50,80 80,85" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" fill="none" />
-                <path d="M50,85 L50,55" stroke="url(#tree-grad)" strokeWidth="4.5" strokeLinecap="round" style={{ filter: "drop-shadow(0px 0px 5px rgba(255,60,0,0.3))" }} />
+            {/* Ilustração Minimalista da Árvore */}
+            <div className="w-16 h-16 flex items-center justify-center bg-white/10 border border-white/20 rounded-2xl p-2 z-10 backdrop-blur-md">
+              <svg viewBox="0 0 100 100" className={`w-full h-full transition-all duration-300 ${treeHealth <= 0 ? "grayscale opacity-40" : ""}`}>
+                <path d="M20,80 Q50,78 80,80" stroke="rgba(255,255,255,0.25)" strokeWidth="3" fill="none" />
+                <path d="M50,80 L50,45" stroke="#ffffff" strokeWidth="5" strokeLinecap="round" />
                 {treeHealth > 0 && (
                   <>
-                    <circle cx="50" cy="50" r="12" fill="#ff7b00" opacity="0.35" className="animate-pulse" style={{ filter: "blur(4px)" }} />
-                    {/* Glowing branches */}
-                    <path d="M50,58 Q42,48 38,42" stroke="#ffaa00" strokeWidth="3" strokeLinecap="round" />
-                    <path d="M50,66 Q58,58 62,50" stroke="#ff3c00" strokeWidth="3" strokeLinecap="round" />
+                    <circle cx="50" cy="40" r="12" fill="#cbf3f0" />
+                    <circle cx="40" cy="48" r="9" fill="#2ec4b6" />
+                    <circle cx="60" cy="46" r="9" fill="#ffffff" />
                   </>
                 )}
-                <defs>
-                  <linearGradient id="tree-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#ffaa00" />
-                    <stop offset="100%" stopColor="#ff3c00" />
-                  </linearGradient>
-                </defs>
               </svg>
             </div>
           </div>
 
-          {/* Minimalist Notepad */}
-          <div className="flex flex-col gap-2.5">
-            <span className="text-[10px] uppercase font-black tracking-widest text-[#ff3c00]">Bloco de Notas Temporário</span>
+          {/* Card: Bloco de Notas */}
+          <div className="flex-1 flex flex-col gap-2 bg-white border border-[#cbdccb]/50 p-6 rounded-[24px] shadow-sm">
+            <span className="text-[10px] uppercase font-black tracking-widest text-[#2ec4b6] flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-[#2ec4b6]" /> Descarregar Pensamentos
+            </span>
             <textarea 
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Descarregue pensamentos aleatórios aqui para não perder a atenção no timer..."
-              className="w-full h-[180px] bg-white/[0.01] border border-white/[0.03] hover:border-white/[0.06] focus:border-[#ff3c00]/30 rounded-2xl p-4 text-sm text-[#ceced8] placeholder-white/[0.08] focus:outline-none transition-all resize-none shadow-2xl backdrop-blur-xl"
+              placeholder="O que está tirando seu foco? Registre aqui rapidamente e limpe sua mente para o timer atual..."
+              className="w-full h-full min-h-[160px] bg-transparent border-0 focus:outline-none text-sm font-medium text-[#0a2540] placeholder-[#0a2540]/20 resize-none transition-all"
             />
-          </div>
-
-          {/* Subfooter Actions */}
-          <div className="flex justify-between items-center text-xs text-[#525159] mt-2 border-t border-white/[0.03] pt-4">
-            <button onClick={loadGlobalRanking} className="hover:text-white font-extrabold transition-all cursor-pointer">🏆 Ver Ranking Global</button>
-            <span>Faltam {timeLeftStr.days} dias ({timeLeftStr.percent}% concluído)</span>
           </div>
         </div>
       </main>
@@ -516,23 +550,29 @@ export default function PragmaDashboard() {
       {settingsActive && (
         <div className="modal-overlay active">
           <div className="modal-content">
-            <div className="modal-header">
-              <h3>Definir Prazo Final</h3>
-              <button className="close-modal-btn" onClick={() => setSettingsActive(false)}>&times;</button>
+            <div className="modal-header flex justify-between items-center pb-4 border-b border-[#cbdccb]/30">
+              <h3 className="font-black text-[#0a2540] flex items-center gap-2">
+                <Settings className="w-4 h-4 text-[#2ec4b6]" /> Definir Prazo Final
+              </h3>
+              <button className="close-modal-btn cursor-pointer" onClick={() => setSettingsActive(false)}>
+                <X className="w-6 h-6" />
+              </button>
             </div>
-            <div className="modal-body flex flex-col gap-4">
+            <div className="modal-body py-6 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-[#8e8d96]">Data Limite da Meta:</label>
+                <label className="text-xs text-[#0a2540]/60 font-black">Data Limite da Meta:</label>
                 <input 
                   type="date" 
                   value={projectDeadline} 
                   onChange={(e) => setProjectDeadline(e.target.value)} 
-                  className="w-full p-3.5 rounded-xl bg-[var(--bg-main)] border border-[var(--border-color)] text-white focus:outline-none focus:border-[#ff3c00]"
+                  className="w-full p-3.5 rounded-2xl bg-[#f0f6f3] border border-[#cbdccb] text-[#0a2540] font-black focus:outline-none focus:border-[#2ec4b6]"
                 />
               </div>
             </div>
-            <div className="modal-footer">
-              <button className="glow-btn w-full py-3.5 rounded-xl bg-gradient-to-r from-[#ff3c00] to-[#ffaa00] text-black font-black text-sm tracking-wider active:scale-[0.98] transition-all cursor-pointer" onClick={() => { setSettingsActive(false); updateDeadlineCountdown(); }}>Salvar</button>
+            <div className="modal-footer pt-4 border-t border-[#cbdccb]/30 flex gap-3">
+              <button className="w-full py-3.5 rounded-2xl bg-[#0a2540] hover:bg-[#061524] text-white font-black text-sm tracking-wider active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-1.5" onClick={() => { setSettingsActive(false); updateDeadlineCountdown(); }}>
+                <Check className="w-4 h-4 text-[#2ec4b6]" /> Salvar
+              </button>
             </div>
           </div>
         </div>
@@ -542,44 +582,40 @@ export default function PragmaDashboard() {
       {rankingActive && (
         <div className="modal-overlay active">
           <div className="modal-content max-w-sm">
-            <div className="modal-header">
-              <h3>🏆 Ranking por Minutos Focados</h3>
-              <button className="close-modal-btn" onClick={() => setRankingActive(false)}>&times;</button>
+            <div className="modal-header flex justify-between items-center pb-4 border-b border-[#cbdccb]/30">
+              <h3 className="font-black text-[#0a2540] flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-[#2ec4b6]" /> Ranking de Foco
+              </h3>
+              <button className="close-modal-btn cursor-pointer" onClick={() => setRankingActive(false)}>
+                <X className="w-6 h-6" />
+              </button>
             </div>
-            <div className="modal-body flex flex-col gap-2 mt-2">
+            <div className="modal-body py-6 flex flex-col gap-2 max-h-[400px] overflow-y-auto">
               {rankingList.map((user, idx) => (
-                <div key={user.username} className={`flex items-center gap-3 p-3 rounded-xl border ${idx === 0 ? 'bg-[#ff3c00]/10 border-[#ff3c00]/30' : idx === 1 ? 'bg-white/5 border-white/10' : 'bg-[#0a090d] border-white/5'}`}>
-                  <span className="font-extrabold text-sm w-5 text-center text-[#ff3c00]">{idx + 1}</span>
+                <div key={user.username} className={`flex items-center gap-3 p-3 rounded-2xl border ${idx === 0 ? 'bg-[#cbf3f0]/60 border-[#2ec4b6]' : 'bg-[#f0f6f3] border-[#cbdccb]'}`}>
+                  <span className="font-black text-sm w-5 text-center text-[#0a2540]">{idx + 1}</span>
                   {user.avatar_url ? (
-                    <img src={user.avatar_url} className="w-8 h-8 rounded-full border border-white/10" alt="Avatar" />
+                    <img src={user.avatar_url} className="w-8 h-8 rounded-full border border-[#cbdccb]" alt="Avatar" />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center font-bold text-xs text-[#8e8d96]">U</div>
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center font-bold text-xs text-[#0a2540]">U</div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-bold truncate text-white flex items-center gap-1.5">
+                    <div className="text-sm font-black truncate text-[#0a2540] flex items-center gap-1.5">
                       {user.username}
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 font-normal text-[#8e8d96]">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white font-normal text-[#0a2540]">
                         {user.country || "BR"}
                       </span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xs font-black text-white">{user.level} min</div>
+                    <div className="text-xs font-black text-[#0a2540]">{user.level} min</div>
                   </div>
                 </div>
               ))}
-              {rankingList.length === 0 && (
-                <div className="text-xs text-[#8e8d96] text-center py-6">Nenhum jogador no ranking ainda.</div>
-              )}
             </div>
           </div>
         </div>
       )}
-
-      {/* Footer */}
-      <footer className="w-full py-6 text-center text-[10px] text-[#3e3d43] border-t border-white/[0.01]">
-        Pragma Focus System &bull; Desenvolvido para Foco Absoluto
-      </footer>
     </div>
   );
 }
