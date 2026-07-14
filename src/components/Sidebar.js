@@ -109,7 +109,7 @@ function SidebarContent({ token, userProfile, onLogout, onOpenRanking, onOpenAch
           <Timer size={16} strokeWidth={2.5} /> Sessão de Foco
         </button>
         <button onClick={onOpenRanking} style={S.navBtn(false)}>
-          <Trophy size={16} strokeWidth={2} /> Ranking Global
+          <Trophy size={16} strokeWidth={2} /> Ranking
         </button>
         <button onClick={onOpenAchievements} style={S.navBtn(false)}>
           <Award size={16} strokeWidth={2} /> Conquistas

@@ -167,7 +167,10 @@ export default function PragmaDashboard() {
       setRankingOffline(false);
       setRankingActive(true);
     } catch {
-      setRankingList([]);
+      // Dados mock enquanto backend estiver offline
+      setRankingList([
+        { username: "GroveUser", xp: totalFocusMinutes || 0, level: getLevel(totalFocusMinutes || 0), country: "BR", avatar_url: null },
+      ]);
       setRankingOffline(true);
       setRankingActive(true);
     }
