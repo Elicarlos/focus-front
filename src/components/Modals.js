@@ -133,7 +133,7 @@ const MOODS = [
   { id: "ready",    icon: "✅", label: "Pronto",     color: "#4ade80", hint: null },
 ];
 
-export function CheckInModal({ active, task, selectedMood, setSelectedMood, microStep, setMicroStep, onConfirm, onClose }) {
+export function CheckInModal({ active, task, selectedMood, setSelectedMood, microStep, setMicroStep, onConfirm, onClose, whyValue, setWhyValue }) {
   if (!active) return null;
   const { theme } = useTheme();
 
@@ -212,6 +212,29 @@ export function CheckInModal({ active, task, selectedMood, setSelectedMood, micr
             <p style={{ fontSize: 10, color: theme.textDim, margin: "6px 0 0", fontFamily: "Outfit, sans-serif" }}>
               Tão pequeno que seu cérebro não acione o alarme. Só o primeiro passo.
             </p>
+          </div>
+        )}
+
+        {/* Pergunta de motivação intrínseca — opcional */}
+        {selectedMood && (
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 11, fontWeight: 800, color: theme.textDim, display: "block", marginBottom: 6, fontFamily: "Outfit, sans-serif" }}>
+              Por que isso é importante pra você? <span style={{ fontWeight: 400, opacity: 0.6 }}>(opcional)</span>
+            </label>
+            <input
+              type="text"
+              value={whyValue || ""}
+              onChange={e => setWhyValue(e.target.value)}
+              placeholder="Ex: Pra passar na prova e não trancar o curso"
+              maxLength={120}
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 10,
+                background: "transparent", border: `1px solid ${theme.border}`,
+                color: theme.textDim, fontFamily: "Outfit, sans-serif", fontSize: 12,
+                fontWeight: 500, outline: "none", boxSizing: "border-box",
+                fontStyle: "italic"
+              }}
+            />
           </div>
         )}
 

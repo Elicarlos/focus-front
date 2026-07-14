@@ -54,6 +54,7 @@ export default function PragmaDashboard() {
   const [checkInActive, setCheckInActive] = useState(false);
   const [selectedMood, setSelectedMood] = useState(null);
   const [microStep, setMicroStep] = useState("");
+  const [whyValue, setWhyValue] = useState("");
 
   // Novos states
   const [victoryActive, setVictoryActive] = useState(false);
@@ -771,6 +772,8 @@ export default function PragmaDashboard() {
         setMicroStep={setMicroStep}
         onConfirm={confirmStartTimer}
         onClose={() => setCheckInActive(false)}
+        whyValue={whyValue}
+        setWhyValue={setWhyValue}
       />
       <VictoryModal
         active={victoryActive}
