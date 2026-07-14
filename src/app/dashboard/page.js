@@ -65,6 +65,7 @@ export default function PragmaDashboard() {
   const timerIntervalRef = useRef(null);
   const confettiCanvasRef = useRef(null);
   const taskInputRef = useRef(null);
+  const syncTimeoutRef = useRef(null);
 
   useEffect(() => {
     const savedToken = localStorage.getItem("pragma_token");
@@ -80,6 +81,19 @@ export default function PragmaDashboard() {
     // Carregar nickname
     const savedNickname = localStorage.getItem("pragma_nickname");
     if (savedNickname) setNickname(savedNickname);
+
+    // Carregar sessões de hoje (resetar se mudou o dia)
+    const savedSessionsDate = localStorage.getItem("pragma_sessions_date");
+    const savedSessionsCount = localStorage.getItem("pragma_sessions_today");
+    if (savedSessionsDate && savedSessionsCount) {
+      const today = new Date().toDateString();
+      if (savedSessionsDate === today) {
+        setSessionsToday(parseInt(savedSessionsCount));
+      } else {
+        localStorage.setItem("pragma_sessions_date", today);
+        localStorage.setItem("pragma_sessions_today", "0");
+      }
+    }
 
     // Carregar bosque
     const savedBosque = localStorage.getItem("pragma_bosque");
@@ -170,8 +184,13 @@ export default function PragmaDashboard() {
   };
 
   useEffect(() => {
-    if (token) syncWithBackend();
-    else localStorage.setItem("pragma_state_minimal", JSON.stringify({ currentTask, projectDeadline, treeHealth, totalFocusMinutes }));
+    // Debounce sync - espera 3 segundos sem mudanças antes de enviar
+    if (token) {
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+      syncTimeoutRef.current = setTimeout(() => syncWithBackend(), 3000);
+    } else {
+      localStorage.setItem("pragma_state_minimal", JSON.stringify({ currentTask, projectDeadline, treeHealth, totalFocusMinutes }));
+    }
     localStorage.setItem("pragma_streak", streak.toString());
     localStorage.setItem("pragma_total_sessions", totalSessions.toString());
   }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes, streak, totalSessions]);
@@ -296,7 +315,12 @@ export default function PragmaDashboard() {
           setTotalFocusMinutes(m => m + 5);
           const newSessions = totalSessions + 1;
           setTotalSessions(newSessions);
-          setSessionsToday(s => Math.min(4, s + 1));
+          setSessionsToday(s => {
+            const newCount = Math.min(4, s + 1);
+            localStorage.setItem("pragma_sessions_today", newCount.toString());
+            localStorage.setItem("pragma_sessions_date", new Date().toDateString());
+            return newCount;
+          });
           setXpGain(true); setTimeout(() => setXpGain(false), 1800);
 
           // Atualizar streak
@@ -340,7 +364,12 @@ export default function PragmaDashboard() {
 
           if (isFocus) {
             setTreeHealth(th => Math.min(100, th + 25));
-            setSessionsToday(s => Math.min(4, s + 1));
+            setSessionsToday(s => {
+              const newCount = Math.min(4, s + 1);
+              localStorage.setItem("pragma_sessions_today", newCount.toString());
+              localStorage.setItem("pragma_sessions_date", new Date().toDateString());
+              return newCount;
+            });
             setXpGain(true); setTimeout(() => setXpGain(false), 1800);
 
             // Plantar árvore no bosque
