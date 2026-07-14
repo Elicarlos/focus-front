@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, TreePine } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 import { TREE_TYPES } from "@/components/TreeTypes";
 
 function getTreePosition(index, total) {

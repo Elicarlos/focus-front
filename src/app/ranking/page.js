@@ -3,10 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Trophy, LogIn } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
 
 export default function RankingPage() {
+  const { theme } = useTheme();
   const router = useRouter();
   const [token, setToken] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
@@ -35,7 +37,7 @@ export default function RankingPage() {
     const check = () => {
       if (window.google && window.google.accounts) {
         window.google.accounts.id.initialize({
-          client_id: "274648341216-k3s64mlubsm394u5ephef4hopiv887ng.apps.googleusercontent.com",
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
           callback: handleGoogleLogin
         });
         if (googleBtnRef.current) {
@@ -108,7 +110,7 @@ export default function RankingPage() {
   // Tela de login
   if (!token) {
     return (
-      <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", fontFamily: "Outfit, sans-serif" }}>
+      <div style={{ minHeight: "100vh", background: theme.bg, color: theme.text, fontFamily: "Outfit, sans-serif" }}>
         <div style={{
           background: "linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%)",
           padding: "24px 20px 28px", position: "relative", overflow: "hidden"
@@ -157,7 +159,7 @@ export default function RankingPage() {
   // Ranking carregando
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", fontFamily: "Outfit, sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ minHeight: "100vh", background: theme.bg, color: theme.text, fontFamily: "Outfit, sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <p style={{ color: "#6b7280", fontSize: 14 }}>Carregando ranking...</p>
       </div>
     );
@@ -165,7 +167,7 @@ export default function RankingPage() {
 
   // Ranking (logado)
   return (
-    <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", fontFamily: "Outfit, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: theme.bg, color: theme.text, fontFamily: "Outfit, sans-serif" }}>
       <div style={{
         background: "linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%)",
         padding: "24px 20px 28px", position: "relative", overflow: "hidden"

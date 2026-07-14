@@ -196,7 +196,7 @@ export default function PragmaDashboard() {
       const initGoogle = () => {
         if (window.google && window.google.accounts) {
           window.google.accounts.id.initialize({
-            client_id: "274648341216-k3s64mlubsm394u5ephef4hopiv887ng.apps.googleusercontent.com",
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
             callback: handleGoogleLoginResponse
           });
         } else { setTimeout(initGoogle, 500); }
