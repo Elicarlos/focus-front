@@ -612,6 +612,28 @@ export default function PragmaDashboard() {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         totalSessions={totalSessions}
+        microtasks={microtasks}
+        onToggleMicrotask={(i) => {
+          const updated = [...microtasks];
+          updated[i] = { ...updated[i], completed: !updated[i].completed };
+          setMicrotasks(updated);
+          localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+        }}
+        onDeleteMicrotask={(i) => {
+          const updated = microtasks.filter((_, idx) => idx !== i);
+          setMicrotasks(updated);
+          localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+        }}
+        newMicrotask={newMicrotask}
+        onSetNewMicrotask={setNewMicrotask}
+        onAddMicrotask={() => {
+          if (newMicrotask.trim()) {
+            const updated = [...microtasks, { text: newMicrotask.trim(), completed: false }];
+            setMicrotasks(updated);
+            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+            setNewMicrotask("");
+          }
+        }}
       />
 
       {/* Área principal */}
@@ -653,60 +675,6 @@ export default function PragmaDashboard() {
               />
               <button onClick={() => setSettingsActive(true)} title="Alterar prazo" style={{ background: "none", border: "none", cursor: "pointer", color: "#4b5563", display: "flex", alignItems: "center", flexShrink: 0 }}><Pencil size={14} /></button>
             </div>
-
-            {/* Microtarefas — breakdown de tarefas */}
-            {currentTask.trim() && (
-              <div style={{ marginTop: 8 }}>
-                {microtasks.length > 0 && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 6 }}>
-                    {microtasks.map((mt, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 8px", borderRadius: 6, background: mt.completed ? "rgba(74,222,128,0.08)" : "transparent" }}>
-                        <button
-                          onClick={() => {
-                            const updated = [...microtasks];
-                            updated[i] = { ...updated[i], completed: !updated[i].completed };
-                            setMicrotasks(updated);
-                            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-                          }}
-                          style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${mt.completed ? "#4ade80" : "#4b5563"}`, background: mt.completed ? "#4ade80" : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 }}
-                        >
-                          {mt.completed && <span style={{ fontSize: 10, color: "white" }}>✓</span>}
-                        </button>
-                        <span style={{ fontSize: 12, color: mt.completed ? "#4ade80" : theme.textDim, textDecoration: mt.completed ? "line-through" : "none", fontFamily: "Outfit, sans-serif" }}>
-                          {mt.text}
-                        </span>
-                        <button
-                          onClick={() => {
-                            const updated = microtasks.filter((_, idx) => idx !== i);
-                            setMicrotasks(updated);
-                            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-                          }}
-                          style={{ marginLeft: "auto", background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: 12, padding: 0, opacity: 0.5 }}
-                        >✕</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div style={{ display: "flex", gap: 6 }}>
-                  <input
-                    type="text"
-                    value={newMicrotask}
-                    onChange={e => setNewMicrotask(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" && newMicrotask.trim()) {
-                        const updated = [...microtasks, { text: newMicrotask.trim(), completed: false }];
-                        setMicrotasks(updated);
-                        localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-                        setNewMicrotask("");
-                      }
-                    }}
-                    placeholder="+ Adicionar microtarefa"
-                    maxLength={80}
-                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 12, color: theme.textDim, fontFamily: "Outfit, sans-serif", padding: "4px 0" }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 24, flexShrink: 0 }}>
