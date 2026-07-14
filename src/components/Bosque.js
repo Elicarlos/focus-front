@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { X, TreePine, Calendar, Clock } from "lucide-react";
 import { TREE_TYPES, getCurrentTree } from "./TreeTypes";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // Gera uma posição pseudo-aleatória mas consistente para cada árvore
 function getTreePosition(index, total) {
@@ -65,6 +66,7 @@ function BosqueTree({ tree, position, index }) {
 }
 
 export default function Bosque({ active, onClose, trees, totalMinutes }) {
+  const { theme } = useTheme();
   if (!active) return null;
 
   const stats = useMemo(() => {
@@ -82,11 +84,11 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)",
+      position: "fixed", inset: 0, background: theme.victoryBg,
       backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999
     }}>
       <div style={{
-        background: "#0d1117", border: "1px solid #21262d", borderRadius: 20,
+        background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: 20,
         padding: 0, width: "95%", maxWidth: 500, maxHeight: "90vh",
         overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.6)"
       }}>
@@ -99,8 +101,8 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
           <div style={{ position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.05)", filter: "blur(30px)" }} />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
             <div>
-              <h3 style={{ fontSize: 20, fontWeight: 900, color: "white", margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif" }}>
-                <TreePine size={22} color="#4ade80" /> Meu Bosque
+              <h3 style={{ fontSize: 20, fontWeight: 900, color: theme.text, margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif" }}>
+                <TreePine size={22} color={theme.accentLight} /> Meu Bosque
               </h3>
               <p style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", margin: "4px 0 0", fontFamily: "Outfit, sans-serif" }}>
                 {trees.length} {trees.length === 1 ? "árvore plantada" : "árvores plantadas"} · {totalMinutes} min focando
@@ -109,7 +111,7 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
             <button onClick={onClose} style={{
               width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.15)",
               border: "none", display: "flex", alignItems: "center", justifyContent: "center",
-              color: "white", cursor: "pointer"
+              color: theme.text, cursor: "pointer"
             }}><X size={18} /></button>
           </div>
         </div>
@@ -118,7 +120,7 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
         <div style={{
           height: 200, position: "relative", overflow: "hidden",
           background: "linear-gradient(180deg, #0a1628 0%, #0d1f0d 50%, #1a2e1a 100%)",
-          borderBottom: "1px solid #21262d"
+          borderBottom: `1px solid ${theme.border}`
         }}>
           {/* Chão */}
           <div style={{
@@ -154,12 +156,12 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
               { label: "Tipos", value: Object.keys(stats.byType).length, icon: "🧬" },
             ].map(({ label, value, icon }) => (
               <div key={label} style={{
-                background: "#161b22", border: "1px solid #21262d", borderRadius: 10,
+                background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 10,
                 padding: "10px 8px", textAlign: "center"
               }}>
                 <div style={{ fontSize: 16, marginBottom: 4 }}>{icon}</div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: "white", fontFamily: "Outfit, sans-serif" }}>{value}</div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: "#4b5563", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif" }}>{value}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: theme.textDim, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
               </div>
             ))}
           </div>
@@ -167,7 +169,7 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
           {/* Tipos plantados */}
           {Object.keys(stats.byType).length > 0 && (
             <div>
-              <div style={{ fontSize: 10, fontWeight: 900, color: "#4b5563", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>
+              <div style={{ fontSize: 10, fontWeight: 900, color: theme.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>
                 Tipos plantados
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
@@ -184,7 +186,7 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
                       <span style={{ fontSize: 10, color: type.colors.leaves[2], fontWeight: 900, fontFamily: "Outfit, sans-serif" }}>
                         {type.name}
                       </span>
-                      <span style={{ fontSize: 10, color: "#6b7280", fontFamily: "Outfit, sans-serif" }}>
+                      <span style={{ fontSize: 10, color: theme.textDim, fontFamily: "Outfit, sans-serif" }}>
                         ×{count}
                       </span>
                     </div>

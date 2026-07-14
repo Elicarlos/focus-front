@@ -119,13 +119,13 @@ export default function RankingPage() {
           <div style={{ maxWidth: 600, margin: "0 auto", position: "relative", zIndex: 1 }}>
             <button onClick={() => router.push("/dashboard")} style={{
               background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 10,
-              padding: "8px 12px", cursor: "pointer", color: "white", display: "flex",
+              padding: "8px 12px", cursor: "pointer", color: theme.text, display: "flex",
               alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, marginBottom: 16,
               fontFamily: "Outfit, sans-serif"
             }}>
               <ArrowLeft size={16} /> Voltar
             </button>
-            <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
+            <h1 style={{ fontSize: 28, fontWeight: 900, color: theme.text, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
               <Trophy size={28} color="#fbbf24" fill="#fbbf24" /> Ranking
             </h1>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", margin: 0 }}>
@@ -136,18 +136,18 @@ export default function RankingPage() {
 
         <div style={{ maxWidth: 600, margin: "0 auto", padding: "40px 20px", textAlign: "center" }}>
           <div style={{
-            background: "#161b22", border: "1px solid #30363d", borderRadius: 20,
+            background: theme.card, border: `1px solid ${theme.borderLight}`, borderRadius: 20,
             padding: "40px 28px", maxWidth: 380, margin: "0 auto"
           }}>
             <div style={{ fontSize: 48, marginBottom: 12 }}>🔒</div>
-            <h3 style={{ fontSize: 18, fontWeight: 900, color: "white", margin: "0 0 8px" }}>
+            <h3 style={{ fontSize: 18, fontWeight: 900, color: theme.text, margin: "0 0 8px" }}>
               Login necessário
             </h3>
-            <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 24px", lineHeight: 1.5 }}>
+            <p style={{ fontSize: 13, color: theme.textDim, margin: "0 0 24px", lineHeight: 1.5 }}>
               Faça login com Google para aparecer no ranking e competir com outros jogadores.
             </p>
             <div ref={googleBtnRef} style={{ display: "flex", justifyContent: "center" }} />
-            <p style={{ fontSize: 11, color: "#4b5563", margin: "16px 0 0" }}>
+            <p style={{ fontSize: 11, color: theme.textDim, margin: "16px 0 0" }}>
               Seus dados ficam seguros e privados
             </p>
           </div>
@@ -160,7 +160,7 @@ export default function RankingPage() {
   if (loading) {
     return (
       <div style={{ minHeight: "100vh", background: theme.bg, color: theme.text, fontFamily: "Outfit, sans-serif", display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <p style={{ color: "#6b7280", fontSize: 14 }}>Carregando ranking...</p>
+        <p style={{ color: theme.textDim, fontSize: 14 }}>Carregando ranking...</p>
       </div>
     );
   }
@@ -178,13 +178,13 @@ export default function RankingPage() {
             <div>
               <button onClick={() => router.push("/dashboard")} style={{
                 background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 10,
-                padding: "8px 12px", cursor: "pointer", color: "white", display: "flex",
+                padding: "8px 12px", cursor: "pointer", color: theme.text, display: "flex",
                 alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, marginBottom: 16,
                 fontFamily: "Outfit, sans-serif"
               }}>
                 <ArrowLeft size={16} /> Voltar
               </button>
-              <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 900, color: theme.text, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
                 <Trophy size={28} color="#fbbf24" fill="#fbbf24" /> Ranking
               </h1>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", margin: 0 }}>
@@ -193,7 +193,7 @@ export default function RankingPage() {
             </div>
             <button onClick={handleLogout} style={{
               background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 10,
-              padding: "8px 12px", cursor: "pointer", color: "white",
+              padding: "8px 12px", cursor: "pointer", color: theme.text,
               fontSize: 12, fontWeight: 700, fontFamily: "Outfit, sans-serif"
             }}>
               Sair
@@ -210,27 +210,27 @@ export default function RankingPage() {
               <div key={user.username} style={{
                 display: "flex", alignItems: "center", gap: 14,
                 padding: "14px 18px", borderRadius: 14,
-                background: isMe ? "rgba(74,222,128,0.12)" : idx === 0 ? "rgba(245,158,11,0.08)" : "#161b22",
-                border: isMe ? "1px solid rgba(74,222,128,0.3)" : "1px solid #21262d",
+                background: isMe ? "rgba(74,222,128,0.12)" : idx === 0 ? "rgba(245,158,11,0.08)" : theme.card,
+                border: isMe ? "1px solid rgba(74,222,128,0.3)" : `1px solid ${theme.border}`,
               }}>
-                <span style={{ width: 32, textAlign: "center", fontSize: idx < 3 ? 22 : 15, fontWeight: 900, color: idx < 3 ? "white" : "#6b7280" }}>
+                <span style={{ width: 32, textAlign: "center", fontSize: idx < 3 ? 22 : 15, fontWeight: 900, color: idx < 3 ? theme.text : theme.textDim }}>
                   {idx < 3 ? medalEmoji[idx] : idx + 1}
                 </span>
                 {user.avatar_url
                   ? <img src={user.avatar_url} style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover" }} alt="" />
-                  : <div style={{ width: 44, height: 44, borderRadius: "50%", background: "linear-gradient(135deg, #166534, #22c55e)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 18, flexShrink: 0 }}>
+                  : <div style={{ width: 44, height: 44, borderRadius: "50%", background: `linear-gradient(135deg, #166534, ${theme.accent})`, color: theme.text, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 18, flexShrink: 0 }}>
                       {user.username?.[0]?.toUpperCase() || "U"}
                     </div>
                 }
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 16, fontWeight: 900, color: isMe ? "#4ade80" : "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  <div style={{ fontSize: 16, fontWeight: 900, color: isMe ? theme.accentLight : theme.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {user.username} {isMe && <span style={{ fontSize: 11, opacity: 0.7 }}>(você)</span>}
                   </div>
-                  <div style={{ fontSize: 11, color: "#4b5563" }}>Nível {user.level} · {user.country || "BR"}</div>
+                  <div style={{ fontSize: 11, color: theme.textDim }}>Nível {user.level} · {user.country || "BR"}</div>
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: "#4ade80", flexShrink: 0 }}>
+                <div style={{ fontSize: 18, fontWeight: 900, color: theme.accentLight, flexShrink: 0 }}>
                   {user.xp ?? 0}
-                  <span style={{ fontSize: 11, color: "#4b5563", marginLeft: 2 }}>XP</span>
+                  <span style={{ fontSize: 11, color: theme.textDim, marginLeft: 2 }}>XP</span>
                 </div>
               </div>
             );
@@ -240,7 +240,7 @@ export default function RankingPage() {
         {rankingList.length === 0 && (
           <div style={{ textAlign: "center", padding: "60px 20px" }}>
             <p style={{ fontSize: 40, margin: 0 }}>🏆</p>
-            <p style={{ fontSize: 14, color: "#6b7280", margin: "12px 0 0" }}>Ninguém no ranking ainda</p>
+            <p style={{ fontSize: 14, color: theme.textDim, margin: "12px 0 0" }}>Ninguém no ranking ainda</p>
           </div>
         )}
       </div>

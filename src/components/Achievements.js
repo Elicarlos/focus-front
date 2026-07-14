@@ -1,6 +1,7 @@
 "use client";
 
 import { Trophy, X, Lock } from "lucide-react";
+import { useTheme } from '@/contexts/ThemeContext';
 
 const ACHIEVEMENTS = [
   { id: "first_session", name: "Primeiro Foco", desc: "Complete sua primeira sessão", icon: "🌱", condition: (s) => s.totalSessions >= 1 },
@@ -19,36 +20,37 @@ const ACHIEVEMENTS = [
 
 export default function AchievementsModal({ active, onClose, stats }) {
   if (!active) return null;
+  const { theme } = useTheme();
 
   const unlocked = ACHIEVEMENTS.filter(a => a.condition(stats));
   const locked = ACHIEVEMENTS.filter(a => !a.condition(stats));
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+      position: "fixed", inset: 0, background: theme.victoryBg,
       backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999
     }}>
       <div style={{
-        background: "#161b22", border: "1px solid #30363d", borderRadius: 20,
+        background: theme.card, border: `1px solid ${theme.borderLight}`, borderRadius: 20,
         padding: 24, width: "92%", maxWidth: 420, boxShadow: "0 24px 64px rgba(0,0,0,0.6)"
       }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <div>
             <h3 style={{
-              fontWeight: 900, color: "white", fontSize: 16, margin: "0 0 3px",
+              fontWeight: 900, color: theme.text, fontSize: 16, margin: "0 0 3px",
               display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif"
             }}>
               <Trophy size={16} color="#f59e0b" /> Conquistas
             </h3>
-            <p style={{ fontSize: 10, color: "#4b5563", margin: 0, fontFamily: "Outfit, sans-serif" }}>
+            <p style={{ fontSize: 10, color: theme.textDim, margin: 0, fontFamily: "Outfit, sans-serif" }}>
               {unlocked.length}/{ACHIEVEMENTS.length} desbloqueadas
             </p>
           </div>
           <button onClick={onClose} style={{
-            width: 32, height: 32, borderRadius: 8, background: "#21262d", border: "none",
+            width: 32, height: 32, borderRadius: 8, background: theme.border, border: "none",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#8b949e", cursor: "pointer"
+            color: theme.textMuted, cursor: "pointer"
           }}><X size={15} /></button>
         </div>
 
@@ -59,19 +61,19 @@ export default function AchievementsModal({ active, onClose, stats }) {
             return (
               <div key={a.id} style={{
                 padding: 14, borderRadius: 12,
-                background: isUnlocked ? "rgba(20,83,45,0.2)" : "#0d1117",
-                border: isUnlocked ? "1px solid rgba(20,83,45,0.4)" : "1px solid #21262d",
+                background: isUnlocked ? "rgba(20,83,45,0.2)" : theme.inputBg,
+                border: isUnlocked ? "1px solid rgba(20,83,45,0.4)" : `1px solid ${theme.border}`,
                 opacity: isUnlocked ? 1 : 0.5,
                 transition: "all 0.2s"
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                   <span style={{ fontSize: 20 }}>{a.icon}</span>
-                  {isUnlocked ? null : <Lock size={10} color="#4b5563" />}
+                  {isUnlocked ? null : <Lock size={10} color={theme.textDim} />}
                 </div>
-                <div style={{ fontSize: 12, fontWeight: 900, color: isUnlocked ? "white" : "#4b5563", fontFamily: "Outfit, sans-serif" }}>
+                <div style={{ fontSize: 12, fontWeight: 900, color: isUnlocked ? theme.text : theme.textDim, fontFamily: "Outfit, sans-serif" }}>
                   {a.name}
                 </div>
-                <div style={{ fontSize: 10, color: "#6b7280", marginTop: 2, fontFamily: "Outfit, sans-serif" }}>
+                <div style={{ fontSize: 10, color: theme.textDim, marginTop: 2, fontFamily: "Outfit, sans-serif" }}>
                   {a.desc}
                 </div>
               </div>

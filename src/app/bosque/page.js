@@ -60,6 +60,7 @@ function BosqueTreeSVG({ tree, position }) {
 }
 
 export default function BosquePage() {
+  const { theme } = useTheme();
   const router = useRouter();
   const [trees, setTrees] = useState([]);
   const [totalMinutes, setTotalMinutes] = useState(0);
@@ -82,7 +83,7 @@ export default function BosquePage() {
   }, [trees]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", fontFamily: "Outfit, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: theme.bg, color: theme.text, fontFamily: "Outfit, sans-serif" }}>
 
       {/* Header */}
       <div style={{
@@ -93,14 +94,14 @@ export default function BosquePage() {
         <div style={{ maxWidth: 700, margin: "0 auto", position: "relative", zIndex: 1 }}>
           <button onClick={() => router.push("/dashboard")} style={{
             background: "rgba(255,255,255,0.15)", border: "none", borderRadius: 10,
-            padding: "8px 12px", cursor: "pointer", color: "white", display: "flex",
+            padding: "8px 12px", cursor: "pointer", color: theme.text, display: "flex",
             alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, marginBottom: 16,
             fontFamily: "Outfit, sans-serif"
           }}>
             <ArrowLeft size={16} /> Voltar
           </button>
-          <h1 style={{ fontSize: 28, fontWeight: 900, color: "white", margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
-            <TreePine size={28} color="#4ade80" /> Meu Bosque
+          <h1 style={{ fontSize: 28, fontWeight: 900, color: theme.text, margin: "0 0 6px", display: "flex", alignItems: "center", gap: 10 }}>
+            <TreePine size={28} color={theme.accentLight} /> Meu Bosque
           </h1>
           <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", margin: 0 }}>
             {trees.length} {trees.length === 1 ? "árvore plantada" : "árvores plantadas"} · {totalMinutes} min focando
@@ -115,7 +116,7 @@ export default function BosquePage() {
         <div style={{
           height: 350, position: "relative", overflow: "hidden", borderRadius: 16,
           background: "linear-gradient(180deg, #0a1628 0%, #0d1f0d 40%, #1a2e1a 100%)",
-          border: "1px solid #21262d"
+          border: `1px solid ${theme.border}`
         }}>
           {/* Estrelas */}
           {Array.from({ length: 15 }).map((_, i) => (
@@ -140,7 +141,7 @@ export default function BosquePage() {
               <TreePine size={64} color="#1e3a1e" />
               <p style={{ fontSize: 15, color: "#4a6a4a", margin: 0 }}>Complete sessões para plantar árvores</p>
               <button onClick={() => router.push("/dashboard")} style={{
-                padding: "10px 24px", borderRadius: 10, background: "#22c55e", color: "white",
+                padding: "10px 24px", borderRadius: 10, background: theme.accent, color: theme.text,
                 border: "none", fontSize: 13, fontWeight: 900, cursor: "pointer", fontFamily: "Outfit, sans-serif"
               }}>
                 Começar a focar
@@ -156,17 +157,17 @@ export default function BosquePage() {
         {/* Stats */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginTop: 20 }}>
           {[
-            { label: "Árvores", value: trees.length, icon: "🌳", color: "#4ade80" },
-            { label: "Vida Média", value: `${stats.avgHealth}%`, icon: "💚", color: "#22c55e" },
+            { label: "Árvores", value: trees.length, icon: "🌳", color: theme.accentLight },
+            { label: "Vida Média", value: `${stats.avgHealth}%`, icon: "💚", color: theme.accent },
             { label: "Tipos", value: Object.keys(stats.byType).length, icon: "🧬", color: "#fbbf24" },
           ].map(({ label, value, icon, color }) => (
             <div key={label} style={{
-              background: "#161b22", border: "1px solid #21262d", borderRadius: 14,
+              background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 14,
               padding: "16px 12px", textAlign: "center"
             }}>
               <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
               <div style={{ fontSize: 22, fontWeight: 900, color }}>{value}</div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#4b5563", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 4 }}>{label}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: theme.textDim, textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 4 }}>{label}</div>
             </div>
           ))}
         </div>
@@ -174,7 +175,7 @@ export default function BosquePage() {
         {/* Tipos plantados */}
         {Object.keys(stats.byType).length > 0 && (
           <div style={{ marginTop: 20 }}>
-            <div style={{ fontSize: 12, fontWeight: 900, color: "#4b5563", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
+            <div style={{ fontSize: 12, fontWeight: 900, color: theme.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>
               Tipos plantados
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -189,7 +190,7 @@ export default function BosquePage() {
                     border: `1px solid ${type.colors.leaves[0]}30`
                   }}>
                     <span style={{ fontSize: 13, fontWeight: 900, color: type.colors.leaves[2] }}>{type.name}</span>
-                    <span style={{ fontSize: 12, color: "#6b7280" }}>×{count}</span>
+                    <span style={{ fontSize: 12, color: theme.textDim }}>×{count}</span>
                   </div>
                 );
               })}
