@@ -64,7 +64,7 @@ export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, tota
     : `linear-gradient(to right,${currentTree.colors.leaves[2]},${currentTree.colors.leaves[3]})`;
 
   return (
-    <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", overflow: "hidden", transition: "background 0.3s, border-color 0.3s" }}>
+    <div style={{ background: theme.id === "light" ? "#ecfdf5" : theme.card, border: `1px solid ${theme.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", overflow: "hidden", transition: "background 0.3s, border-color 0.3s" }}>
 
       {/* +XP flutuante */}
       {xpGain && (
@@ -137,7 +137,7 @@ export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, tota
           { label: "Total", value: totalFocusMinutes, unit: "min", color: "white" },
           { label: "Árvore", value: currentTree.name, unit: "", color: currentTree.colors.leaves[2] },
         ].map(({ label, value, unit, color }) => (
-          <div key={label} style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: 10, padding: "8px 10px", textAlign: "center" }}>
+          <div key={label} style={{ background: theme.id === "light" ? "#1a1a2e" : theme.cardHover, border: `1px solid ${theme.id === "light" ? "#2a2a4a" : theme.border}`, borderRadius: 10, padding: "8px 10px", textAlign: "center" }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: "#4b5563", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 3 }}>{label}</div>
             <div style={{ fontSize: 15, fontWeight: 900, color, lineHeight: 1 }}>{value}<span style={{ fontSize: 10, color: "#6b7280", marginLeft: 2 }}>{unit}</span></div>
           </div>
