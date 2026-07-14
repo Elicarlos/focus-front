@@ -9,7 +9,7 @@ import AchievementsModal from "@/components/Achievements";
 import Bosque from "@/components/Bosque";
 import MascotTree from "@/components/MascotTree";
 import { getCurrentTree } from "@/components/TreeTypes";
-import { SettingsModal, RankingModal, CheckInModal } from "@/components/Modals";
+import { SettingsModal, CheckInModal } from "@/components/Modals";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
 
@@ -31,9 +31,6 @@ function calculateStreak(lastActivityDate) {
 export default function PragmaDashboard() {
   const [token, setToken] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
-  const [rankingList, setRankingList] = useState([]);
-  const [rankingActive, setRankingActive] = useState(false);
-  const [rankingOffline, setRankingOffline] = useState(false);
 
   const [currentTask, setCurrentTask] = useState("");
   const [projectDeadline, setProjectDeadline] = useState("");
@@ -61,8 +58,6 @@ export default function PragmaDashboard() {
   const [achievementsActive, setAchievementsActive] = useState(false);
   const [showTreeInCenter, setShowTreeInCenter] = useState(false);
   const [nickname, setNickname] = useState("");
-  const [nicknamePrompt, setNicknamePrompt] = useState(false);
-  const [nicknameInput, setNicknameInput] = useState("");
   const [bosqueActive, setBosqueActive] = useState(false);
   const [bosqueTrees, setBosqueTrees] = useState([]);
 
@@ -133,6 +128,11 @@ export default function PragmaDashboard() {
       setUserProfile(d); setTreeHealth(d.tree_health); setTotalFocusMinutes(d.xp);
       if (d.streak) setStreak(d.streak);
       if (d.total_sessions) setTotalSessions(d.total_sessions);
+      // Salvar nome do Google como nickname
+      if (d.username) {
+        setNickname(d.username);
+        localStorage.setItem("pragma_nickname", d.username);
+      }
     } catch (e) { console.error(e); loadStateLocal(); }
   };
 
@@ -177,35 +177,8 @@ export default function PragmaDashboard() {
   }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes, streak, totalSessions]);
 
   const loadGlobalRanking = async () => {
-    // Se não tem nickname, pedir primeiro
-    if (!nickname) {
-      setNicknameInput("");
-      setNicknamePrompt(true);
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_BASE_URL}/ranking`);
-      if (!res.ok) throw new Error("offline");
-      setRankingList(await res.json());
-      setRankingOffline(false);
-      setRankingActive(true);
-    } catch {
-      // Dados mock enquanto backend estiver offline
-      setRankingList([
-        { username: nickname, xp: totalFocusMinutes || 0, level: getLevel(totalFocusMinutes || 0), country: "BR", avatar_url: null },
-      ]);
-      setRankingOffline(true);
-      setRankingActive(true);
-    }
-  };
-
-  const handleSaveNickname = () => {
-    const trimmed = nicknameInput.trim();
-    if (trimmed.length < 2 || trimmed.length > 20) return;
-    setNickname(trimmed);
-    localStorage.setItem("pragma_nickname", trimmed);
-    setNicknamePrompt(false);
+    // Ranking agora requer login — redirecionar para página dedicada
+    router.push("/ranking");
   };
 
   useEffect(() => {
@@ -580,12 +553,6 @@ export default function PragmaDashboard() {
         setProjectDeadline={setProjectDeadline}
         onSave={() => { setSettingsActive(false); updateDeadlineCountdown(); }}
       />
-      <RankingModal
-        active={rankingActive}
-        onClose={() => setRankingActive(false)}
-        rankingList={rankingList}
-        isOffline={rankingOffline}
-      />
       <CheckInModal
         active={checkInActive}
         task={currentTask}
@@ -611,57 +578,6 @@ export default function PragmaDashboard() {
         onClose={() => setAchievementsActive(false)}
         stats={{ totalSessions, streak, totalXP: totalFocusMinutes, level, treeHealth }}
       />
-
-      {/* Nickname Prompt */}
-      {nicknamePrompt && (
-        <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
-          backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999
-        }}>
-          <div style={{
-            background: "#161b22", border: "1px solid #30363d", borderRadius: 20,
-            padding: 28, width: "92%", maxWidth: 360, boxShadow: "0 24px 64px rgba(0,0,0,0.6)"
-          }}>
-            <div style={{ textAlign: "center", marginBottom: 20 }}>
-              <div style={{ fontSize: 36, marginBottom: 8 }}>🏷️</div>
-              <h3 style={{ fontSize: 18, fontWeight: 900, color: "white", margin: "0 0 6px", fontFamily: "Outfit, sans-serif" }}>
-                Qual seu apelido?
-              </h3>
-              <p style={{ fontSize: 12, color: "#6b7280", margin: 0, fontFamily: "Outfit, sans-serif" }}>
-                Aparecerá no ranking e nas conquistas
-              </p>
-            </div>
-            <input
-              type="text"
-              value={nicknameInput}
-              onChange={e => setNicknameInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSaveNickname()}
-              placeholder="Ex: FocadoMan"
-              maxLength={20}
-              autoFocus
-              style={{
-                width: "100%", padding: "14px 16px", borderRadius: 12,
-                background: "#0d1117", border: "1px solid #30363d",
-                color: "white", fontFamily: "Outfit, sans-serif", fontSize: 15,
-                fontWeight: 700, outline: "none", marginBottom: 16, boxSizing: "border-box"
-              }}
-            />
-            <button
-              onClick={handleSaveNickname}
-              disabled={nicknameInput.trim().length < 2}
-              style={{
-                width: "100%", padding: "14px 0", borderRadius: 12,
-                background: nicknameInput.trim().length >= 2 ? "#22c55e" : "#21262d",
-                color: nicknameInput.trim().length >= 2 ? "white" : "#4b5563",
-                border: "none", fontSize: 14, fontWeight: 900, cursor: "pointer",
-                fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
-              }}
-            >
-              Entrar no Ranking
-            </button>
-          </div>
-        </div>
-      )}
 
       <Bosque
         active={bosqueActive}
