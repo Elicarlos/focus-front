@@ -455,10 +455,10 @@ export default function PragmaDashboard() {
           const isFocus = activeTimerMode === 1500;
           const xpGained = isFocus ? 25 : 5;
           setTotalFocusMinutes(m => m + xpGained);
-          const newSessions = totalSessions + 1;
-          setTotalSessions(newSessions);
 
           if (isFocus) {
+            const newSessions = totalSessions + 1;
+            setTotalSessions(newSessions);
             setTreeHealth(th => Math.min(100, th + 25));
             setSessionsToday(s => {
               const newCount = Math.min(4, s + 1);
