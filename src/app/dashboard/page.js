@@ -374,7 +374,8 @@ export default function PragmaDashboard() {
 
   const handleStartTimer = () => {
     if (timerRunning) { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); localStorage.removeItem("pragma_timer_state"); return; }
-    if (!currentTask.trim()) {
+    // Pausa não precisa de tarefa
+    if (activeTimerMode !== 300 && !currentTask.trim()) {
       setTaskShaking(true);
       setTimeout(() => setTaskShaking(false), 400);
       taskInputRef.current?.focus();
