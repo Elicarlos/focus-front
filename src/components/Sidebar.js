@@ -76,18 +76,7 @@ function SidebarContent({ theme, token, userProfile, onLogout, onOpenRanking, on
         </div>
       )}
 
-      {/* Nav */}
-      <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <button onClick={onOpenBosque} style={S.navBtn(false)}>
-          <TreePine size={16} strokeWidth={2} /> Bosque
-        </button>
-        <button onClick={onOpenRanking} style={S.navBtn(false)}>
-          <Trophy size={16} strokeWidth={2} /> Ranking
-        </button>
-        <button onClick={() => onOpenAchievements()} style={S.navBtn(false)}>
-          <Award size={16} strokeWidth={2} /> Conquistas
-        </button>
-      </nav>
+      {/* Nav — só Mascote e Streak ficam aqui */}
     </>
   );
 }
