@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Pencil, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 import Sidebar from "@/components/Sidebar";
 import TimerCircle from "@/components/TimerCircle";
 import VictoryModal from "@/components/VictoryModal";
@@ -518,7 +519,8 @@ export default function PragmaDashboard() {
             </button>
 
             {/* Login / Avatar no canto direito */}
-            <div style={{ marginLeft: 16, borderLeft: "1px solid #21262d", paddingLeft: 16 }}>
+            <div style={{ marginLeft: 16, borderLeft: "1px solid #21262d", paddingLeft: 16, display: "flex", alignItems: "center", gap: 10 }}>
+              <ThemeToggle />
               {token && userProfile ? (
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   {userProfile.avatar_url
