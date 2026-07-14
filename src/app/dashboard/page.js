@@ -73,6 +73,84 @@ export default function PragmaDashboard() {
   const taskInputRef = useRef(null);
   const syncTimeoutRef = useRef(null);
 
+  // Salvar estado do timer no localStorage (a cada segundo)
+  const saveTimerState = () => {
+    const state = {
+      timerSeconds,
+      activeTimerMode,
+      timerRunning,
+      currentTask,
+      treeHealth,
+      totalFocusMinutes,
+      sessionsToday,
+      streak,
+      totalSessions,
+      savedAt: Date.now(),
+    };
+    localStorage.setItem("pragma_timer_state", JSON.stringify(state));
+  };
+
+  // Restaurar estado do timer do localStorage
+  const restoreTimerState = () => {
+    try {
+      const saved = localStorage.getItem("pragma_timer_state");
+      if (!saved) return false;
+
+      const state = JSON.parse(saved);
+      const elapsed = Math.floor((Date.now() - state.savedAt) / 1000);
+
+      // Se salvou há mais de 10 minutos, descarta (sessão expirou)
+      if (elapsed > 600) {
+        localStorage.removeItem("pragma_timer_state");
+        return false;
+      }
+
+      // Se estava rodando, retomar de onde parou
+      if (state.timerRunning && state.timerSeconds > elapsed) {
+        const remaining = state.timerSeconds - elapsed;
+        setTimerSeconds(remaining);
+        setActiveTimerMode(state.activeTimerMode);
+        setCurrentTask(state.currentTask || "");
+        setTreeHealth(state.treeHealth || 0);
+        setTotalFocusMinutes(state.totalFocusMinutes || 0);
+        setSessionsToday(state.sessionsToday || 0);
+        setStreak(state.streak || 0);
+        setTotalSessions(state.totalSessions || 0);
+        return true; // Timer estava rodando
+      }
+    } catch (e) { console.error(e); }
+    return false;
+  };
+
+  // Aviso antes de recarregar a página
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (timerRunning) {
+        saveTimerState();
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [timerRunning, timerSeconds, activeTimerMode, currentTask, treeHealth, totalFocusMinutes, sessionsToday, streak, totalSessions]);
+
+  // Salvar estado do timer a cada segundo quando estiver rodando
+  useEffect(() => {
+    if (timerRunning) {
+      saveTimerState();
+    }
+  }, [timerSeconds, timerRunning]);
+
+  // Restaurar timer ao carregar a página
+  useEffect(() => {
+    const wasRunning = restoreTimerState();
+    if (wasRunning) {
+      // Timer estava rodando — retomar automaticamente
+      confirmStartTimer();
+    }
+  }, []);
+
   useEffect(() => {
     const savedToken = localStorage.getItem("pragma_token");
     if (savedToken) { setToken(savedToken); fetchUserData(savedToken); }
@@ -295,7 +373,7 @@ export default function PragmaDashboard() {
   };
 
   const handleStartTimer = () => {
-    if (timerRunning) { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); return; }
+    if (timerRunning) { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); localStorage.removeItem("pragma_timer_state"); return; }
     if (!currentTask.trim()) {
       setTaskShaking(true);
       setTimeout(() => setTaskShaking(false), 400);
@@ -326,6 +404,7 @@ export default function PragmaDashboard() {
       setTimerSeconds(prev => {
         if (prev <= 1) {
           clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false);
+          localStorage.removeItem("pragma_timer_state");
           playSound("alarm"); triggerConfetti();
           setTotalFocusMinutes(m => m + 5);
           const newSessions = totalSessions + 1;
@@ -370,6 +449,7 @@ export default function PragmaDashboard() {
       setTimerSeconds(prev => {
         if (prev <= 1) {
           clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false);
+          localStorage.removeItem("pragma_timer_state");
           playSound("alarm"); triggerConfetti();
           const isFocus = activeTimerMode === 1500;
           const xpGained = isFocus ? 25 : 5;
@@ -431,7 +511,7 @@ export default function PragmaDashboard() {
     }, 1000);
   };
 
-  const selectTimerMode = (d) => { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); setActiveTimerMode(d); setTimerSeconds(d); };
+  const selectTimerMode = (d) => { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); setActiveTimerMode(d); setTimerSeconds(d); localStorage.removeItem("pragma_timer_state"); };
   const formatTimer = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   const handleShare = () => {
