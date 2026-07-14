@@ -170,11 +170,14 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
         <button onClick={() => selectTimerMode(activeTimerMode)} style={{
           display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
           padding: isMobile ? "14px 14px" : "16px 20px", borderRadius: 14, fontSize: isMobile ? 11 : 13, fontWeight: 900,
-          background: "#161b22", color: "#8b949e", border: "1px solid #30363d", cursor: "pointer",
+          background: theme.id === "light" ? theme.btnSecondary : "#161b22",
+          color: theme.id === "light" ? theme.btnSecondaryText : "#8b949e",
+          border: `1px solid ${theme.id === "light" ? theme.border : "#30363d"}`,
+          cursor: "pointer",
           fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
         }}
-          onMouseEnter={e => { e.currentTarget.style.background = "#21262d"; e.currentTarget.style.color = "white"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "#161b22"; e.currentTarget.style.color = "#8b949e"; }}
+          onMouseEnter={e => { e.currentTarget.style.background = theme.id === "light" ? theme.border : "#21262d"; e.currentTarget.style.color = theme.id === "light" ? theme.text : "white"; }}
+          onMouseLeave={e => { e.currentTarget.style.background = theme.id === "light" ? theme.btnSecondary : "#161b22"; e.currentTarget.style.color = theme.id === "light" ? theme.btnSecondaryText : "#8b949e"; }}
         >
           <RotateCcw size={isMobile ? 13 : 15} /> {isMobile ? "Reset" : "Reiniciar"}
         </button>
@@ -182,11 +185,14 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
           <button onClick={onStartQuick} title="Sessão rápida de 5 minutos" style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             padding: isMobile ? "14px 12px" : "16px 16px", borderRadius: 14, fontSize: isMobile ? 11 : 12, fontWeight: 900,
-            background: "#161b22", color: "#f59e0b", border: "1px solid #92400e", cursor: "pointer",
+            background: theme.id === "light" ? "#fef3c7" : "#161b22",
+            color: theme.id === "light" ? "#92400e" : "#f59e0b",
+            border: `1px solid ${theme.id === "light" ? "#fcd34d" : "#92400e"}`,
+            cursor: "pointer",
             fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
           }}
-            onMouseEnter={e => { e.currentTarget.style.background = "#78350f"; e.currentTarget.style.color = "#fbbf24"; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "#161b22"; e.currentTarget.style.color = "#f59e0b"; }}
+            onMouseEnter={e => { e.currentTarget.style.background = theme.id === "light" ? "#fde68a" : "#78350f"; e.currentTarget.style.color = theme.id === "light" ? "#78350f" : "#fbbf24"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = theme.id === "light" ? "#fef3c7" : "#161b22"; e.currentTarget.style.color = theme.id === "light" ? "#92400e" : "#f59e0b"; }}
           >
             <Timer size={isMobile ? 13 : 15} /> 5min
           </button>

@@ -27,6 +27,8 @@ export const themes = {
     timerGlow: "rgba(74,222,128,0.25)",
     victoryBg: "rgba(0,0,0,0.8)",
     modalBg: "#161b22",
+    btnSecondary: "#161b22",
+    btnSecondaryText: "#8b949e",
   },
   light: {
     id: "light",
@@ -44,12 +46,14 @@ export const themes = {
     accentBg: "rgba(22,163,74,0.08)",
     danger: "#dc2626",
     warning: "#ea580c",
-    inputBg: "#f1f5f9",
+    inputBg: "#ffffff",
     sidebarBg: "#f0fdf4",
-    headerBorder: "#a7f3d0",
+    headerBorder: "#d1fae5",
     timerGlow: "rgba(22,163,74,0.2)",
-    victoryBg: "rgba(0,0,0,0.5)",
+    victoryBg: "rgba(0,0,0,0.4)",
     modalBg: "#ffffff",
+    btnSecondary: "#e2e8f0",
+    btnSecondaryText: "#475569",
   },
   midnight: {
     id: "midnight",
@@ -73,6 +77,8 @@ export const themes = {
     timerGlow: "rgba(99,102,241,0.3)",
     victoryBg: "rgba(0,0,0,0.9)",
     modalBg: "#0c1222",
+    btnSecondary: "#0c1222",
+    btnSecondaryText: "#7986cb",
   },
 };
 
