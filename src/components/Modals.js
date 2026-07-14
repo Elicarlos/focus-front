@@ -124,9 +124,9 @@ export function RankingModal({ active, onClose, rankingList, currentUser, isOffl
 }
 
 const MOODS = [
-  { id: "anxious",  icon: "😰", label: "Ansioso",   color: "#f97316", hint: "Normal sentir isso. Um micro-passo vai quebrar o bloqueio." },
-  { id: "bored",    icon: "😑", label: "Entediado",  color: "#60a5fa", hint: "Tédio some nos primeiros 3 minutos. Só comece." },
-  { id: "stuck",    icon: "😤", label: "Travado",    color: "#a78bfa", hint: "Defina só o primeiro passo físico. Sem pressão pelo resto." },
+  { id: "anxious",  icon: "😰", label: "Ansioso",   color: "#f97316", hint: "Ansiedade é normal. Seu cérebro está tentando te proteger. Respire fundo — você não precisa ser perfeito, só precisa começar." },
+  { id: "bored",    icon: "😑", label: "Entediado",  color: "#60a5fa", hint: "Tédio é o cérebro pedindo novidade. Comece por 5 minutos — o tédio costuma sumir quando você entra no fluxo." },
+  { id: "stuck",    icon: "😤", label: "Travado",    color: "#a78bfa", hint: "Travado é diferente de incapaz. Você só precisa de um passo menor. O menor passo possível. Sem pressão pelo resto." },
   { id: "ready",    icon: "✅", label: "Pronto",     color: "#4ade80", hint: null },
 ];
 
@@ -175,20 +175,20 @@ export function CheckInModal({ active, task, selectedMood, setSelectedMood, micr
           ))}
         </div>
 
-        {/* Hint contextual */}
+        {/* Hint contextual — mais acolhedor */}
         {mood?.hint && (
-          <div style={{ padding: "10px 14px", borderRadius: 10, background: `${mood.color}10`, border: `1px solid ${mood.color}30`, marginBottom: 16 }}>
-            <p style={{ fontSize: 12, color: mood.color, margin: 0, fontFamily: "Outfit, sans-serif", lineHeight: 1.5 }}>
+          <div style={{ padding: "12px 14px", borderRadius: 10, background: `${mood.color}10`, border: `1px solid ${mood.color}25`, marginBottom: 16 }}>
+            <p style={{ fontSize: 12, color: mood.color, margin: 0, fontFamily: "Outfit, sans-serif", lineHeight: 1.6 }}>
               {mood.hint}
             </p>
           </div>
         )}
 
-        {/* Campo de micro-passo — aparece só se não estiver pronto */}
+        {/* Campo de micro-passo — linguagem da pesquisa */}
         {needsMicroStep && (
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: "#4b5563", display: "block", marginBottom: 8, fontFamily: "Outfit, sans-serif" }}>
-              Qual é o primeiro passo? (só um, pequeno)
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 11, fontWeight: 800, color: "#9ca3af", display: "block", marginBottom: 8, fontFamily: "Outfit, sans-serif" }}>
+              O que você precisa fazer nos próximos 5 minutos?
             </label>
             <input
               type="text"
@@ -205,6 +205,9 @@ export function CheckInModal({ active, task, selectedMood, setSelectedMood, micr
                 fontWeight: 600, outline: "none", boxSizing: "border-box"
               }}
             />
+            <p style={{ fontSize: 10, color: "#4b5563", margin: "6px 0 0", fontFamily: "Outfit, sans-serif" }}>
+              Tão pequeno que seu cérebro não acione o alarme. Só o primeiro passo.
+            </p>
           </div>
         )}
 
@@ -222,7 +225,7 @@ export function CheckInModal({ active, task, selectedMood, setSelectedMood, micr
           }}
         >
           <Zap size={16} fill={canStart ? "white" : "#4b5563"} />
-          {selectedMood === "ready" ? "Iniciar Foco!" : canStart ? "Iniciar com esse passo" : "Selecione como está se sentindo"}
+          {selectedMood === "ready" ? "Iniciar Foco!" : canStart ? "Começar com esse passo" : "Selecione como está se sentindo"}
           {canStart && <ChevronRight size={16} />}
         </button>
       </div>
