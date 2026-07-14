@@ -105,9 +105,6 @@ function SidebarContent({ token, userProfile, onLogout, onOpenRanking, onOpenAch
 
       {/* Nav */}
       <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <button style={S.navBtn(true)}>
-          <Timer size={16} strokeWidth={2.5} /> Sessão de Foco
-        </button>
         <button onClick={onOpenRanking} style={S.navBtn(false)}>
           <Trophy size={16} strokeWidth={2} /> Ranking
         </button>
