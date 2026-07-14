@@ -569,15 +569,48 @@ export default function PragmaDashboard() {
 
         {/* Área do timer com árvore central quando rodando */}
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative" }}>
-          {/* Árvore central durante sessão */}
+          {/* Só a árvore SVG — sem card, sem stats */}
           {showTreeInCenter && (
             <div style={{
               position: "absolute", top: "50%", left: "50%",
               transform: "translate(-50%, -50%)",
-              opacity: 0.15, pointerEvents: "none",
+              opacity: 0.12, pointerEvents: "none",
               transition: "opacity 1s ease"
             }}>
-              <MascotTree treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={false} />
+              <svg viewBox="0 0 120 140" width={180} height={210} className="tree-sway" style={{ overflow: "visible" }}>
+                <ellipse cx="60" cy="132" rx="22" ry="5" fill="#21262d" />
+                {treeHealth === 0 ? (<>
+                  <circle cx="60" cy="128" r="5" fill="#4ade80" opacity="0.6" />
+                  <circle cx="60" cy="128" r="3" fill="#86efac" />
+                  <line x1="60" y1="123" x2="60" y2="115" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" />
+                </>) : treeHealth <= 25 ? (<>
+                  <rect x="57" y="105" width="6" height="27" rx="3" fill="#6b4c1e" />
+                  <circle cx="60" cy="100" r="12" fill="#16a34a" />
+                  <circle cx="52" cy="107" r="8" fill="#15803d" />
+                  <circle cx="68" cy="106" r="8" fill="#15803d" />
+                </>) : treeHealth <= 50 ? (<>
+                  <rect x="55" y="95" width="10" height="37" rx="5" fill="#6b4c1e" />
+                  <circle cx="60" cy="85" r="20" fill="#16a34a" />
+                  <circle cx="44" cy="96" r="13" fill="#15803d" />
+                  <circle cx="76" cy="94" r="13" fill="#15803d" />
+                  <circle cx="60" cy="73" r="12" fill="#22c55e" />
+                </>) : treeHealth <= 75 ? (<>
+                  <rect x="54" y="92" width="12" height="40" rx="6" fill="#6b4c1e" />
+                  <circle cx="60" cy="74" r="26" fill="#16a34a" />
+                  <circle cx="40" cy="85" r="18" fill="#15803d" />
+                  <circle cx="80" cy="83" r="18" fill="#15803d" />
+                  <circle cx="60" cy="60" r="17" fill="#22c55e" />
+                  <circle cx="48" cy="68" r="10" fill="#4ade80" opacity="0.5" />
+                </>) : (<>
+                  <rect x="54" y="90" width="12" height="42" rx="6" fill="#6b4c1e" />
+                  <circle cx="60" cy="60" r="32" fill="#16a34a" />
+                  <circle cx="38" cy="74" r="22" fill="#15803d" />
+                  <circle cx="82" cy="72" r="22" fill="#15803d" />
+                  <circle cx="60" cy="46" r="20" fill="#22c55e" />
+                  <circle cx="47" cy="55" r="13" fill="#4ade80" opacity="0.6" />
+                  <circle cx="73" cy="53" r="11" fill="#4ade80" opacity="0.5" />
+                </>)}
+              </svg>
             </div>
           )}
 
