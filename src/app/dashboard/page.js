@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Pencil, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { useTheme } from "@/contexts/ThemeContext";
 import Sidebar from "@/components/Sidebar";
 import TimerCircle from "@/components/TimerCircle";
 import VictoryModal from "@/components/VictoryModal";
@@ -30,6 +31,7 @@ function calculateStreak(lastActivityDate) {
 }
 
 export default function PragmaDashboard() {
+  const { theme } = useTheme();
   const [token, setToken] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
 
@@ -437,7 +439,7 @@ export default function PragmaDashboard() {
   const level = getLevel(totalFocusMinutes);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", fontFamily: "Outfit, sans-serif", display: "flex", position: "relative", userSelect: "none" }}>
+    <div style={{ minHeight: "100vh", background: theme.bg, color: theme.text, fontFamily: "Outfit, sans-serif", display: "flex", position: "relative", userSelect: "none" }}>
       <canvas ref={confettiCanvasRef} style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 50 }} />
 
       {sidebarOpen && (
@@ -470,7 +472,7 @@ export default function PragmaDashboard() {
 
         {/* Header */}
         <div style={{
-          borderBottom: "1px solid #21262d",
+          borderBottom: `1px solid ${theme.border}`,
           padding: "14px 20px",
           display: "flex",
           alignItems: "center",
