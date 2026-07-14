@@ -72,6 +72,41 @@ export default function PragmaDashboard() {
   const confettiCanvasRef = useRef(null);
   const taskInputRef = useRef(null);
   const syncTimeoutRef = useRef(null);
+  const channelRef = useRef(null);
+
+  // Sincronizar abas via BroadcastChannel
+  useEffect(() => {
+    if (typeof BroadcastChannel === "undefined") return;
+    const channel = new BroadcastChannel("grove_sync");
+    channelRef.current = channel;
+
+    channel.onmessage = (e) => {
+      if (e.data.type === "sessions_updated") {
+        const saved = localStorage.getItem("pragma_sessions_today");
+        const savedDate = localStorage.getItem("pragma_sessions_date");
+        const today = new Date().toDateString();
+        if (savedDate === today && saved) {
+          setSessionsToday(parseInt(saved));
+        }
+        setTotalSessions(parseInt(localStorage.getItem("pragma_total_sessions") || "0"));
+      }
+      if (e.data.type === "timer_started") {
+        // Outra aba iniciou timer — pausar esta
+        if (timerRunning) {
+          clearInterval(timerIntervalRef.current);
+          setTimerRunning(false);
+          setShowTreeInCenter(false);
+          localStorage.removeItem("pragma_timer_state");
+        }
+      }
+    };
+
+    return () => channel.close();
+  }, [timerRunning]);
+
+  const broadcastSync = (type) => {
+    channelRef.current?.postMessage({ type });
+  };
 
   // Salvar estado do timer no localStorage (a cada segundo)
   const saveTimerState = () => {
@@ -277,6 +312,7 @@ export default function PragmaDashboard() {
     }
     localStorage.setItem("pragma_streak", streak.toString());
     localStorage.setItem("pragma_total_sessions", totalSessions.toString());
+    broadcastSync("sessions_updated");
   }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes, streak, totalSessions]);
 
   const loadGlobalRanking = async () => {
@@ -401,6 +437,7 @@ export default function PragmaDashboard() {
     setTimerSeconds(300);
     setTimerRunning(true);
     setShowTreeInCenter(true);
+    broadcastSync("timer_started");
     timerIntervalRef.current = setInterval(() => {
       setTimerSeconds(prev => {
         if (prev <= 1) {
@@ -446,6 +483,7 @@ export default function PragmaDashboard() {
     setCheckInActive(false);
     setTimerRunning(true);
     setShowTreeInCenter(true);
+    broadcastSync("timer_started");
     timerIntervalRef.current = setInterval(() => {
       setTimerSeconds(prev => {
         if (prev <= 1) {
