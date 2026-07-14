@@ -51,7 +51,7 @@ export function SettingsModal({ active, onClose, projectDeadline, setProjectDead
   );
 }
 
-export function RankingModal({ active, onClose, rankingList, currentUser }) {
+export function RankingModal({ active, onClose, rankingList, currentUser, isOffline }) {
   if (!active) return null;
 
   const medalEmoji = ["🥇", "🥈", "🥉"];
@@ -106,8 +106,15 @@ export function RankingModal({ active, onClose, rankingList, currentUser }) {
 
           {rankingList.length === 0 && (
             <div style={{ padding: "40px 0", textAlign: "center" }}>
-              <p style={{ fontSize: 14, color: "#6b7280", margin: 0 }}>🏆</p>
-              <p style={{ fontSize: 13, color: "#6b7280", margin: "8px 0 0" }}>Ninguém ainda</p>
+              <p style={{ fontSize: 28, margin: 0 }}>{isOffline ? "📡" : "🏆"}</p>
+              <p style={{ fontSize: 13, color: "#6b7280", margin: "8px 0 0", fontFamily: "Outfit, sans-serif" }}>
+                {isOffline ? "Servidor indisponível" : "Ninguém ainda"}
+              </p>
+              {isOffline && (
+                <p style={{ fontSize: 11, color: "#4b5563", margin: "4px 0 0", fontFamily: "Outfit, sans-serif" }}>
+                  Tente novamente mais tarde
+                </p>
+              )}
             </div>
           )}
         </div>

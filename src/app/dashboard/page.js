@@ -31,6 +31,7 @@ export default function PragmaDashboard() {
   const [userProfile, setUserProfile] = useState(null);
   const [rankingList, setRankingList] = useState([]);
   const [rankingActive, setRankingActive] = useState(false);
+  const [rankingOffline, setRankingOffline] = useState(false);
 
   const [currentTask, setCurrentTask] = useState("");
   const [projectDeadline, setProjectDeadline] = useState("");
@@ -161,8 +162,15 @@ export default function PragmaDashboard() {
   const loadGlobalRanking = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/ranking`);
-      setRankingList(await res.json()); setRankingActive(true);
-    } catch { alert("Erro ao obter o ranking."); }
+      if (!res.ok) throw new Error("offline");
+      setRankingList(await res.json());
+      setRankingOffline(false);
+      setRankingActive(true);
+    } catch {
+      setRankingList([]);
+      setRankingOffline(true);
+      setRankingActive(true);
+    }
   };
 
   useEffect(() => {
@@ -499,6 +507,7 @@ export default function PragmaDashboard() {
         active={rankingActive}
         onClose={() => setRankingActive(false)}
         rankingList={rankingList}
+        isOffline={rankingOffline}
       />
       <CheckInModal
         active={checkInActive}
