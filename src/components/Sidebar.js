@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Target, Timer, Trophy, Zap, Flame, Award, X } from "lucide-react";
+import { Target, Timer, Trophy, Zap, Flame, Award, X, TreePine } from "lucide-react";
 import MascotTree from "@/components/MascotTree";
 
 const S = {
@@ -18,7 +18,7 @@ const S = {
   avatarFallback: { width: 36, height: 36, borderRadius: "50%", background: "#16a34a", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, flexShrink: 0 },
 };
 
-export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, streak = 0, treeHealth, totalFocusMinutes, xpGain, timerRunning = false, open = true, onClose }) {
+export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, onOpenBosque, streak = 0, treeHealth, totalFocusMinutes, xpGain, timerRunning = false, open = true, onClose, totalSessions = 0 }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, o
               <X size={20} />
             </button>
           </div>
-          <SidebarContent token={token} userProfile={userProfile} onLogout={onLogout} onOpenRanking={onOpenRanking} onOpenAchievements={onOpenAchievements} streak={streak} treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} />
+          <SidebarContent token={token} userProfile={userProfile} onLogout={onLogout} onOpenRanking={onOpenRanking} onOpenAchievements={onOpenAchievements} onOpenBosque={onOpenBosque} streak={streak} treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} totalSessions={totalSessions} />
         </aside>
       </>
     );
@@ -76,12 +76,12 @@ export default function Sidebar({ token, userProfile, onLogout, onOpenRanking, o
       position: "sticky",
       top: 0,
     }}>
-      <SidebarContent token={token} userProfile={userProfile} onLogout={onLogout} onOpenRanking={onOpenRanking} onOpenAchievements={onOpenAchievements} streak={streak} treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} />
+      <SidebarContent token={token} userProfile={userProfile} onLogout={onLogout} onOpenRanking={onOpenRanking} onOpenAchievements={onOpenAchievements} onOpenBosque={onOpenBosque} streak={streak} treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} totalSessions={totalSessions} />
     </aside>
   );
 }
 
-function SidebarContent({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, streak, treeHealth, totalFocusMinutes, xpGain }) {
+function SidebarContent({ token, userProfile, onLogout, onOpenRanking, onOpenAchievements, onOpenBosque, streak, treeHealth, totalFocusMinutes, xpGain, totalSessions }) {
   return (<>
       {/* Logo */}
       <div style={S.logo}>
@@ -90,7 +90,7 @@ function SidebarContent({ token, userProfile, onLogout, onOpenRanking, onOpenAch
       </div>
 
       {/* Mascote */}
-      <MascotTree treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} />
+      <MascotTree treeHealth={treeHealth} totalFocusMinutes={totalFocusMinutes} xpGain={xpGain} totalSessions={totalSessions} streak={streak} />
 
       {/* Streak */}
       {streak > 0 && (
@@ -105,6 +105,9 @@ function SidebarContent({ token, userProfile, onLogout, onOpenRanking, onOpenAch
 
       {/* Nav */}
       <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <button onClick={onOpenBosque} style={S.navBtn(false)}>
+          <TreePine size={16} strokeWidth={2} /> Bosque
+        </button>
         <button onClick={onOpenRanking} style={S.navBtn(false)}>
           <Trophy size={16} strokeWidth={2} /> Ranking
         </button>

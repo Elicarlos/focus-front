@@ -6,7 +6,9 @@ import Sidebar from "@/components/Sidebar";
 import TimerCircle from "@/components/TimerCircle";
 import VictoryModal from "@/components/VictoryModal";
 import AchievementsModal from "@/components/Achievements";
+import Bosque from "@/components/Bosque";
 import MascotTree from "@/components/MascotTree";
+import { getCurrentTree } from "@/components/TreeTypes";
 import { SettingsModal, RankingModal, CheckInModal } from "@/components/Modals";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
@@ -61,6 +63,8 @@ export default function PragmaDashboard() {
   const [nickname, setNickname] = useState("");
   const [nicknamePrompt, setNicknamePrompt] = useState(false);
   const [nicknameInput, setNicknameInput] = useState("");
+  const [bosqueActive, setBosqueActive] = useState(false);
+  const [bosqueTrees, setBosqueTrees] = useState([]);
 
   const audioCtxRef = useRef(null);
   const timerIntervalRef = useRef(null);
@@ -81,6 +85,12 @@ export default function PragmaDashboard() {
     // Carregar nickname
     const savedNickname = localStorage.getItem("pragma_nickname");
     if (savedNickname) setNickname(savedNickname);
+
+    // Carregar bosque
+    const savedBosque = localStorage.getItem("pragma_bosque");
+    if (savedBosque) {
+      try { setBosqueTrees(JSON.parse(savedBosque)); } catch (e) {}
+    }
 
     // Solicitar permissão de notificação
     if ("Notification" in window && Notification.permission === "default") {
@@ -360,6 +370,19 @@ export default function PragmaDashboard() {
             setSessionsToday(s => Math.min(4, s + 1));
             setXpGain(true); setTimeout(() => setXpGain(false), 1800);
 
+            // Plantar árvore no bosque
+            const stats = { totalSessions: newSessions, streak: newStreak, totalXP: totalFocusMinutes + xpGained };
+            const currentTree = getCurrentTree(stats);
+            const newTree = {
+              id: Date.now(),
+              typeId: currentTree.id,
+              health: Math.min(100, treeHealth + 25),
+              plantedAt: new Date().toISOString(),
+            };
+            const updatedBosque = [...bosqueTrees, newTree];
+            setBosqueTrees(updatedBosque);
+            localStorage.setItem("pragma_bosque", JSON.stringify(updatedBosque));
+
             // Atualizar streak
             const today = new Date().toDateString();
             const lastDate = localStorage.getItem("pragma_last_activity");
@@ -428,6 +451,7 @@ export default function PragmaDashboard() {
         onLogout={handleLogout}
         onOpenRanking={loadGlobalRanking}
         onOpenAchievements={() => setAchievementsActive(true)}
+        onOpenBosque={() => setBosqueActive(true)}
         streak={streak}
         treeHealth={treeHealth}
         totalFocusMinutes={totalFocusMinutes}
@@ -435,6 +459,7 @@ export default function PragmaDashboard() {
         timerRunning={timerRunning}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        totalSessions={totalSessions}
       />
 
       {/* Área principal */}
@@ -610,6 +635,13 @@ export default function PragmaDashboard() {
           </div>
         </div>
       )}
+
+      <Bosque
+        active={bosqueActive}
+        onClose={() => setBosqueActive(false)}
+        trees={bosqueTrees}
+        totalMinutes={totalFocusMinutes}
+      />
     </div>
   );
 }

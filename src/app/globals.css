@@ -82,6 +82,20 @@ body {
 ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 99px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
+/* ====== PARTICLES ====== */
+@keyframes particleFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+  100% { transform: translateY(120px) rotate(360deg); opacity: 0; }
+}
+.particle-fall { animation: particleFall 3s ease-in infinite; }
+
+@keyframes sparkleFloat {
+  0% { transform: translateY(0) scale(1); opacity: 0.9; }
+  50% { transform: translateY(-10px) scale(1.3); opacity: 1; }
+  100% { transform: translateY(-20px) scale(0.8); opacity: 0; }
+}
+.sparkle-float { animation: sparkleFloat 2s ease-in-out infinite; }
+
 /* ====== RESPONSIVE ====== */
 @media (max-width: 768px) {
   .sidebar-mobile {
