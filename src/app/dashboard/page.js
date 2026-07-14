@@ -703,7 +703,7 @@ export default function PragmaDashboard() {
         </div>
 
         {/* Área do timer com árvore central quando rodando */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative", overflow: "auto" }}>
           {/* Só a árvore SVG — sem card, sem stats */}
           {showTreeInCenter && (
             <div style={{
