@@ -612,28 +612,6 @@ export default function PragmaDashboard() {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         totalSessions={totalSessions}
-        microtasks={microtasks}
-        onToggleMicrotask={(i) => {
-          const updated = [...microtasks];
-          updated[i] = { ...updated[i], completed: !updated[i].completed };
-          setMicrotasks(updated);
-          localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-        }}
-        onDeleteMicrotask={(i) => {
-          const updated = microtasks.filter((_, idx) => idx !== i);
-          setMicrotasks(updated);
-          localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-        }}
-        newMicrotask={newMicrotask}
-        onSetNewMicrotask={setNewMicrotask}
-        onAddMicrotask={() => {
-          if (newMicrotask.trim()) {
-            const updated = [...microtasks, { text: newMicrotask.trim(), completed: false }];
-            setMicrotasks(updated);
-            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-            setNewMicrotask("");
-          }
-        }}
       />
 
       {/* Área principal */}
@@ -771,7 +749,7 @@ export default function PragmaDashboard() {
             </div>
           )}
 
-          <div style={{ position: "relative", zIndex: 1 }}>
+          <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480 }}>
             <TimerCircle
               timerSeconds={timerSeconds}
               timerRunning={timerRunning}
@@ -782,6 +760,71 @@ export default function PragmaDashboard() {
               sessionsToday={sessionsToday}
               onStartQuick={handleQuickStart}
             />
+
+            {/* Microtarefas — só aparece quando timer parado */}
+            {!timerRunning && (
+              <div style={{
+                marginTop: 16, padding: "12px 16px", borderRadius: 12,
+                background: theme.card, border: `1px solid ${theme.border}`,
+                transition: "all 0.3s ease"
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: theme.textDim, marginBottom: 8, fontFamily: "Outfit, sans-serif" }}>
+                  Próximos passos
+                </div>
+                {microtasks.length > 0 ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
+                    {microtasks.map((mt, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
+                        <button
+                          onClick={() => {
+                            const updated = [...microtasks];
+                            updated[i] = { ...updated[i], completed: !updated[i].completed };
+                            setMicrotasks(updated);
+                            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+                          }}
+                          style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${mt.completed ? theme.accent : theme.textDim}`, background: mt.completed ? theme.accent : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 }}
+                        >
+                          {mt.completed && <span style={{ fontSize: 9, color: "white" }}>✓</span>}
+                        </button>
+                        <span style={{ fontSize: 12, color: mt.completed ? theme.accent : theme.text, textDecoration: mt.completed ? "line-through" : "none", fontFamily: "Outfit, sans-serif", flex: 1 }}>
+                          {mt.text}
+                        </span>
+                        <button
+                          onClick={() => {
+                            const updated = microtasks.filter((_, idx) => idx !== i);
+                            setMicrotasks(updated);
+                            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+                          }}
+                          style={{ background: "none", border: "none", color: theme.danger, cursor: "pointer", fontSize: 11, padding: 0, opacity: 0.4 }}
+                        >✕</button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 11, color: theme.textDim, margin: "0 0 8px", fontFamily: "Outfit, sans-serif" }}>
+                    Divida sua tarefa em passos pequenos
+                  </p>
+                )}
+                <div style={{ display: "flex", gap: 6 }}>
+                  <input
+                    type="text"
+                    value={newMicrotask}
+                    onChange={e => setNewMicrotask(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === "Enter" && newMicrotask.trim()) {
+                        const updated = [...microtasks, { text: newMicrotask.trim(), completed: false }];
+                        setMicrotasks(updated);
+                        localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+                        setNewMicrotask("");
+                      }
+                    }}
+                    placeholder="+ Adicionar passo"
+                    maxLength={60}
+                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 12, color: theme.textDim, fontFamily: "Outfit, sans-serif", padding: "4px 0" }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>
