@@ -1,155 +1,142 @@
 "use client";
 
 import { useMemo } from "react";
-import { X, TreePine, Calendar, Clock } from "lucide-react";
-import { TREE_TYPES, getCurrentTree } from "./TreeTypes";
+import { X, TreePine } from "lucide-react";
+import { TREE_TYPES } from "./TreeTypes";
 import { useTheme } from "@/contexts/ThemeContext";
 
-// Gera uma posição pseudo-aleatória mas consistente para cada árvore
 function getTreePosition(index, total) {
-  const cols = Math.max(1, Math.ceil(Math.sqrt(total)));
+  if (total === 1) return { x: 50, y: 55, scale: 1.1 };
+  const cols = Math.max(2, Math.ceil(Math.sqrt(total)));
   const row = Math.floor(index / cols);
   const col = index % cols;
-  const offsetX = (row % 2) * 8;
   return {
-    x: 15 + (col / Math.max(1, cols - 1)) * 70 + (cols === 1 ? 35 : 0) + offsetX,
-    y: 30 + row * 25,
-    scale: 0.8 + (index % 3) * 0.1,
+    x: 15 + (col / (cols - 1)) * 70,
+    y: 35 + row * 30,
+    scale: 0.85 + (index % 3) * 0.08,
   };
 }
 
-function BosqueTree({ tree, position, index }) {
+function BosqueTreeSVG({ tree }) {
   const treeType = TREE_TYPES.find(t => t.id === tree.typeId) || TREE_TYPES[0];
-  const colors = treeType.colors;
-  const isMature = tree.health > 50;
+  const c = treeType.colors;
+  const h = tree.health;
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: `${position.x}%`,
-        top: `${position.y}%`,
-        transform: `translate(-50%, -50%) scale(${position.scale})`,
-        transition: "transform 0.3s",
-        cursor: "default",
-      }}
-      title={`${treeType.name} - ${tree.health}% vida`}
-    >
-      <svg viewBox="0 0 60 70" width={40} height={46}>
-        {/* Sombra */}
-        <ellipse cx="30" cy="66" rx="12" ry="3" fill="rgba(0,0,0,0.2)" />
-        {/* Tronco */}
-        <rect x="27" y={isMature ? 40 : 45} width="6" height={isMature ? 26 : 21} rx="3" fill={colors.trunk} />
-        {/* Copa */}
-        {tree.health <= 25 ? (
-          <circle cx="30" cy="38" r="10" fill={colors.leaves[0]} />
-        ) : tree.health <= 50 ? (<>
-          <circle cx="30" cy="32" r="14" fill={colors.leaves[0]} />
-          <circle cx="22" cy="38" r="9" fill={colors.leaves[1]} />
-          <circle cx="38" cy="37" r="9" fill={colors.leaves[1]} />
-        </>) : tree.health <= 75 ? (<>
-          <circle cx="30" cy="28" r="18" fill={colors.leaves[0]} />
-          <circle cx="18" cy="35" r="12" fill={colors.leaves[1]} />
-          <circle cx="42" cy="34" r="12" fill={colors.leaves[1]} />
-          <circle cx="30" cy="20" r="11" fill={colors.leaves[2]} />
-        </>) : (<>
-          <circle cx="30" cy="24" r="22" fill={colors.leaves[0]} />
-          <circle cx="14" cy="32" r="16" fill={colors.leaves[1]} />
-          <circle cx="46" cy="30" r="16" fill={colors.leaves[1]} />
-          <circle cx="30" cy="14" r="14" fill={colors.leaves[2]} />
-          <circle cx="20" cy="20" r="8" fill={colors.leaves[3]} opacity="0.6" />
-          <circle cx="40" cy="18" r="7" fill={colors.leaves[3]} opacity="0.5" />
-        </>)}
-      </svg>
-    </div>
+    <svg viewBox="0 0 60 80" width={80} height={106} className="tree-sway" style={{ overflow: "visible" }}>
+      <ellipse cx="30" cy="76" rx="14" ry="4" fill="rgba(0,0,0,0.15)" />
+      <rect x="27" y={h > 50 ? 48 : 52} width="6" height={h > 50 ? 28 : 24} rx="3" fill={c.trunk} />
+      {h <= 25 ? (
+        <circle cx="30" cy="44" r="14" fill={c.leaves[0]} />
+      ) : h <= 50 ? (<>
+        <circle cx="30" cy="36" r="18" fill={c.leaves[0]} />
+        <circle cx="20" cy="44" r="12" fill={c.leaves[1]} />
+        <circle cx="40" cy="43" r="12" fill={c.leaves[1]} />
+      </>) : h <= 75 ? (<>
+        <circle cx="30" cy="30" r="22" fill={c.leaves[0]} />
+        <circle cx="16" cy="40" r="16" fill={c.leaves[1]} />
+        <circle cx="44" cy="38" r="16" fill={c.leaves[1]} />
+        <circle cx="30" cy="20" r="14" fill={c.leaves[2]} />
+      </>) : (<>
+        <circle cx="30" cy="26" r="26" fill={c.leaves[0]} />
+        <circle cx="12" cy="38" r="20" fill={c.leaves[1]} />
+        <circle cx="48" cy="36" r="20" fill={c.leaves[1]} />
+        <circle cx="30" cy="14" r="18" fill={c.leaves[2]} />
+        <circle cx="18" cy="22" r="10" fill={c.leaves[3]} opacity="0.5" />
+        <circle cx="42" cy="20" r="9" fill={c.leaves[3]} opacity="0.4" />
+      </>)}
+    </svg>
   );
 }
 
 export default function Bosque({ active, onClose, trees, totalMinutes }) {
   const { theme } = useTheme();
-  if (!active) return null;
 
   const stats = useMemo(() => {
+    if (!trees || trees.length === 0) return { byType: {}, totalHealth: 0, avgHealth: 0 };
     const byType = {};
     let totalHealth = 0;
     trees.forEach(t => {
       byType[t.typeId] = (byType[t.typeId] || 0) + 1;
       totalHealth += t.health;
     });
-    return { byType, totalHealth, avgHealth: trees.length ? Math.round(totalHealth / trees.length) : 0 };
+    return { byType, totalHealth, avgHealth: Math.round(totalHealth / trees.length) };
   }, [trees]);
 
-  // Últimas 20 árvores (as mais recentes)
-  const recentTrees = trees.slice(-20);
+  const recentTrees = useMemo(() => (trees || []).slice(-12), [trees]);
+
+  if (!active) return null;
 
   return (
     <div style={{
-      position: "fixed", inset: 0, background: theme.victoryBg,
-      backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+      backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999
     }}>
       <div style={{
         background: theme.bg, border: `1px solid ${theme.border}`, borderRadius: 20,
-        padding: 0, width: "95%", maxWidth: 500, maxHeight: "90vh",
-        overflow: "hidden", boxShadow: "0 24px 64px rgba(0,0,0,0.6)"
+        width: "95%", maxWidth: 440, maxHeight: "90vh", overflow: "hidden",
+        boxShadow: "0 24px 64px rgba(0,0,0,0.5)"
       }}>
 
         {/* Header */}
         <div style={{
-          background: "linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)",
-          padding: "20px 20px 16px", position: "relative", overflow: "hidden"
+          background: "linear-gradient(135deg, #065f46, #059669)",
+          padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center"
         }}>
-          <div style={{ position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%", background: "rgba(255,255,255,0.05)", filter: "blur(30px)" }} />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", position: "relative", zIndex: 1 }}>
-            <div>
-              <h3 style={{ fontSize: 20, fontWeight: 900, color: theme.text, margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif" }}>
-                <TreePine size={22} color={theme.accentLight} /> Meu Bosque
-              </h3>
-              <p style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", margin: "4px 0 0", fontFamily: "Outfit, sans-serif" }}>
-                {trees.length} {trees.length === 1 ? "árvore plantada" : "árvores plantadas"} · {totalMinutes} min focando
-              </p>
-            </div>
-            <button onClick={onClose} style={{
-              width: 32, height: 32, borderRadius: 8, background: "rgba(255,255,255,0.15)",
-              border: "none", display: "flex", alignItems: "center", justifyContent: "center",
-              color: theme.text, cursor: "pointer"
-            }}><X size={18} /></button>
+          <div>
+            <h3 style={{ fontSize: 18, fontWeight: 900, color: "white", margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif" }}>
+              <TreePine size={20} /> Meu Bosque
+            </h3>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", margin: "4px 0 0", fontFamily: "Outfit, sans-serif" }}>
+              {trees.length} {trees.length === 1 ? "árvore" : "árvores"} · {totalMinutes} min focando
+            </p>
           </div>
+          <button onClick={onClose} style={{
+            width: 30, height: 30, borderRadius: 8, background: "rgba(255,255,255,0.15)",
+            border: "none", display: "flex", alignItems: "center", justifyContent: "center",
+            color: "white", cursor: "pointer"
+          }}><X size={16} /></button>
         </div>
 
         {/* Bosque visual */}
         <div style={{
-          height: 200, position: "relative", overflow: "hidden",
-          background: "linear-gradient(180deg, #0a1628 0%, #0d1f0d 50%, #1a2e1a 100%)",
-          borderBottom: `1px solid ${theme.border}`
+          height: 260, position: "relative", overflow: "hidden",
+          background: "linear-gradient(180deg, #0f172a 0%, #1a2e1a 60%, #2d4a2d 100%)"
         }}>
-          {/* Chão */}
+          {/* Chão com grama */}
           <div style={{
-            position: "absolute", bottom: 0, left: 0, right: 0, height: 40,
-            background: "linear-gradient(180deg, transparent, #1a2e1a)"
+            position: "absolute", bottom: 0, left: 0, right: 0, height: 50,
+            background: "linear-gradient(180deg, transparent, #1a3a1a 40%, #2d5a2d)"
           }} />
 
           {recentTrees.length === 0 ? (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 8 }}>
-              <TreePine size={48} color="#1e3a1e" />
-              <p style={{ fontSize: 13, color: "#4a6a4a", margin: 0, fontFamily: "Outfit, sans-serif" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 10 }}>
+              <TreePine size={56} color="#2d5a2d" />
+              <p style={{ fontSize: 13, color: "#4a7a4a", margin: 0, fontFamily: "Outfit, sans-serif" }}>
                 Complete sessões para plantar árvores
               </p>
             </div>
           ) : (
-            recentTrees.map((tree, i) => (
-              <BosqueTree
-                key={tree.id}
-                tree={tree}
-                position={getTreePosition(i, recentTrees.length)}
-                index={i}
-              />
-            ))
+            recentTrees.map((tree, i) => {
+              const pos = getTreePosition(i, recentTrees.length);
+              return (
+                <div key={tree.id} style={{
+                  position: "absolute",
+                  left: `${pos.x}%`,
+                  top: `${pos.y}%`,
+                  transform: `translate(-50%, -100%) scale(${pos.scale})`,
+                  transition: "transform 0.3s",
+                }} title={`${TREE_TYPES.find(t => t.id === tree.typeId)?.name || "Árvore"} — ${tree.health}% vida`}>
+                  <BosqueTreeSVG tree={tree} />
+                </div>
+              );
+            })
           )}
         </div>
 
-        {/* Stats */}
-        <div style={{ padding: 16 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 16 }}>
+        {/* Stats + Tipos */}
+        <div style={{ padding: "14px 16px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8, marginBottom: 12 }}>
             {[
               { label: "Árvores", value: trees.length, icon: "🌳" },
               { label: "Vida Média", value: `${stats.avgHealth}%`, icon: "💚" },
@@ -159,40 +146,34 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
                 background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 10,
                 padding: "10px 8px", textAlign: "center"
               }}>
-                <div style={{ fontSize: 16, marginBottom: 4 }}>{icon}</div>
+                <div style={{ fontSize: 16, marginBottom: 2 }}>{icon}</div>
                 <div style={{ fontSize: 16, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif" }}>{value}</div>
-                <div style={{ fontSize: 9, fontWeight: 700, color: theme.textDim, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
+                <div style={{ fontSize: 8, fontWeight: 700, color: theme.textDim, textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</div>
               </div>
             ))}
           </div>
 
-          {/* Tipos plantados */}
           {Object.keys(stats.byType).length > 0 && (
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 900, color: theme.textDim, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>
-                Tipos plantados
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                {Object.entries(stats.byType).map(([typeId, count]) => {
-                  const type = TREE_TYPES.find(t => t.id === typeId);
-                  if (!type) return null;
-                  return (
-                    <div key={typeId} style={{
-                      display: "flex", alignItems: "center", gap: 6,
-                      padding: "4px 10px", borderRadius: 99,
-                      background: `${type.colors.leaves[0]}15`,
-                      border: `1px solid ${type.colors.leaves[0]}30`
-                    }}>
-                      <span style={{ fontSize: 10, color: type.colors.leaves[2], fontWeight: 900, fontFamily: "Outfit, sans-serif" }}>
-                        {type.name}
-                      </span>
-                      <span style={{ fontSize: 10, color: theme.textDim, fontFamily: "Outfit, sans-serif" }}>
-                        ×{count}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {Object.entries(stats.byType).map(([typeId, count]) => {
+                const type = TREE_TYPES.find(t => t.id === typeId);
+                if (!type) return null;
+                return (
+                  <div key={typeId} style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    padding: "4px 10px", borderRadius: 99,
+                    background: `${type.colors.leaves[0]}15`,
+                    border: `1px solid ${type.colors.leaves[0]}30`
+                  }}>
+                    <span style={{ fontSize: 11, fontWeight: 900, color: type.colors.leaves[2], fontFamily: "Outfit, sans-serif" }}>
+                      {type.name}
+                    </span>
+                    <span style={{ fontSize: 10, color: theme.textDim, fontFamily: "Outfit, sans-serif" }}>
+                      ×{count}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

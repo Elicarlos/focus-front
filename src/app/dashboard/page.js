@@ -237,7 +237,8 @@ export default function PragmaDashboard() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && !token) {
+    if (typeof window !== "undefined" && !token && !window._googleInitialized) {
+      window._googleInitialized = true;
       const initGoogle = () => {
         if (window.google && window.google.accounts) {
           window.google.accounts.id.initialize({
@@ -582,6 +583,14 @@ export default function PragmaDashboard() {
 
   const isUrgent = parseInt(timeLeftStr.days) <= 3;
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const level = getLevel(totalFocusMinutes);
 
@@ -702,77 +711,83 @@ export default function PragmaDashboard() {
           </div>
         </div>
 
-        {/* Área do timer com árvore central quando rodando */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative", overflow: "auto" }}>
-          {/* Só a árvore SVG — sem card, sem stats */}
-          {showTreeInCenter && (
-            <div style={{
-              position: "absolute", top: "50%", left: "50%",
-              transform: "translate(-50%, -50%)",
-              opacity: 0.12, pointerEvents: "none",
-              transition: "opacity 1s ease"
-            }}>
-              <svg viewBox="0 0 120 140" width={180} height={210} className="tree-sway" style={{ overflow: "visible" }}>
-                <ellipse cx="60" cy="132" rx="22" ry="5" fill="#21262d" />
-                {treeHealth === 0 ? (<>
-                  <circle cx="60" cy="128" r="5" fill="#4ade80" opacity="0.6" />
-                  <circle cx="60" cy="128" r="3" fill="#86efac" />
-                  <line x1="60" y1="123" x2="60" y2="115" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" />
-                </>) : treeHealth <= 25 ? (<>
-                  <rect x="57" y="105" width="6" height="27" rx="3" fill="#6b4c1e" />
-                  <circle cx="60" cy="100" r="12" fill="#16a34a" />
-                  <circle cx="52" cy="107" r="8" fill="#15803d" />
-                  <circle cx="68" cy="106" r="8" fill="#15803d" />
-                </>) : treeHealth <= 50 ? (<>
-                  <rect x="55" y="95" width="10" height="37" rx="5" fill="#6b4c1e" />
-                  <circle cx="60" cy="85" r="20" fill="#16a34a" />
-                  <circle cx="44" cy="96" r="13" fill="#15803d" />
-                  <circle cx="76" cy="94" r="13" fill="#15803d" />
-                  <circle cx="60" cy="73" r="12" fill="#22c55e" />
-                </>) : treeHealth <= 75 ? (<>
-                  <rect x="54" y="92" width="12" height="40" rx="6" fill="#6b4c1e" />
-                  <circle cx="60" cy="74" r="26" fill="#16a34a" />
-                  <circle cx="40" cy="85" r="18" fill="#15803d" />
-                  <circle cx="80" cy="83" r="18" fill="#15803d" />
-                  <circle cx="60" cy="60" r="17" fill="#22c55e" />
-                  <circle cx="48" cy="68" r="10" fill="#4ade80" opacity="0.5" />
-                </>) : (<>
-                  <rect x="54" y="90" width="12" height="42" rx="6" fill="#6b4c1e" />
-                  <circle cx="60" cy="60" r="32" fill="#16a34a" />
-                  <circle cx="38" cy="74" r="22" fill="#15803d" />
-                  <circle cx="82" cy="72" r="22" fill="#15803d" />
-                  <circle cx="60" cy="46" r="20" fill="#22c55e" />
-                  <circle cx="47" cy="55" r="13" fill="#4ade80" opacity="0.6" />
-                  <circle cx="73" cy="53" r="11" fill="#4ade80" opacity="0.5" />
-                </>)}
-              </svg>
+        {/* Área do timer */}
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative", overflow: "auto" }}>
+          <div style={{
+            display: "flex", flexDirection: isMobile ? "column" : "row",
+            alignItems: "center", gap: isMobile ? 16 : 40,
+            width: "100%", maxWidth: isMobile ? 480 : 900
+          }}>
+            {/* Timer */}
+            <div style={{ position: "relative", flexShrink: 0 }}>
+              {showTreeInCenter && (
+                <div style={{
+                  position: "absolute", top: "50%", left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  opacity: 0.12, pointerEvents: "none",
+                  transition: "opacity 1s ease"
+                }}>
+                  <svg viewBox="0 0 120 140" width={isMobile ? 120 : 180} height={isMobile ? 140 : 210} className="tree-sway" style={{ overflow: "visible" }}>
+                    <ellipse cx="60" cy="132" rx="22" ry="5" fill="#21262d" />
+                    {treeHealth === 0 ? (<>
+                      <circle cx="60" cy="128" r="5" fill="#4ade80" opacity="0.6" />
+                      <circle cx="60" cy="128" r="3" fill="#86efac" />
+                      <line x1="60" y1="123" x2="60" y2="115" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" />
+                    </>) : treeHealth <= 25 ? (<>
+                      <rect x="57" y="105" width="6" height="27" rx="3" fill="#6b4c1e" />
+                      <circle cx="60" cy="100" r="12" fill="#16a34a" />
+                      <circle cx="52" cy="107" r="8" fill="#15803d" />
+                      <circle cx="68" cy="106" r="8" fill="#15803d" />
+                    </>) : treeHealth <= 50 ? (<>
+                      <rect x="55" y="95" width="10" height="37" rx="5" fill="#6b4c1e" />
+                      <circle cx="60" cy="85" r="20" fill="#16a34a" />
+                      <circle cx="44" cy="96" r="13" fill="#15803d" />
+                      <circle cx="76" cy="94" r="13" fill="#15803d" />
+                      <circle cx="60" cy="73" r="12" fill="#22c55e" />
+                    </>) : treeHealth <= 75 ? (<>
+                      <rect x="54" y="92" width="12" height="40" rx="6" fill="#6b4c1e" />
+                      <circle cx="60" cy="74" r="26" fill="#16a34a" />
+                      <circle cx="40" cy="85" r="18" fill="#15803d" />
+                      <circle cx="80" cy="83" r="18" fill="#15803d" />
+                      <circle cx="60" cy="60" r="17" fill="#22c55e" />
+                      <circle cx="48" cy="68" r="10" fill="#4ade80" opacity="0.5" />
+                    </>) : (<>
+                      <rect x="54" y="90" width="12" height="42" rx="6" fill="#6b4c1e" />
+                      <circle cx="60" cy="60" r="32" fill="#16a34a" />
+                      <circle cx="38" cy="74" r="22" fill="#15803d" />
+                      <circle cx="82" cy="72" r="22" fill="#15803d" />
+                      <circle cx="60" cy="46" r="20" fill="#22c55e" />
+                      <circle cx="47" cy="55" r="13" fill="#4ade80" opacity="0.6" />
+                      <circle cx="73" cy="53" r="11" fill="#4ade80" opacity="0.5" />
+                    </>)}
+                  </svg>
+                </div>
+              )}
+              <TimerCircle
+                timerSeconds={timerSeconds}
+                timerRunning={timerRunning}
+                activeTimerMode={activeTimerMode}
+                handleStartTimer={handleStartTimer}
+                selectTimerMode={selectTimerMode}
+                formatTimer={formatTimer}
+                sessionsToday={sessionsToday}
+                onStartQuick={handleQuickStart}
+              />
             </div>
-          )}
-
-          <div style={{ position: "relative", zIndex: 1, width: "100%", maxWidth: 480 }}>
-            <TimerCircle
-              timerSeconds={timerSeconds}
-              timerRunning={timerRunning}
-              activeTimerMode={activeTimerMode}
-              handleStartTimer={handleStartTimer}
-              selectTimerMode={selectTimerMode}
-              formatTimer={formatTimer}
-              sessionsToday={sessionsToday}
-              onStartQuick={handleQuickStart}
-            />
 
             {/* Microtarefas — só aparece quando timer parado */}
             {!timerRunning && (
               <div style={{
-                marginTop: 16, padding: "12px 16px", borderRadius: 12,
+                width: isMobile ? "100%" : 280,
+                padding: "16px 18px", borderRadius: 14,
                 background: theme.card, border: `1px solid ${theme.border}`,
-                transition: "all 0.3s ease"
+                flexShrink: 0
               }}>
-                <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: theme.textDim, marginBottom: 8, fontFamily: "Outfit, sans-serif" }}>
+                <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: theme.textDim, marginBottom: 10, fontFamily: "Outfit, sans-serif" }}>
                   Próximos passos
                 </div>
                 {microtasks.length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 8 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
                     {microtasks.map((mt, i) => (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
                         <button
@@ -801,7 +816,7 @@ export default function PragmaDashboard() {
                     ))}
                   </div>
                 ) : (
-                  <p style={{ fontSize: 11, color: theme.textDim, margin: "0 0 8px", fontFamily: "Outfit, sans-serif" }}>
+                  <p style={{ fontSize: 11, color: theme.textDim, margin: "0 0 10px", fontFamily: "Outfit, sans-serif" }}>
                     Divida sua tarefa em passos pequenos
                   </p>
                 )}

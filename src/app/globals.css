@@ -17,6 +17,13 @@ body {
 }
 .ring-pulse { animation: ringPulse 2s ease-in-out infinite; }
 
+/* ====== ÁRVORE RESPIRA ====== */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+.tree-breathe { animation: breathe 4s ease-in-out infinite; transform-origin: 50% 95%; }
+
 /* ====== ÁRVORE BALANÇA ====== */
 @keyframes sway {
   0%, 100% { transform: rotate(0deg); }
