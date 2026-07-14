@@ -467,6 +467,17 @@ export default function PragmaDashboard() {
             });
             setXpGain(true); setTimeout(() => setXpGain(false), 1800);
 
+            // Atualizar streak (ANTES de plantar árvore)
+            const today = new Date().toDateString();
+            const lastDate = localStorage.getItem("pragma_last_activity");
+            let newStreak = streak;
+            if (lastDate !== today) {
+              const yesterday = new Date(Date.now() - 86400000).toDateString();
+              newStreak = lastDate === yesterday ? streak + 1 : 1;
+              setStreak(newStreak);
+              localStorage.setItem("pragma_last_activity", today);
+            }
+
             // Plantar árvore no bosque
             const stats = { totalSessions: newSessions, streak: newStreak, totalXP: totalFocusMinutes + xpGained };
             const currentTree = getCurrentTree(stats);
@@ -479,17 +490,6 @@ export default function PragmaDashboard() {
             const updatedBosque = [...bosqueTrees, newTree];
             setBosqueTrees(updatedBosque);
             localStorage.setItem("pragma_bosque", JSON.stringify(updatedBosque));
-
-            // Atualizar streak
-            const today = new Date().toDateString();
-            const lastDate = localStorage.getItem("pragma_last_activity");
-            let newStreak = streak;
-            if (lastDate !== today) {
-              const yesterday = new Date(Date.now() - 86400000).toDateString();
-              newStreak = lastDate === yesterday ? streak + 1 : 1;
-              setStreak(newStreak);
-              localStorage.setItem("pragma_last_activity", today);
-            }
 
             // Mostrar vitória
             const lvl = getLevel(totalFocusMinutes + xpGained);
