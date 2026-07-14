@@ -31,7 +31,8 @@ export default function ThemeToggle() {
           <div onClick={() => setOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 90 }} />
           <div style={{
             position: "absolute", top: "100%", right: 0, marginTop: 8,
-            background: "#ffffff", border: `1px solid ${theme.border}`,
+            background: theme.id === "light" ? "#ffffff" : theme.card,
+            border: `1px solid ${theme.border}`,
             borderRadius: 12, padding: 8, zIndex: 91,
             boxShadow: "0 8px 32px rgba(0,0,0,0.3)", minWidth: 140
           }}>
@@ -44,12 +45,12 @@ export default function ThemeToggle() {
                   width: "100%", padding: "8px 12px", borderRadius: 8,
                   border: "none", cursor: "pointer",
                   background: themeId === t.id ? theme.accentBg : "transparent",
-                  color: themeId === t.id ? theme.accent : "#1f2937",
+                  color: themeId === t.id ? theme.accent : (theme.id === "light" ? "#1f2937" : theme.text),
                   fontSize: 13, fontWeight: themeId === t.id ? 900 : 600,
                   fontFamily: "Outfit, sans-serif", transition: "all 0.15s",
                   textAlign: "left"
                 }}
-                onMouseEnter={e => { if (themeId !== t.id) e.currentTarget.style.background = "#f3f4f6"; }}
+                onMouseEnter={e => { if (themeId !== t.id) e.currentTarget.style.background = theme.id === "light" ? "#f3f4f6" : theme.cardHover; }}
                 onMouseLeave={e => { if (themeId !== t.id) e.currentTarget.style.background = "transparent"; }}
               >
                 {t.id === "dark" && <Moon size={14} />}
