@@ -63,6 +63,9 @@ export default function PragmaDashboard() {
   const [nickname, setNickname] = useState("");
   const [bosqueActive, setBosqueActive] = useState(false);
   const [bosqueTrees, setBosqueTrees] = useState([]);
+  const [rankingActive, setRankingActive] = useState(false);
+  const [rankingList, setRankingList] = useState([]);
+  const [rankingLoading, setRankingLoading] = useState(false);
 
   const audioCtxRef = useRef(null);
   const timerIntervalRef = useRef(null);
@@ -199,8 +202,17 @@ export default function PragmaDashboard() {
   }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes, streak, totalSessions]);
 
   const loadGlobalRanking = async () => {
-    // Ranking agora requer login — redirecionar para página dedicada
-    router.push("/ranking");
+    setBosqueActive(false);
+    setRankingActive(true);
+    setRankingLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/ranking`);
+      if (!res.ok) throw new Error("offline");
+      setRankingList(await res.json());
+    } catch {
+      setRankingList([]);
+    }
+    setRankingLoading(false);
   };
 
   useEffect(() => {
@@ -509,16 +521,21 @@ export default function PragmaDashboard() {
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 24, flexShrink: 0 }}>
-            {[{ v: timeLeftStr.days, l: "Dias" }, { v: timeLeftStr.hours, l: "Horas" }].map(({ v, l }) => (
-              <div key={l} style={{ textAlign: "center" }}>
-                <div style={{ fontSize: 28, fontWeight: 900, color: isUrgent ? "#f97316" : "white", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{v}</div>
-                <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#4b5563", marginTop: 3 }}>{l}</div>
-              </div>
-            ))}
-            <button onClick={() => setSettingsActive(true)} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "center", padding: 0 }}>
-              <div style={{ fontSize: 28, fontWeight: 900, color: isUrgent ? "#f97316" : "white", fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{timeLeftStr.percent}%</div>
-              <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#4b5563", marginTop: 3 }}>do prazo</div>
-            </button>
+            {/* Countdown — só aparece se tem prazo */}
+            {projectDeadline && (
+              <>
+                {[{ v: timeLeftStr.days, l: "Dias" }, { v: timeLeftStr.hours, l: "Horas" }].map(({ v, l }) => (
+                  <div key={l} style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 28, fontWeight: 900, color: isUrgent ? theme.warning : theme.text, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{v}</div>
+                    <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: theme.textDim, marginTop: 3 }}>{l}</div>
+                  </div>
+                ))}
+                <button onClick={() => setSettingsActive(true)} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "center", padding: 0 }}>
+                  <div style={{ fontSize: 28, fontWeight: 900, color: isUrgent ? theme.warning : theme.text, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>{timeLeftStr.percent}%</div>
+                  <div style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: theme.textDim, marginTop: 3 }}>do prazo</div>
+                </button>
+              </>
+            )}
 
             {/* Login / Avatar no canto direito */}
             <div style={{ marginLeft: 16, borderLeft: "1px solid #21262d", paddingLeft: 16, display: "flex", alignItems: "center", gap: 10 }}>
@@ -618,6 +635,71 @@ export default function PragmaDashboard() {
         trees={bosqueTrees}
         totalMinutes={totalFocusMinutes}
       />
+
+      {/* Ranking Overlay */}
+      {rankingActive && (
+        <div style={{
+          position: "fixed", inset: 0, background: theme.victoryBg,
+          backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999
+        }}>
+          <div style={{
+            background: theme.modalBg, border: `1px solid ${theme.border}`, borderRadius: 20,
+            padding: 24, width: "92%", maxWidth: 420, maxHeight: "80vh", overflow: "hidden",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.5)"
+          }}>
+            {/* Header */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <h3 style={{ fontSize: 20, fontWeight: 900, color: theme.text, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                🏆 Ranking
+              </h3>
+              <button onClick={() => setRankingActive(false)} style={{
+                width: 32, height: 32, borderRadius: 8, background: theme.border,
+                border: "none", display: "flex", alignItems: "center", justifyContent: "center",
+                color: theme.textMuted, cursor: "pointer"
+              }}>✕</button>
+            </div>
+
+            {!token ? (
+              <div style={{ textAlign: "center", padding: "30px 0" }}>
+                <p style={{ fontSize: 36, margin: 0 }}>🔒</p>
+                <p style={{ fontSize: 14, color: theme.textMuted, margin: "12px 0 0" }}>Faça login para ver o ranking</p>
+              </div>
+            ) : rankingLoading ? (
+              <p style={{ textAlign: "center", color: theme.textMuted, padding: 30 }}>Carregando...</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 400, overflowY: "auto" }}>
+                {rankingList.length === 0 ? (
+                  <p style={{ textAlign: "center", color: theme.textMuted, padding: 30 }}>Ninguém no ranking ainda</p>
+                ) : rankingList.map((user, idx) => {
+                  const isMe = userProfile && user.username === userProfile.username;
+                  return (
+                    <div key={user.username} style={{
+                      display: "flex", alignItems: "center", gap: 12,
+                      padding: "10px 14px", borderRadius: 12,
+                      background: isMe ? theme.accentBg : "transparent",
+                      border: isMe ? `1px solid ${theme.accent}40` : "1px solid transparent",
+                    }}>
+                      <span style={{ width: 28, textAlign: "center", fontSize: idx < 3 ? 18 : 13, fontWeight: 900, color: idx < 3 ? theme.accent : theme.textDim }}>
+                        {idx < 3 ? ["🥇","🥈","🥉"][idx] : idx + 1}
+                      </span>
+                      {user.avatar_url
+                        ? <img src={user.avatar_url} style={{ width: 36, height: 36, borderRadius: "50%" }} alt="" />
+                        : <div style={{ width: 36, height: 36, borderRadius: "50%", background: theme.accentBg, color: theme.accent, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14 }}>{user.username?.[0]?.toUpperCase() || "U"}</div>
+                      }
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 14, fontWeight: 900, color: isMe ? theme.accent : theme.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {user.username} {isMe && <span style={{ fontSize: 10, opacity: 0.7 }}>(você)</span>}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 900, color: theme.accent }}>{user.xp ?? 0}<span style={{ fontSize: 10, color: theme.textDim, marginLeft: 2 }}>XP</span></div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

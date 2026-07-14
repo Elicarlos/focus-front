@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { RotateCcw, Zap, Flame, Circle, Timer } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const MODE_FOCUS = 1500;
 const MODE_BREAK = 300;
@@ -22,6 +23,7 @@ function getHeatGlow(progress) {
 }
 
 export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMode, handleStartTimer, selectTimerMode, formatTimer, sessionsToday = 0, onStartQuick }) {
+  const { theme } = useTheme();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -35,11 +37,11 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
   const progress = timerSeconds / activeTimerMode;
   const isUrgent = progress < 0.15 && timerRunning;
 
-  const heatColor = timerRunning ? getHeatColor(progress) : (isFocus ? "#4ade80" : "#60a5fa");
-  const arcColor = isUrgent ? "#f97316" : isFocus ? "#4ade80" : "#60a5fa";
-  const glowColor = isUrgent ? "rgba(249,115,22,0.3)" : timerRunning ? getHeatGlow(progress) : (isFocus ? "rgba(74,222,128,0.25)" : "rgba(96,165,250,0.25)");
-  const btnBg = isFocus ? "#22c55e" : "#3b82f6";
-  const btnHoverBg = isFocus ? "#16a34a" : "#2563eb";
+  const heatColor = timerRunning ? getHeatColor(progress) : (isFocus ? theme.accent : "#60a5fa");
+  const arcColor = isUrgent ? "#f97316" : isFocus ? theme.accent : "#60a5fa";
+  const glowColor = isUrgent ? "rgba(249,115,22,0.3)" : timerRunning ? getHeatGlow(progress) : (isFocus ? theme.timerGlow : "rgba(96,165,250,0.25)");
+  const btnBg = isFocus ? theme.accent : "#3b82f6";
+  const btnHoverBg = isFocus ? theme.accentLight : "#2563eb";
   const btnLabel = timerRunning ? (isFocus ? "Pausar Foco" : "Pausar Pausa") : (isFocus ? "Iniciar Foco" : "Iniciar Pausa");
 
   // SVG progress ring - responsive
@@ -54,12 +56,12 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
 
       {/* Sessões dots */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#4b5563" }}>Sessões hoje:</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: theme.textDim }}>Sessões hoje:</span>
         {Array.from({ length: MAX_SESSIONS }).map((_, i) => (
           <div key={i} style={{
             width: 10, height: 10, borderRadius: "50%",
-            background: i < sessionsToday ? "#4ade80" : "#21262d",
-            boxShadow: i < sessionsToday ? "0 0 6px rgba(74,222,128,0.6)" : "none",
+            background: i < sessionsToday ? theme.accent : theme.border,
+            boxShadow: i < sessionsToday ? `0 0 6px ${theme.accent}90` : "none",
             transform: i === sessionsToday - 1 ? "scale(1.3)" : "scale(1)",
             transition: "all 0.5s"
           }} />

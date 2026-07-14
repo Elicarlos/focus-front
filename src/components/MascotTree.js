@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Sparkles, Sprout, Lock } from "lucide-react";
 import { getCurrentTree, getNextTree, getTreeProgress, TREE_TYPES, isTreeUnlocked } from "./TreeTypes";
+import { useTheme } from "@/contexts/ThemeContext";
 
 function getLevel(min) { return Math.floor(min / 100) + 1; }
 function getLevelXP(min) { return min % 100; }
@@ -45,6 +46,7 @@ function Particles({ type, color, count, running }) {
 }
 
 export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, totalSessions = 0, streak = 0 }) {
+  const { theme } = useTheme();
   const level = getLevel(totalFocusMinutes);
   const levelXP = getLevelXP(totalFocusMinutes);
   const levelName = getLevelName(level);
@@ -62,22 +64,22 @@ export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, tota
     : `linear-gradient(to right,${currentTree.colors.leaves[2]},${currentTree.colors.leaves[3]})`;
 
   return (
-    <div style={{ background: "#0d1117", border: "1px solid #21262d", borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", overflow: "hidden" }}>
+    <div style={{ background: theme.card, border: `1px solid ${theme.border}`, borderRadius: 14, padding: 16, display: "flex", flexDirection: "column", gap: 12, position: "relative", overflow: "hidden", transition: "background 0.3s, border-color 0.3s" }}>
 
       {/* +XP flutuante */}
       {xpGain && (
         <div className="xp-float" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 20, pointerEvents: "none" }}>
-          <span style={{ fontSize: 22, fontWeight: 900, color: "#4ade80", display: "flex", alignItems: "center", gap: 6 }}>+25 XP <Sparkles size={20} color="#4ade80" fill="#4ade80" /></span>
+          <span style={{ fontSize: 22, fontWeight: 900, color: theme.accent, display: "flex", alignItems: "center", gap: 6 }}>+25 XP <Sparkles size={20} color={theme.accent} fill={theme.accent} /></span>
         </div>
       )}
 
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <div style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: "#4b5563", marginBottom: 2 }}>Mascote</div>
-          <div style={{ fontSize: 15, fontWeight: 900, color: currentTree.colors.leaves[2] }}>{treeLabel}</div>
+          <div style={{ fontSize: 9, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: theme.textDim, marginBottom: 2 }}>Mascote</div>
+          <div style={{ fontSize: 15, fontWeight: 900, color: theme.accent }}>{treeLabel}</div>
         </div>
-        <div style={{ fontSize: 10, fontWeight: 900, padding: "3px 10px", borderRadius: 99, background: treeHealth === 0 ? "rgba(31,41,55,0.5)" : `${currentTree.colors.leaves[0]}20`, color: treeHealth === 0 ? "#6b7280" : currentTree.colors.leaves[2], border: treeHealth === 0 ? "1px solid #374151" : `1px solid ${currentTree.colors.leaves[0]}40` }}>
+        <div style={{ fontSize: 10, fontWeight: 900, padding: "3px 10px", borderRadius: 99, background: treeHealth === 0 ? theme.border : `${currentTree.colors.leaves[0]}20`, color: treeHealth === 0 ? theme.textDim : currentTree.colors.leaves[2], border: treeHealth === 0 ? `1px solid ${theme.borderLight}` : `1px solid ${currentTree.colors.leaves[0]}40` }}>
           {treeHealth === 0 ? <span style={{ display: "flex", alignItems: "center", gap: 4 }}><Sprout size={12} /> Plantada</span> : `Nív. ${level}`}
         </div>
       </div>
