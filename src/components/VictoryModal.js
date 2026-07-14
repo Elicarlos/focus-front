@@ -2,8 +2,10 @@
 
 import { Sparkles, ArrowRight, Share2, TreePine } from "lucide-react";
 
-export default function VictoryModal({ active, xpGained, totalXP, level, levelName, sessionsToday, onContinue, onShare }) {
+export default function VictoryModal({ active, xpGained, totalXP, level, levelName, sessionsToday, onContinue, onShare, sessionType = "focus" }) {
   if (!active) return null;
+
+  const isFocus = sessionType === "focus";
 
   return (
     <div style={{
@@ -33,10 +35,10 @@ export default function VictoryModal({ active, xpGained, totalXP, level, levelNa
           fontSize: 24, fontWeight: 900, color: "white", margin: "0 0 6px",
           fontFamily: "Outfit, sans-serif"
         }}>
-          Sessão Completa!
+          {isFocus ? "Sessão Completa!" : "Pausa Completa!"}
         </h2>
         <p style={{ fontSize: 13, color: "#6b7280", margin: "0 0 24px", fontFamily: "Outfit, sans-serif" }}>
-          Você focou por 25 minutos. Continue assim!
+          {isFocus ? "Você focou por 25 minutos. Continue assim!" : "Descanso feito! Hora de voltar ao foco."}
         </p>
 
         {/* XP ganho */}

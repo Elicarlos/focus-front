@@ -66,6 +66,7 @@ export default function PragmaDashboard() {
   const [rankingActive, setRankingActive] = useState(false);
   const [rankingList, setRankingList] = useState([]);
   const [rankingLoading, setRankingLoading] = useState(false);
+  const [victorySessionType, setVictorySessionType] = useState("focus");
 
   const audioCtxRef = useRef(null);
   const timerIntervalRef = useRef(null);
@@ -469,6 +470,7 @@ export default function PragmaDashboard() {
           // Mostrar vitória
           const lvl = getLevel(totalFocusMinutes + 5);
           setVictoryData({ xp: 5, total: totalFocusMinutes + 5, level: lvl, levelName: getLevelName(lvl), sessions: sessionsToday + 1 });
+          setVictorySessionType("focus");
           setTimeout(() => setVictoryActive(true), 300);
 
           setTimeout(() => selectTimerMode(1500), 500);
@@ -538,8 +540,13 @@ export default function PragmaDashboard() {
             sendNotification("Grove", `Sessão completa! +25 XP. Streak: ${newStreak} dias`);
             setTimeout(() => selectTimerMode(300), 2000);
           } else {
+            // Pausa completa — mostrar vitória
+            const lvl = getLevel(totalFocusMinutes + 5);
+            setVictoryData({ xp: 5, total: totalFocusMinutes + 5, level: lvl, levelName: getLevelName(lvl), sessions: sessionsToday });
+            setVictorySessionType("break");
+            setTimeout(() => setVictoryActive(true), 300);
             sendNotification("Grove", "Pausa completa! Hora de voltar ao foco.");
-            setTimeout(() => selectTimerMode(1500), 500);
+            setTimeout(() => selectTimerMode(1500), 2000);
           }
           return activeTimerMode;
         }
@@ -774,6 +781,7 @@ export default function PragmaDashboard() {
         sessionsToday={victoryData.sessions}
         onContinue={() => setVictoryActive(false)}
         onShare={handleShare}
+        sessionType={victorySessionType}
       />
       <AchievementsModal
         active={achievementsActive}

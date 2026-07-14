@@ -6,14 +6,14 @@ import { TREE_TYPES, getCurrentTree } from "./TreeTypes";
 
 // Gera uma posição pseudo-aleatória mas consistente para cada árvore
 function getTreePosition(index, total) {
-  const cols = Math.ceil(Math.sqrt(total * 1.5));
+  const cols = Math.max(1, Math.ceil(Math.sqrt(total)));
   const row = Math.floor(index / cols);
   const col = index % cols;
-  const offsetX = (row % 2) * 15; // offset alternado
+  const offsetX = (row % 2) * 8;
   return {
-    x: (col / cols) * 100 + offsetX,
-    y: 50 + row * 28,
-    scale: 0.7 + Math.random() * 0.4,
+    x: 15 + (col / Math.max(1, cols - 1)) * 70 + (cols === 1 ? 35 : 0) + offsetX,
+    y: 30 + row * 25,
+    scale: 0.8 + (index % 3) * 0.1,
   };
 }
 
