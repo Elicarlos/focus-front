@@ -1,9 +1,9 @@
 "use client";
 
-import { Sparkles, ArrowRight, Share2, TreePine } from "lucide-react";
+import { Sparkles, ArrowRight, Share2, TreePine, Trophy } from "lucide-react";
 import { useTheme } from '@/contexts/ThemeContext';
 
-export default function VictoryModal({ active, xpGained, totalXP, level, levelName, sessionsToday, onContinue, onShare, sessionType = "focus" }) {
+export default function VictoryModal({ active, xpGained, totalXP, level, levelName, sessionsToday, onContinue, onShare, sessionType = "focus", projectName = "" }) {
   if (!active) return null;
   const { theme } = useTheme();
 
@@ -29,7 +29,11 @@ export default function VictoryModal({ active, xpGained, totalXP, level, levelNa
           display: "flex", alignItems: "center", justifyContent: "center",
           margin: "0 auto 20px", boxShadow: "0 0 40px rgba(74,222,128,0.4)"
         }}>
-          <Sparkles size={32} color={theme.text} fill={theme.text} />
+          {sessionType === "project" ? (
+            <Trophy size={32} color="white" fill="white" />
+          ) : (
+            <Sparkles size={32} color="white" fill="white" />
+          )}
         </div>
 
         {/* Título */}
@@ -37,10 +41,16 @@ export default function VictoryModal({ active, xpGained, totalXP, level, levelNa
           fontSize: 24, fontWeight: 900, color: theme.text, margin: "0 0 6px",
           fontFamily: "Outfit, sans-serif"
         }}>
-          {isFocus ? "Sessão Completa!" : "Pausa Completa!"}
+          {sessionType === "project" ? "Projeto Concluído!" : isFocus ? "Sessão Completa!" : "Pausa Completa!"}
         </h2>
         <p style={{ fontSize: 13, color: theme.textDim, margin: "0 0 24px", fontFamily: "Outfit, sans-serif" }}>
-          {isFocus ? "Você focou por 25 minutos. Continue assim!" : "Descanso feito! Hora de voltar ao foco."}
+          {sessionType === "project" ? (
+            <>Você finalizou com sucesso o projeto <strong style={{ color: theme.text }}>{projectName}</strong>!</>
+          ) : isFocus ? (
+            "Você focou por 25 minutos. Continue assim!"
+          ) : (
+            "Descanso feito! Hora de voltar ao foco."
+          )}
         </p>
 
         {/* XP ganho */}

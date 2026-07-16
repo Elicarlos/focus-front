@@ -45,7 +45,7 @@ function Particles({ type, color, count, running }) {
   );
 }
 
-export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, totalSessions = 0, streak = 0 }) {
+export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, totalSessions = 0, streak = 0, isPro = false }) {
   const { theme } = useTheme();
   const level = getLevel(totalFocusMinutes);
   const levelXP = getLevelXP(totalFocusMinutes);
@@ -53,7 +53,10 @@ export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, tota
   const treeLabel = getTreeLabel(treeHealth);
 
   const stats = useMemo(() => ({ totalSessions, streak, totalXP: totalFocusMinutes }), [totalSessions, streak, totalFocusMinutes]);
-  const currentTree = getCurrentTree(stats);
+  let currentTree = getCurrentTree(stats);
+  if (!isPro && currentTree.id !== "carvalho") {
+    currentTree = TREE_TYPES[0]; // Carvalho
+  }
   const nextTree = getNextTree(stats);
   const progress = getTreeProgress(stats);
 
@@ -121,7 +124,7 @@ export default function MascotTree({ treeHealth, totalFocusMinutes, xpGain, tota
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, fontWeight: 700, marginBottom: 4 }}>
               <span style={{ color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.08em" }}>Próxima</span>
               <span style={{ color: "#f59e0b", fontWeight: 900, display: "flex", alignItems: "center", gap: 4 }}>
-                <Lock size={9} /> {nextTree.name}
+                <Lock size={9} /> {nextTree.name} {!isPro && "(PRO)"}
               </span>
             </div>
             <div style={{ height: 6, background: "#21262d", borderRadius: 99, overflow: "hidden" }}>

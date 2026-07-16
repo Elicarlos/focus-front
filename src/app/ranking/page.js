@@ -19,6 +19,12 @@ export default function RankingPage() {
   // Carregar token do localStorage
   useEffect(() => {
     const saved = localStorage.getItem("pragma_token");
+    const savedProfile = localStorage.getItem("pragma_user_profile");
+    if (savedProfile) {
+      try {
+        setUserProfile(JSON.parse(savedProfile));
+      } catch (e) { console.error(e); }
+    }
     if (saved) {
       setToken(saved);
       fetchUserData(saved);
@@ -55,16 +61,36 @@ export default function RankingPage() {
 
   const handleGoogleLogin = async (gr) => {
     try {
+      const parts = gr.credential.split('.');
+      if (parts.length === 3) {
+        try {
+          const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+          const localProfile = {
+            username: payload.name || payload.email.split('@')[0],
+            email: payload.email,
+            avatar_url: payload.picture,
+            level: 1,
+            xp: 0
+          };
+          setUserProfile(localProfile);
+          localStorage.setItem("pragma_user_profile", JSON.stringify(localProfile));
+          setToken(gr.credential);
+          localStorage.setItem("pragma_token", gr.credential);
+        } catch (err) { console.error(err); }
+      }
+
       const res = await fetch(`${API_BASE_URL}/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential_token: gr.credential })
       });
-      const d = await res.json();
-      if (d.access_token) {
-        localStorage.setItem("pragma_token", d.access_token);
-        setToken(d.access_token);
-        fetchUserData(d.access_token);
+      if (res.ok) {
+        const d = await res.json();
+        if (d.access_token) {
+          localStorage.setItem("pragma_token", d.access_token);
+          setToken(d.access_token);
+          fetchUserData(d.access_token);
+        }
       }
     } catch (e) { console.error(e); }
   };
@@ -77,6 +103,7 @@ export default function RankingPage() {
       if (res.status === 401) { setToken(null); setLoading(false); return; }
       const d = await res.json();
       setUserProfile(d);
+      localStorage.setItem("pragma_user_profile", JSON.stringify(d));
       localStorage.setItem("pragma_nickname", d.username);
       loadRanking(jwt);
     } catch {
@@ -99,6 +126,7 @@ export default function RankingPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("pragma_token");
+    localStorage.removeItem("pragma_user_profile");
     setToken(null);
     setUserProfile(null);
     setRankingList([]);

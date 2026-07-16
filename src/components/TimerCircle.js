@@ -54,20 +54,7 @@ export default function TimerCircle({ timerSeconds, timerRunning, activeTimerMod
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, width: "100%", maxWidth: 480 }}>
 
-      {/* Sessões dots */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: theme.textDim }}>Sessões hoje:</span>
-        {Array.from({ length: MAX_SESSIONS }).map((_, i) => (
-          <div key={i} style={{
-            width: 10, height: 10, borderRadius: "50%",
-            background: i < sessionsToday ? theme.accent : theme.border,
-            boxShadow: i < sessionsToday ? `0 0 6px ${theme.accent}90` : "none",
-            transform: i === sessionsToday - 1 ? "scale(1.3)" : "scale(1)",
-            transition: "all 0.5s"
-          }} />
-        ))}
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#4b5563" }}>{sessionsToday}/{MAX_SESSIONS}</span>
-      </div>
+
 
       {/* Timer com anel de progresso */}
       <div style={{ position: "relative", width: ringRadius * 2 + 40, height: ringRadius * 2 + 40, display: "flex", alignItems: "center", justifyContent: "center" }}>

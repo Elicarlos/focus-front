@@ -1,6 +1,7 @@
 "use client";
 
-import { X, Check, Trophy, Settings, Medal, Zap, ChevronRight } from "lucide-react";
+import { useState } from "react";
+import { X, Check, Trophy, Settings, Medal, Zap, ChevronRight, ClipboardList, Heart, Target } from "lucide-react";
 import { useTheme } from '@/contexts/ThemeContext';
 
 const backdrop = (theme) => ({
@@ -259,3 +260,382 @@ export function CheckInModal({ active, task, selectedMood, setSelectedMood, micr
     </div>
   );
 }
+
+export function SelfCompassionModal({ active, onClose }) {
+  if (!active) return null;
+  const { theme } = useTheme();
+  
+  // Lista de mensagens acolhedoras baseadas em TCC e regulação emocional
+  const messages = [
+    "Tudo bem fazer uma pausa. O progresso não é linear. O importante é você ter tentado e poder recomeçar suavemente quando quiser.",
+    "Estudos mostram que perdoar a si mesmo por procrastinar ou pausar uma tarefa reduz a ansiedade e melhora o foco na próxima tentativa. Respire fundo, você é humano.",
+    "Não seja tão duro consigo mesmo. Pausar para respirar ou reorganizar as ideias também faz parte do processo de aprendizagem e regulação emocional.",
+    "Parar agora não cancela o esforço que você já fez. Cada minuto conta. Quando estiver pronto, defina um micro-passo ainda menor para recomeçar sem pressão."
+  ];
+  
+  // Seleção semi-estável
+  const message = messages[Math.floor(Date.now() / 10000) % messages.length];
+
+  return (
+    <div style={backdrop(theme)}>
+      <div style={card(theme)}>
+        <div style={modalHeader}>
+          <h3 style={{ fontWeight: 900, color: theme.text, fontSize: 16, margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif" }}>
+            <Heart size={16} fill="#22c55e" color="#22c55e" /> Autocompaixão
+          </h3>
+          <button onClick={onClose} style={closeBtn(theme)}><X size={15} /></button>
+        </div>
+        <p style={{ fontSize: 13, color: theme.textDim, lineHeight: 1.6, margin: "0 0 24px", fontFamily: "Outfit, sans-serif", textAlign: "left" }}>
+          {message}
+        </p>
+        <button
+          onClick={onClose}
+          style={{
+            width: "100%", padding: "14px 0", borderRadius: 12, fontSize: 14, fontWeight: 900,
+            border: "none", cursor: "pointer", background: theme.accent, color: "white",
+            fontFamily: "Outfit, sans-serif"
+          }}
+        >
+          Recomeçar Suavemente
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function MicrotasksModal({ active, onClose, microtasks, setMicrotasks, whyValue, setWhyValue, triggerConfetti, playSound, onStartFocus }) {
+  if (!active) return null;
+  const { theme } = useTheme();
+  const [localInput, setLocalInput] = useState("");
+
+  const handleAdd = () => {
+    if (localInput.trim()) {
+      const updated = [...microtasks, { text: localInput.trim(), completed: false }];
+      setMicrotasks(updated);
+      localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+      setLocalInput("");
+    }
+  };
+
+  const labelColor = theme.id === "light" ? "#334155" : "#e2e8f0"; // slate-700 / slate-200
+  const descColor = theme.id === "light" ? "#64748b" : "#94a3b8"; // slate-500 / slate-400
+  const placeholderColor = theme.id === "light" ? "#94a3b8" : "#6e7681";
+  const inputBorder = theme.id === "light" ? "#cbd5e1" : "#30363d";
+
+  return (
+    <div style={backdrop(theme)}>
+      <div style={{ ...card(theme), maxWidth: 440 }}>
+        <style>{`
+          .pragma-modal-input::placeholder {
+            color: ${placeholderColor} !important;
+            opacity: 1 !important;
+          }
+        `}</style>
+
+        {/* Header */}
+        <div style={modalHeader}>
+          <h3 style={{ fontWeight: 900, color: theme.text, fontSize: 16, margin: 0, display: "flex", alignItems: "center", gap: 8, fontFamily: "Outfit, sans-serif" }}>
+            <ClipboardList size={16} color={theme.accent} /> Quebra de Tarefas
+          </h3>
+          <button onClick={onClose} style={closeBtn(theme)}><X size={15} /></button>
+        </div>
+
+        {/* Lista de Microtarefas */}
+        <div style={{ fontSize: 11, fontWeight: 800, color: labelColor, marginBottom: 8, fontFamily: "Outfit, sans-serif" }}>
+          Passos Planejados ({microtasks.length})
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 180, overflowY: "auto", paddingRight: 4, marginBottom: 20 }}>
+          {microtasks.length > 0 ? (
+            microtasks.map((mt, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "8px 12px", borderRadius: 10,
+                background: theme.id === "light" ? "#f8fafc" : "#161b22",
+                border: `1px solid ${theme.borderLight}`,
+                transition: "all 0.2s ease"
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = theme.accent + "50"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = theme.borderLight}
+              >
+                <button
+                  onClick={() => {
+                    const updated = [...microtasks];
+                    const isNowCompleted = !updated[i].completed;
+                    updated[i] = { ...updated[i], completed: isNowCompleted };
+                    setMicrotasks(updated);
+                    localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+                    if (isNowCompleted) {
+                      triggerConfetti();
+                      playSound("alarm");
+                    }
+                  }}
+                  style={{
+                    width: 18, height: 18, borderRadius: "50%",
+                    border: `2px solid ${mt.completed ? theme.accent : theme.textDim}`,
+                    background: mt.completed ? theme.accent : "transparent",
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, padding: 0, transition: "all 0.2s ease"
+                  }}
+                >
+                  {mt.completed && <span style={{ fontSize: 9, color: "white", fontWeight: "bold" }}>✓</span>}
+                </button>
+                <span style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: mt.completed ? theme.textMuted : theme.text,
+                  textDecoration: mt.completed ? "line-through" : "none",
+                  fontFamily: "Outfit, sans-serif",
+                  flex: 1,
+                  lineHeight: 1.4,
+                  opacity: mt.completed ? 0.5 : 1
+                }}>
+                  {mt.text}
+                </span>
+                <button
+                  onClick={() => {
+                    const updated = microtasks.filter((_, idx) => idx !== i);
+                    setMicrotasks(updated);
+                    localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+                  }}
+                  style={{
+                    background: "none", border: "none", color: theme.danger,
+                    cursor: "pointer", fontSize: 12, padding: 4, opacity: 0.3,
+                    transition: "opacity 0.2s ease"
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = 1}
+                  onMouseLeave={e => e.currentTarget.style.opacity = 0.3}
+                >✕</button>
+              </div>
+            ))
+          ) : (
+            <div style={{ textAlign: "center", color: descColor, fontSize: 12, padding: "20px 0", fontFamily: "Outfit, sans-serif" }}>
+              Nenhum passo definido ainda. Adicione micro-ações abaixo para vencer a inércia.
+            </div>
+          )}
+        </div>
+
+        {/* Input para adicionar nova microtarefa */}
+        <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
+          <input
+            type="text"
+            className="pragma-modal-input"
+            value={localInput}
+            onChange={e => setLocalInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleAdd()}
+            placeholder="Adicionar passo de 5 min..."
+            maxLength={80}
+            style={{
+              flex: 1, background: theme.inputBg, border: `1px solid ${inputBorder}`,
+              borderRadius: 10, padding: "10px 14px", fontSize: 12, color: theme.text,
+              fontFamily: "Outfit, sans-serif", outline: "none"
+            }}
+          />
+          <button
+            onClick={handleAdd}
+            style={{
+              background: theme.accent, border: "none", borderRadius: 10,
+              color: "white", width: 36, height: 36, fontWeight: 900,
+              fontSize: 16, cursor: "pointer", fontFamily: "Outfit, sans-serif",
+              display: "flex", alignItems: "center", justifyContent: "center"
+            }}
+          >
+            +
+          </button>
+        </div>
+
+        {/* Botão de ação para Iniciar Foco */}
+        <button
+          onClick={() => {
+            onClose();
+            onStartFocus();
+          }}
+          style={{
+            width: "100%", padding: "14px 0", borderRadius: 12, fontSize: 14, fontWeight: 900,
+            border: "none", cursor: "pointer", background: theme.accent, color: "white",
+            fontFamily: "Outfit, sans-serif", marginTop: 12, marginBottom: 12, display: "flex", alignItems: "center",
+            justifyContent: "center", gap: 8, transition: "all 0.2s ease"
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.transform = "scale(1.02)";
+            e.currentTarget.style.background = theme.accentLight;
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.background = theme.accent;
+          }}
+        >
+          <Zap size={16} fill="white" /> Iniciar Sessão de Foco
+        </button>
+ 
+        <p style={{ fontSize: 10, color: descColor, margin: 0, fontFamily: "Outfit, sans-serif", lineHeight: 1.4, textAlign: "center" }}>
+          Quebre seu projeto em tarefas tão minúsculas que seja impossível falhar ou procrastinar.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function PaywallModal({ active, onClose, onSubscribe }) {
+  if (!active) return null;
+  const { theme } = useTheme();
+  const [selectedPlan, setSelectedPlan] = useState("annual");
+
+  const benefits = [
+    { icon: "🌳", title: "Foco e Bosque Ilimitados", desc: "Plante quantas árvores quiser por dia, sem o bloqueio de 4 sessões." },
+    { icon: "🎨", title: "5 Novas Árvores Exclusivas", desc: "Desbloqueie Cerejeira, Pinheiro, Bambu, Ipê e a lendária Árvore Dourada." },
+    { icon: "🏆", title: "Ranking Global Completo", desc: "Dispute sua posição no ranking em tempo real com toda a comunidade." },
+    { icon: "🎶", title: "Sons de Foco Premium", desc: "Acesse áudios zen, de natureza e lo-fi relaxantes para ajudar na concentração." }
+  ];
+
+  return (
+    <div style={backdrop(theme)}>
+      <div style={{ ...card(theme), maxWidth: 440, position: "relative", overflow: "hidden" }}>
+        
+        {/* Badge Pulsante Premium */}
+        <div style={{
+          position: "absolute", top: 16, left: 16,
+          background: "#f59e0b", color: "#0d1117", fontSize: 9, fontWeight: 900,
+          textTransform: "uppercase", letterSpacing: "0.12em", padding: "4px 10px",
+          borderRadius: 20, display: "flex", alignItems: "center", gap: 4,
+          boxShadow: "0 0 12px rgba(245,158,11,0.4)",
+          animation: "pulse 2s infinite"
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#0d1117" }} /> Oferta Especial
+        </div>
+
+        {/* Header */}
+        <div style={{ ...modalHeader, justifyContent: "flex-end", marginBottom: 12 }}>
+          <button onClick={onClose} style={closeBtn(theme)}><X size={15} /></button>
+        </div>
+
+        {/* Hero do Paywall */}
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <h2 style={{ fontSize: 21, fontWeight: 900, color: theme.text, margin: "0 0 8px", letterSpacing: "-0.02em", fontFamily: "Outfit, sans-serif" }}>
+            Vença a Procrastinação Sem Limites
+          </h2>
+          <p style={{ fontSize: 12, color: theme.textDim, margin: 0, fontFamily: "Outfit, sans-serif", lineHeight: 1.5 }}>
+            Você atingiu o limite de 4 sessões gratuitas diárias. Faça o upgrade agora para manter sua árvore viva, não perder sua sequência de dias e focar sem limites.
+          </p>
+        </div>
+
+        {/* Benefícios */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+          {benefits.map((b, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 8, background: theme.border,
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0
+              }}>
+                {b.icon}
+              </div>
+              <div>
+                <h4 style={{ fontSize: 12, fontWeight: 800, color: theme.text, margin: "0 0 1px", fontFamily: "Outfit, sans-serif" }}>
+                  {b.title}
+                </h4>
+                <p style={{ fontSize: 10, color: theme.textDim, margin: 0, fontFamily: "Outfit, sans-serif", lineHeight: 1.3 }}>
+                  {b.desc}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Seletor de Planos */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 20 }}>
+          {/* Plano Anual (Recomendado) */}
+          <div 
+            onClick={() => setSelectedPlan("annual")}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "10px 14px", borderRadius: 12, cursor: "pointer",
+              border: selectedPlan === "annual" ? "2px solid #22c55e" : `1px solid ${theme.borderLight}`,
+              background: selectedPlan === "annual" ? "rgba(34,197,94,0.06)" : theme.inputBg,
+              transition: "all 0.2s ease"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 14, height: 14, borderRadius: "50%", border: `1.5px solid ${selectedPlan === "annual" ? "#22c55e" : theme.textMuted}`,
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                {selectedPlan === "annual" && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />}
+              </div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 900, color: theme.text, display: "flex", alignItems: "center", gap: 6, fontFamily: "Outfit, sans-serif" }}>
+                  Plano Anual <span style={{ background: "#22c55e", color: "white", fontSize: 8, fontWeight: 900, padding: "1px 5px", borderRadius: 5, textTransform: "uppercase" }}>Salvar 33%</span>
+                </div>
+                <div style={{ fontSize: 10, color: theme.textDim, fontFamily: "Outfit, sans-serif" }}>Faturado anualmente por R$ 118,80</div>
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 14, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif" }}>R$ 9,90</div>
+              <div style={{ fontSize: 9, color: theme.textDim, fontWeight: 700 }}>/mês</div>
+            </div>
+          </div>
+
+          {/* Plano Mensal */}
+          <div 
+            onClick={() => setSelectedPlan("monthly")}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "10px 14px", borderRadius: 12, cursor: "pointer",
+              border: selectedPlan === "monthly" ? "2px solid #22c55e" : `1px solid ${theme.borderLight}`,
+              background: selectedPlan === "monthly" ? "rgba(34,197,94,0.06)" : theme.inputBg,
+              transition: "all 0.2s ease"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 14, height: 14, borderRadius: "50%", border: `1.5px solid ${selectedPlan === "monthly" ? "#22c55e" : theme.textMuted}`,
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                {selectedPlan === "monthly" && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e" }} />}
+              </div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif" }}>Plano Mensal</div>
+                <div style={{ fontSize: 10, color: theme.textDim, fontFamily: "Outfit, sans-serif" }}>Sem fidelidade, cancele quando quiser</div>
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 14, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif" }}>R$ 14,90</div>
+              <div style={{ fontSize: 9, color: theme.textDim, fontWeight: 700 }}>/mês</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Preço e CTA */}
+        <div style={{
+          background: theme.id === "light" ? "#f8fafc" : "#161b22",
+          border: `1px solid ${theme.borderLight}`, borderRadius: 16, padding: 16, textAlign: "center"
+        }}>
+          <button
+            onClick={() => onSubscribe(selectedPlan)}
+            style={{
+              width: "100%", padding: "14px 0", borderRadius: 12, fontSize: 14, fontWeight: 900,
+              border: "none", cursor: "pointer", background: "#22c55e", color: "white",
+              fontFamily: "Outfit, sans-serif", display: "flex", alignItems: "center",
+              justifyContent: "center", gap: 8, transition: "all 0.3s ease",
+              boxShadow: "0 4px 14px rgba(34,197,94,0.3)"
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "scale(1.02)";
+              e.currentTarget.style.background = "#16a34a";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.background = "#22c55e";
+            }}
+          >
+            <Zap size={16} fill="white" /> Desbloquear Acesso PRO
+          </button>
+          
+          <p style={{ fontSize: 9, color: theme.textDim, margin: "10px 0 0", fontFamily: "Outfit, sans-serif", fontWeight: 700, lineHeight: 1.2 }}>
+            🔒 Ativação instantânea. Cancele com 1 clique a qualquer momento no seu painel.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+

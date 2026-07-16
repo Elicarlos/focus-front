@@ -44,12 +44,12 @@ export default function LandingPage() {
               <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: "#4ade80", marginBottom: 20, display: "flex", alignItems: "center", gap: 6 }}>
                 <Zap size={12} fill="#4ade80" /> Anti-procrastinação · Foco Profundo
               </div>
-              <h1 style={{ fontSize: 48, fontWeight: 900, lineHeight: 1.1, letterSpacing: "-0.03em", color: "white", margin: "0 0 20px" }}>
-                  Pare de adiar.<br />
-                  <span style={{ color: "#4ade80" }}>Comece agora.</span>
+              <h1 style={{ fontSize: 38, fontWeight: 900, lineHeight: 1.15, letterSpacing: "-0.03em", color: "white", margin: "0 0 20px" }}>
+                  A procrastinação não é preguiça —<br />
+                  <span style={{ color: "#4ade80" }}>é regulação emocional.</span>
                 </h1>
-                <p style={{ fontSize: 16, color: "#8b949e", lineHeight: 1.7, margin: "0 0 32px", fontWeight: 500 }}>
-                  Grove transforma foco em crescimento. Timer Pomodoro, mascote que evolui com você e ranking global.
+                <p style={{ fontSize: 15, color: "#8b949e", lineHeight: 1.6, margin: "0 0 32px", fontWeight: 500 }}>
+                  Vença o bloqueio inicial em 5 minutos com foco baseado em ciência. Pomodoro intuitivo, mascote que cresce com você e ranking global.
                 </p>
               <div style={{ display: "flex", gap: 12 }}>
                 <Link href="/dashboard" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "14px 24px", borderRadius: 12, background: "#22c55e", color: "white", fontWeight: 900, fontSize: 14, textDecoration: "none" }}>
@@ -113,10 +113,121 @@ export default function LandingPage() {
         {/* ── DIVISOR ── */}
         <div style={{ borderTop: "1px solid #21262d" }} />
 
+        {/* ── TABELA COMPARATIVA ── */}
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "72px 32px" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: "#4ade80", marginBottom: 12 }}>Comparativo</div>
+            <h2 style={{ fontSize: 30, fontWeight: 900, color: "white", margin: 0, letterSpacing: "-0.02em" }}>Por que escolher o Grove?</h2>
+          </div>
+          
+          <div style={{ overflowX: "auto", border: "1px solid #30363d", borderRadius: 16, background: "#161b22" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid #30363d", background: "#0d1117" }}>
+                  <th style={{ padding: "16px 24px", fontWeight: 900, color: "white" }}>Funcionalidade</th>
+                  <th style={{ padding: "16px 24px", fontWeight: 900, color: "#8b949e" }}>Grove Grátis</th>
+                  <th style={{ padding: "16px 24px", fontWeight: 900, color: "#4ade80" }}>Grove PRO</th>
+                  <th style={{ padding: "16px 24px", fontWeight: 900, color: "#8b949e" }}>Outros Apps</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: "Sessões de Foco Diárias", free: "4 sessões", pro: "Ilimitado", others: "Ilimitado" },
+                  { name: "Check-in Emocional (Científico)", free: "Sim", pro: "Sim", others: "Não" },
+                  { name: "Espécies de Árvore Mascote", free: "1 espécie (Carvalho)", pro: "6 espécies exclusivas", others: "Sem mascotes" },
+                  { name: "Ranking Global", free: "Não", pro: "Sim", others: "Não" },
+                  { name: "Sons de Foco Premium", free: "Não", pro: "Sim (Áudios Zen/Lo-Fi)", others: "Requer compras extras" },
+                  { name: "Espaço do Bosque", free: "Máx. 10 árvores", pro: "Ilimitado", others: "Sem bosque visual" },
+                  { name: "Preço", free: "Grátis (4 sessões/dia)", pro: "R$ 9,90/mês (Anual) ou R$ 14,90/mês", others: "R$ 29,90+ / mês" }
+                ].map((row, index) => (
+                  <tr key={index} style={{ borderBottom: "1px solid #21262d", background: index % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                    <td style={{ padding: "16px 24px", color: "white", fontWeight: 700 }}>{row.name}</td>
+                    <td style={{ padding: "16px 24px", color: "#8b949e" }}>{row.free}</td>
+                    <td style={{ padding: "16px 24px", color: "#4ade80", fontWeight: 900 }}>{row.pro}</td>
+                    <td style={{ padding: "16px 24px", color: "#8b949e" }}>{row.others}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── DIVISOR ── */}
+        <div style={{ borderTop: "1px solid #21262d" }} />
+
+        {/* ── SEÇÃO DE PREÇOS ── */}
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "72px 32px" }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: "#4ade80", marginBottom: 12 }}>Planos</div>
+            <h2 style={{ fontSize: 30, fontWeight: 900, color: "white", margin: "0 0 12px", letterSpacing: "-0.02em" }}>Escolha o plano ideal para você</h2>
+            <p style={{ fontSize: 14, color: "#6e7681", margin: 0, lineHeight: 1.6 }}>Comece grátis e faça upgrade quando quiser desbloquear todo o potencial.</p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 20, maxWidth: 640, margin: "0 auto" }}>
+            {/* Plano Free */}
+            <div style={{ background: "#161b22", border: "1px solid #30363d", borderRadius: 16, padding: 28, display: "flex", flexDirection: "column" }}>
+              <div style={{ fontSize: 12, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "#8b949e", marginBottom: 8 }}>Grátis</div>
+              <div style={{ fontSize: 36, fontWeight: 900, color: "white", marginBottom: 4 }}>R$ 0</div>
+              <div style={{ fontSize: 13, color: "#6e7681", marginBottom: 20 }}>Para sempre</div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> 4 sessões de foco por dia
+                </li>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> Check-in emocional
+                </li>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> 1 espécie de árvore
+                </li>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> Bosque com até 10 árvores
+                </li>
+              </ul>
+              <Link href="/dashboard" style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", padding: "12px 20px", borderRadius: 10, background: "#21262d", color: "#c9d1d9", fontWeight: 700, fontSize: 13, textDecoration: "none", border: "1px solid #30363d", transition: "all 0.2s" }}>
+                Começar Grátis
+              </Link>
+            </div>
+
+            {/* Plano PRO */}
+            <div style={{ background: "#161b22", border: "2px solid #22c55e", borderRadius: 16, padding: 28, display: "flex", flexDirection: "column", position: "relative" }}>
+              <div style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "#22c55e", color: "white", fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", padding: "4px 12px", borderRadius: 20 }}>Mais Popular</div>
+              <div style={{ fontSize: 12, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.1em", color: "#4ade80", marginBottom: 8 }}>PRO</div>
+              <div style={{ fontSize: 36, fontWeight: 900, color: "white", marginBottom: 4 }}>R$ 9,90<span style={{ fontSize: 14, fontWeight: 600, color: "#8b949e" }}>/mês</span></div>
+              <div style={{ fontSize: 13, color: "#6e7681", marginBottom: 20 }}>Plano anual (economize 34%)</div>
+              <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> Sessões ilimitadas
+                </li>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> 6 espécies de árvores exclusivas
+                </li>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> Ranking global
+                </li>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> Sons de foco premium
+                </li>
+                <li style={{ fontSize: 13, color: "#c9d1d9", display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "#4ade80" }}>✓</span> Bosque ilimitado
+                </li>
+              </ul>
+              <Link href="/dashboard?buy=annual" style={{ marginTop: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "12px 20px", borderRadius: 10, background: "#22c55e", color: "white", fontWeight: 900, fontSize: 13, textDecoration: "none", transition: "all 0.2s" }}>
+                Assinar PRO Anual
+              </Link>
+              <Link href="/dashboard?buy=monthly" style={{ marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 20px", borderRadius: 10, background: "transparent", color: "#4ade80", fontWeight: 700, fontSize: 12, textDecoration: "none", border: "1px solid #22c55e40", transition: "all 0.2s" }}>
+                ou R$ 14,90/mês (mensal)
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* ── DIVISOR ── */}
+        <div style={{ borderTop: "1px solid #21262d" }} />
+
         {/* ── CTA FINAL ── */}
         <div style={{ maxWidth: 960, margin: "0 auto", padding: "72px 32px", textAlign: "center" }}>
           <h2 style={{ fontSize: 30, fontWeight: 900, color: "white", margin: "0 0 12px", letterSpacing: "-0.02em" }}>Pronto para parar de procrastinar?</h2>
-          <p style={{ fontSize: 14, color: "#6e7681", margin: "0 0 32px", lineHeight: 1.6 }}>Sem cadastro. Sem tutorial longo. Abra e comece.</p>
+          <p style={{ fontSize: 14, color: "#6e7681", margin: "0 0 32px", lineHeight: 1.6 }}>Sem cadastro. Sem tutorial longo. Comece com 4 sessões grátis por dia.</p>
           <Link href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "16px 36px", borderRadius: 16, background: "#22c55e", color: "white", fontWeight: 900, fontSize: 16, textDecoration: "none" }}>
             <Zap size={18} fill="white" /> Começar Agora — É Grátis
           </Link>
@@ -125,8 +236,15 @@ export default function LandingPage() {
       </main>
 
       {/* ── FOOTER ── */}
-      <footer style={{ borderTop: "1px solid #21262d", padding: "28px 32px", textAlign: "center", fontSize: 12, fontWeight: 600, color: "#484f58" }}>
-        © {new Date().getFullYear()} Pragma · Foco é poder.
+      <footer style={{ borderTop: "1px solid #21262d", padding: "40px 32px", textAlign: "center", fontSize: 12, fontWeight: 600, color: "#8b949e", display: "flex", flexDirection: "column", gap: 16, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center" }}>
+          <a href="https://geraqrcode.com.br" target="_blank" rel="noopener noreferrer" style={{ color: "#8b949e", textDecoration: "none", transition: "color 0.2s" }}>Gera QR Code</a>
+          <a href="https://gerador-planos.com.br" target="_blank" rel="noopener noreferrer" style={{ color: "#8b949e", textDecoration: "none", transition: "color 0.2s" }}>Gerador de Planos de Aula</a>
+          <a href="https://focus-front.vercel.app" target="_blank" rel="noopener noreferrer" style={{ color: "#8b949e", textDecoration: "none", transition: "color 0.2s" }}>Grove Foco</a>
+        </div>
+        <div style={{ color: "#484f58" }}>
+          © {new Date().getFullYear()} Pragma · Foco é poder.
+        </div>
       </footer>
 
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Pencil, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Pencil, PanelLeftClose, PanelLeftOpen, User, ClipboardList, Target, CheckCircle2 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useTheme } from "@/contexts/ThemeContext";
 import Sidebar from "@/components/Sidebar";
@@ -10,8 +10,8 @@ import VictoryModal from "@/components/VictoryModal";
 import AchievementsModal from "@/components/Achievements";
 import Bosque from "@/components/Bosque";
 import MascotTree from "@/components/MascotTree";
-import { getCurrentTree } from "@/components/TreeTypes";
-import { SettingsModal, CheckInModal } from "@/components/Modals";
+import { getCurrentTree, TREE_TYPES } from "@/components/TreeTypes";
+import { SettingsModal, CheckInModal, SelfCompassionModal, MicrotasksModal, PaywallModal } from "@/components/Modals";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://a33qw28hn83ky06i7gua435q.187.127.15.180.sslip.io";
 
@@ -63,6 +63,8 @@ export default function PragmaDashboard() {
   const [victoryData, setVictoryData] = useState({ xp: 0, total: 0, level: 1, levelName: "Semente", sessions: 0 });
   const [achievementsActive, setAchievementsActive] = useState(false);
   const [showTreeInCenter, setShowTreeInCenter] = useState(false);
+  const [selfCompassionActive, setSelfCompassionActive] = useState(false);
+  const [microtasksModalActive, setMicrotasksModalActive] = useState(false);
   const [nickname, setNickname] = useState("");
   const [bosqueActive, setBosqueActive] = useState(false);
   const [bosqueTrees, setBosqueTrees] = useState([]);
@@ -71,6 +73,9 @@ export default function PragmaDashboard() {
   const [rankingList, setRankingList] = useState([]);
   const [rankingLoading, setRankingLoading] = useState(false);
   const [victorySessionType, setVictorySessionType] = useState("focus");
+  const [victoryProjectName, setVictoryProjectName] = useState("");
+  const [isPro, setIsPro] = useState(false);
+  const [paywallActive, setPaywallActive] = useState(false);
 
   const audioCtxRef = useRef(null);
   const timerIntervalRef = useRef(null);
@@ -193,6 +198,12 @@ export default function PragmaDashboard() {
 
   useEffect(() => {
     const savedToken = localStorage.getItem("pragma_token");
+    const savedProfile = localStorage.getItem("pragma_user_profile");
+    if (savedProfile) {
+      try {
+        setUserProfile(JSON.parse(savedProfile));
+      } catch (e) { console.error(e); }
+    }
     if (savedToken) { setToken(savedToken); fetchUserData(savedToken); }
     else loadStateLocal();
 
@@ -235,7 +246,101 @@ export default function PragmaDashboard() {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
     }
+
+    // Carregar status PRO
+    const savedIsPro = localStorage.getItem("pragma_is_pro");
+    if (savedIsPro === "true") {
+      setIsPro(true);
+      // Validar assinatura no Stripe se houver ID de assinatura
+      const subscriptionId = localStorage.getItem("pragma_stripe_subscription_id");
+      if (subscriptionId) {
+        checkSubscriptionStatus(subscriptionId);
+      }
+    }
+
+    // Verificar sessão de pagamento do Stripe
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get("session_id");
+      const buyPlan = params.get("buy");
+
+      if (sessionId) {
+        verifyStripeSession(sessionId);
+      } else if (buyPlan === "annual" || buyPlan === "monthly") {
+        // Compra direta da landing page — iniciar checkout automaticamente
+        handleDirectBuy(buyPlan);
+      } else if (params.get("canceled") === "true") {
+        // Limpar parâmetros da URL
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        alert("O processo de assinatura foi cancelado. Você pode tentar novamente a qualquer momento!");
+      }
+    }
   }, []);
+
+  const handleDirectBuy = async (plan) => {
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan })
+      });
+      const data = await response.json();
+      if (data.url) {
+        // Limpar parâmetros da URL antes de redirecionar
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+        window.location.href = data.url;
+      } else {
+        alert("Erro ao iniciar o checkout: " + (data.error || "Tente novamente."));
+      }
+    } catch (err) {
+      console.error("Erro ao iniciar o checkout:", err);
+      alert("Erro de conexão com o servidor de pagamento.");
+    }
+  };
+
+  const verifyStripeSession = async (sessionId) => {
+    try {
+      const response = await fetch(`/api/verify-session?session_id=${sessionId}`);
+      const data = await response.json();
+      if (data.success) {
+        setIsPro(true);
+        localStorage.setItem("pragma_is_pro", "true");
+        if (data.subscription) {
+          localStorage.setItem("pragma_stripe_subscription_id", data.subscription);
+        }
+        
+        // Limpar parâmetros da URL
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+
+        triggerConfetti();
+        playSound("alarm");
+        alert("🎉 Assinatura PRO Ativada com Sucesso! Seu bosque e sessões agora são ilimitados.");
+      } else {
+        alert("Não foi possível confirmar o pagamento. Por favor, tente novamente ou entre em contato com o suporte.");
+      }
+    } catch (err) {
+      console.error("Erro ao verificar sessão de pagamento:", err);
+      alert("Erro de conexão ao verificar o pagamento.");
+    }
+  };
+
+  const checkSubscriptionStatus = async (subscriptionId) => {
+    try {
+      const response = await fetch(`/api/verify-subscription?subscription_id=${subscriptionId}`);
+      const data = await response.json();
+      if (data.active === false) {
+        setIsPro(false);
+        localStorage.removeItem("pragma_is_pro");
+        localStorage.removeItem("pragma_stripe_subscription_id");
+        alert("⚠️ Sua assinatura do Grove PRO não está mais ativa. Sua conta retornou ao plano gratuito.");
+      }
+    } catch (err) {
+      console.error("Erro ao verificar assinatura em segundo plano:", err);
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined" && !token && !window._googleInitialized) {
@@ -244,7 +349,8 @@ export default function PragmaDashboard() {
         if (window.google && window.google.accounts) {
           window.google.accounts.id.initialize({
             client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-            callback: handleGoogleLoginResponse
+            callback: handleGoogleLoginResponse,
+            use_fedcm_for_prompt: false
           });
         } else { setTimeout(initGoogle, 500); }
       };
@@ -270,10 +376,16 @@ export default function PragmaDashboard() {
       const res = await fetch(`${API_BASE_URL}/users/me`, { headers: { Authorization: `Bearer ${jwt}` } });
       if (res.status === 401) { handleLogout(); return; }
       const d = await res.json();
-      setUserProfile(d); setTreeHealth(d.tree_health); setTotalFocusMinutes(d.xp);
-      if (d.streak) setStreak(d.streak);
-      if (d.total_sessions) setTotalSessions(d.total_sessions);
-      // Salvar nome do Google como nickname
+      setUserProfile(d);
+      localStorage.setItem("pragma_user_profile", JSON.stringify(d));
+      // Merge: usar o MAIOR valor entre backend e local (nunca perder progresso)
+      const localState = JSON.parse(localStorage.getItem("pragma_state_minimal") || "{}");
+      const localTreeHealth = localState.treeHealth || 0;
+      const localXP = localState.totalFocusMinutes || 0;
+      setTreeHealth(Math.max(d.tree_health || 0, localTreeHealth));
+      setTotalFocusMinutes(Math.max(d.xp || 0, localXP));
+      setStreak(Math.max(d.streak || 0, parseInt(localStorage.getItem("pragma_streak") || "0")));
+      setTotalSessions(Math.max(d.total_sessions || 0, parseInt(localStorage.getItem("pragma_total_sessions") || "0")));
       if (d.username) {
         setNickname(d.username);
         localStorage.setItem("pragma_nickname", d.username);
@@ -283,17 +395,46 @@ export default function PragmaDashboard() {
 
   const handleGoogleLoginResponse = async (gr) => {
     try {
+      const parts = gr.credential.split('.');
+      if (parts.length === 3) {
+        try {
+          const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+          const localProfile = {
+            username: payload.name || payload.email.split('@')[0],
+            email: payload.email,
+            avatar_url: payload.picture,
+            tree_health: treeHealth,
+            xp: totalFocusMinutes,
+            streak: streak,
+            total_sessions: totalSessions
+          };
+          setUserProfile(localProfile);
+          localStorage.setItem("pragma_user_profile", JSON.stringify(localProfile));
+          setToken(gr.credential);
+          localStorage.setItem("pragma_token", gr.credential);
+        } catch (err) {
+          console.error("Erro ao decodificar token do Google:", err);
+        }
+      }
+
       const res = await fetch(`${API_BASE_URL}/auth/google`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ credential_token: gr.credential })
       });
       const d = await res.json();
-      if (d.access_token) { localStorage.setItem("pragma_token", d.access_token); setToken(d.access_token); fetchUserData(d.access_token); }
-    } catch (e) { console.error(e); }
+      if (d.access_token) {
+        localStorage.setItem("pragma_token", d.access_token);
+        setToken(d.access_token);
+        fetchUserData(d.access_token);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("pragma_token");
+    localStorage.removeItem("pragma_user_profile");
     setToken(null); setUserProfile(null); loadStateLocal();
   };
 
@@ -315,19 +456,23 @@ export default function PragmaDashboard() {
   };
 
   useEffect(() => {
-    // Debounce sync - espera 3 segundos sem mudanças antes de enviar
-    if (token) {
-      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
-      syncTimeoutRef.current = setTimeout(() => syncWithBackend(), 3000);
-    } else {
-      localStorage.setItem("pragma_state_minimal", JSON.stringify({ currentTask, projectDeadline, treeHealth, totalFocusMinutes }));
-    }
+    // SEMPRE salvar no localStorage (offline-first) — fallback se backend estiver offline
+    localStorage.setItem("pragma_state_minimal", JSON.stringify({ currentTask, projectDeadline, treeHealth, totalFocusMinutes }));
     localStorage.setItem("pragma_streak", streak.toString());
     localStorage.setItem("pragma_total_sessions", totalSessions.toString());
     broadcastSync("sessions_updated");
+    // Tentar sync com backend se logado
+    if (token) {
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+      syncTimeoutRef.current = setTimeout(() => syncWithBackend(), 3000);
+    }
   }, [currentTask, projectDeadline, treeHealth, totalFocusMinutes, streak, totalSessions]);
 
   const loadGlobalRanking = async () => {
+    if (!isPro) {
+      setPaywallActive(true);
+      return;
+    }
     setBosqueActive(false);
     setRankingActive(true);
     setRankingLoading(true);
@@ -421,7 +566,21 @@ export default function PragmaDashboard() {
   };
 
   const handleStartTimer = () => {
-    if (timerRunning) { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); localStorage.removeItem("pragma_timer_state"); return; }
+    if (timerRunning) {
+      clearInterval(timerIntervalRef.current);
+      setTimerRunning(false);
+      setShowTreeInCenter(false);
+      localStorage.removeItem("pragma_timer_state");
+      if (activeTimerMode === 1500) {
+        setSelfCompassionActive(true);
+      }
+      return;
+    }
+    // Limite de sessões gratuitas (foco)
+    if (!isPro && activeTimerMode === 1500 && sessionsToday >= 4) {
+      setPaywallActive(true);
+      return;
+    }
     // Pausa não precisa de tarefa
     if (activeTimerMode !== 300 && !currentTask.trim()) {
       setTaskShaking(true);
@@ -431,14 +590,94 @@ export default function PragmaDashboard() {
     }
     if (activeTimerMode === 1500) {
       setSelectedMood(null);
-      setMicroStep("");
+      const activeTask = microtasks.find(t => !t.completed);
+      setMicroStep(activeTask ? activeTask.text : "");
       setCheckInActive(true);
       return;
     }
     confirmStartTimer();
   };
 
+  const handleCompleteProject = () => {
+    if (!currentTask.trim()) return;
+
+    const completedName = currentTask;
+    setVictoryProjectName(completedName);
+
+    const completedStepsCount = microtasks.filter(t => t.completed).length;
+    
+    try {
+      const historyStr = localStorage.getItem("pragma_completed_projects") || "[]";
+      const history = JSON.parse(historyStr);
+      history.push({
+        id: Date.now().toString(),
+        name: completedName,
+        date: new Date().toISOString(),
+        stepsCount: microtasks.length,
+        completedStepsCount: completedStepsCount
+      });
+      localStorage.setItem("pragma_completed_projects", JSON.stringify(history));
+    } catch (e) {
+      console.error(e);
+    }
+
+    const xpBonus = completedStepsCount > 0 ? 10 + (completedStepsCount * 5) : 5;
+    const newXP = totalFocusMinutes + xpBonus;
+    setTotalFocusMinutes(newXP);
+    setTreeHealth(100);
+
+    setCurrentTask("");
+    setMicrotasks([]);
+    setWhyValue("");
+    setProjectDeadline("");
+    
+    localStorage.removeItem("pragma_microtasks");
+    localStorage.removeItem("pragma_why_value");
+
+    if (token && userProfile) {
+      const lvl = getLevel(newXP);
+      const updatedUser = {
+        email: userProfile.email,
+        username: userProfile.username,
+        xp: newXP,
+        level: lvl,
+        gems: 100,
+        streak,
+        water_units: 0,
+        skill_points: 0,
+        avatar_url: userProfile.avatar_url || ""
+      };
+      
+      localStorage.setItem(`user_offline_${userProfile.email}`, JSON.stringify(updatedUser));
+      fetch(`${API_BASE_URL}/ranking`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(updatedUser)
+      }).catch(err => console.error("Erro ao atualizar ranking no servidor:", err));
+    }
+
+    const lvl = getLevel(newXP);
+    setVictoryData({
+      xp: xpBonus,
+      total: newXP,
+      level: lvl,
+      levelName: getLevelName(lvl),
+      sessions: sessionsToday
+    });
+    setVictorySessionType("project");
+    
+    setTimeout(() => {
+      setVictoryActive(true);
+      triggerConfetti();
+      playSound("alarm");
+    }, 100);
+  };
+
   const handleQuickStart = () => {
+    if (!isPro && sessionsToday >= 4) {
+      setPaywallActive(true);
+      return;
+    }
     if (!currentTask.trim()) {
       setTaskShaking(true);
       setTimeout(() => setTaskShaking(false), 400);
@@ -532,16 +771,26 @@ export default function PragmaDashboard() {
 
             // Plantar árvore no bosque
             const stats = { totalSessions: newSessions, streak: newStreak, totalXP: totalFocusMinutes + xpGained };
-            const currentTree = getCurrentTree(stats);
-            const newTree = {
-              id: Date.now(),
-              typeId: currentTree.id,
-              health: Math.min(100, treeHealth + 25),
-              plantedAt: new Date().toISOString(),
-            };
-            const updatedBosque = [...bosqueTrees, newTree];
-            setBosqueTrees(updatedBosque);
-            localStorage.setItem("pragma_bosque", JSON.stringify(updatedBosque));
+            let currentTree = getCurrentTree(stats);
+            if (!isPro && currentTree.id !== "carvalho") {
+              currentTree = TREE_TYPES[0]; // Carvalho
+            }
+
+            let updatedBosque = [...bosqueTrees];
+            if (isPro || bosqueTrees.length < 10) {
+              const newTree = {
+                id: Date.now(),
+                typeId: currentTree.id,
+                health: Math.min(100, treeHealth + 25),
+                plantedAt: new Date().toISOString(),
+              };
+              updatedBosque = [...bosqueTrees, newTree];
+              setBosqueTrees(updatedBosque);
+              localStorage.setItem("pragma_bosque", JSON.stringify(updatedBosque));
+            } else {
+              // Limite de 10 atingido no Free
+              sendNotification("Grove", "Seu Bosque está cheio (limite de 10 árvores)! Assine o PRO para plantar mais.");
+            }
 
             // Mostrar vitória
             const lvl = getLevel(totalFocusMinutes + xpGained);
@@ -568,7 +817,17 @@ export default function PragmaDashboard() {
     }, 1000);
   };
 
-  const selectTimerMode = (d) => { clearInterval(timerIntervalRef.current); setTimerRunning(false); setShowTreeInCenter(false); setActiveTimerMode(d); setTimerSeconds(d); localStorage.removeItem("pragma_timer_state"); };
+  const selectTimerMode = (d) => {
+    if (timerRunning && activeTimerMode === 1500) {
+      setSelfCompassionActive(true);
+    }
+    clearInterval(timerIntervalRef.current);
+    setTimerRunning(false);
+    setShowTreeInCenter(false);
+    setActiveTimerMode(d);
+    setTimerSeconds(d);
+    localStorage.removeItem("pragma_timer_state");
+  };
   const formatTimer = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 
   const handleShare = () => {
@@ -595,6 +854,7 @@ export default function PragmaDashboard() {
   }, []);
 
   const level = getLevel(totalFocusMinutes);
+  const canCompleteProject = microtasks.length > 0 && microtasks.some(mt => mt.completed);
 
   return (
     <div style={{ minHeight: "100vh", background: theme.bg, color: theme.text, fontFamily: "Outfit, sans-serif", display: "flex", position: "relative", userSelect: "none" }}>
@@ -623,6 +883,8 @@ export default function PragmaDashboard() {
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         totalSessions={totalSessions}
+        sessionsToday={sessionsToday}
+        isPro={isPro}
       />
 
       {/* Área principal */}
@@ -635,35 +897,148 @@ export default function PragmaDashboard() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 16,
-          opacity: timerRunning ? 0.3 : 1,
-          pointerEvents: timerRunning ? "none" : "auto",
-          transition: "opacity 0.7s"
+          gap: 16
         }}>
           <button
             onClick={() => setSidebarOpen(o => !o)}
+            disabled={timerRunning}
             title={sidebarOpen ? "Esconder sidebar" : "Mostrar sidebar"}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "#4b5563", display: "flex", alignItems: "center", flexShrink: 0, padding: 4 }}
+            style={{
+              background: "none", border: "none", cursor: timerRunning ? "not-allowed" : "pointer",
+              color: "#4b5563", display: "flex", alignItems: "center", flexShrink: 0, padding: 4,
+              opacity: timerRunning ? 0.3 : 1
+            }}
           >
             {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
 
-          <div className={taskShaking ? "shake" : ""} style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: taskShaking ? "#f97316" : "#22c55e", marginBottom: 4, transition: "color 0.2s" }}>
-              {taskShaking ? "⚠ Defina o projeto antes de iniciar" : "Projeto Ativo"}
+          <div className={taskShaking ? "shake" : ""} style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 2 }}>
+            <div style={{
+              display: "flex", flexDirection: "column", gap: 2,
+              opacity: timerRunning ? 0.5 : 1,
+              pointerEvents: timerRunning ? "none" : "auto",
+              transition: "opacity 0.3s"
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: taskShaking ? "#f97316" : "#22c55e", transition: "color 0.2s" }}>
+                {taskShaking ? "⚠ Defina o projeto antes de iniciar" : "Projeto Ativo"}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  ref={taskInputRef}
+                  type="text"
+                  value={currentTask}
+                  onChange={e => setCurrentTask(e.target.value)}
+                  placeholder="No que você vai focar agora?"
+                  maxLength={80}
+                  style={{ background: "transparent", border: "none", outline: "none", fontSize: 18, fontWeight: 900, color: "white", fontFamily: "Outfit, sans-serif", caretColor: "#4ade80", width: "100%" }}
+                />
+                <button onClick={() => setSettingsActive(true)} title="Alterar prazo" style={{ background: "none", border: "none", cursor: "pointer", color: "#4b5563", display: "flex", alignItems: "center", flexShrink: 0 }}><Pencil size={14} /></button>
+                {currentTask.trim() && (
+                  <button
+                    onClick={canCompleteProject ? handleCompleteProject : null}
+                    disabled={!canCompleteProject}
+                    title={canCompleteProject ? "Finalizar projeto e colher recompensas" : "Planeje e conclua pelo menos uma microtarefa para poder finalizar o projeto"}
+                    style={{
+                      background: "none", border: "none", cursor: canCompleteProject ? "pointer" : "not-allowed",
+                      color: canCompleteProject ? "#22c55e" : "#4b5563", display: "flex", alignItems: "center",
+                      flexShrink: 0, padding: "0 4px", transition: "all 0.2s",
+                      opacity: canCompleteProject ? 1 : 0.3
+                    }}
+                    onMouseEnter={e => {
+                      if (canCompleteProject) e.currentTarget.style.transform = "scale(1.15)";
+                    }}
+                    onMouseLeave={e => {
+                      if (canCompleteProject) e.currentTarget.style.transform = "scale(1)";
+                    }}
+                  >
+                    <CheckCircle2 size={16} />
+                  </button>
+                )}
+              </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, borderBottom: `1px solid ${taskShaking ? "#f97316" : "transparent"}`, paddingBottom: 2, transition: "border-color 0.2s" }}>
-              <input
-                ref={taskInputRef}
-                type="text"
-                value={currentTask}
-                onChange={e => setCurrentTask(e.target.value)}
-                placeholder="No que você vai focar agora?"
-                maxLength={80}
-                style={{ background: "transparent", border: "none", outline: "none", fontSize: 18, fontWeight: 900, color: "white", fontFamily: "Outfit, sans-serif", caretColor: "#4ade80", width: "100%" }}
-              />
-              <button onClick={() => setSettingsActive(true)} title="Alterar prazo" style={{ background: "none", border: "none", cursor: "pointer", color: "#4b5563", display: "flex", alignItems: "center", flexShrink: 0 }}><Pencil size={14} /></button>
-            </div>
+            
+            {!timerRunning && currentTask.trim() && (
+              <button
+                onClick={() => setMicrotasksModalActive(true)}
+                style={{
+                  background: "transparent", border: "none",
+                  color: theme.accent, padding: "2px 0",
+                  fontSize: 11, fontWeight: 700, cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 4,
+                  fontFamily: "Outfit, sans-serif", width: "fit-content",
+                  transition: "opacity 0.2s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.opacity = 0.8}
+                onMouseLeave={e => e.currentTarget.style.opacity = 1}
+              >
+                <ClipboardList size={13} /> Quebrar em micro-passos ({microtasks.filter(t => !t.completed).length} pendentes)
+              </button>
+            )}
+
+            {timerRunning && (
+              (() => {
+                const activeTask = microtasks.find(t => !t.completed);
+                if (!activeTask) return null;
+                return (
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "4px 8px",
+                    borderRadius: 8,
+                    background: theme.id === "light" ? "#f8fafc" : "rgba(255,255,255,0.02)",
+                    border: `1px solid ${theme.borderLight}`,
+                    marginTop: 4,
+                    width: "fit-content",
+                    animation: "fadeIn 0.3s ease"
+                  }}>
+                    <button
+                      onClick={() => {
+                        const updated = [...microtasks];
+                        const idx = microtasks.findIndex(t => t.id === activeTask.id || (t.text === activeTask.text && !t.completed));
+                        if (idx !== -1) {
+                          updated[idx] = { ...updated[idx], completed: true };
+                          setMicrotasks(updated);
+                          localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
+                          triggerConfetti();
+                          playSound("alarm");
+                        }
+                      }}
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: "50%",
+                        border: `1.5px solid ${theme.accent}`,
+                        background: "transparent",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: 0,
+                        flexShrink: 0,
+                        transition: "all 0.2s ease"
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
+                      onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+                    >
+                      <span style={{ fontSize: 8, color: theme.accent, fontWeight: "bold" }}>✓</span>
+                    </button>
+                    <span style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      color: theme.text,
+                      fontFamily: "Outfit, sans-serif",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      maxWidth: 240
+                    }}>
+                      Foco atual: {activeTask.text}
+                    </span>
+                  </div>
+                );
+              })()
+            )}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 24, flexShrink: 0 }}>
@@ -686,98 +1061,134 @@ export default function PragmaDashboard() {
             {/* Avatar / Login */}
             <div style={{ marginLeft: 16, borderLeft: `1px solid ${theme.border}`, paddingLeft: 16, display: "flex", alignItems: "center", gap: 10, position: "relative" }}>
               <ThemeToggle />
-              {token && userProfile ? (
-                <div style={{ position: "relative" }}>
-                  <button onClick={() => setUserMenuOpen(!userMenuOpen)} style={{
-                    width: 36, height: 36, borderRadius: "50%", border: `2px solid ${theme.borderLight}`,
-                    background: "transparent", cursor: "pointer", overflow: "hidden", padding: 0
-                  }}>
-                    {userProfile.avatar_url
-                      ? <img src={userProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
-                      : <div style={{ width: "100%", height: "100%", background: theme.accent, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14 }}>{userProfile.username?.[0]?.toUpperCase() || "U"}</div>
-                    }
-                  </button>
+              <div style={{ position: "relative" }}>
+                <button onClick={() => setUserMenuOpen(!userMenuOpen)} style={{
+                  width: 36, height: 36, borderRadius: "50%", border: `2px solid ${theme.borderLight}`,
+                  background: "transparent", cursor: "pointer", overflow: "hidden", padding: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center", color: theme.textMuted,
+                  transition: "all 0.2s"
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.color = theme.text; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = theme.borderLight; e.currentTarget.style.color = theme.textMuted; }}
+                >
+                  {token && userProfile ? (
+                    userProfile.avatar_url ? (
+                      <img src={userProfile.avatar_url} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="" />
+                    ) : (
+                      <div style={{ width: "100%", height: "100%", background: theme.accent, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14 }}>{userProfile.username?.[0]?.toUpperCase() || "U"}</div>
+                    )
+                  ) : (
+                    <User size={18} />
+                  )}
+                </button>
 
-                  {/* Dropdown */}
-                  {userMenuOpen && (<>
+                {/* Dropdown */}
+                {userMenuOpen && (
+                  <>
                     <div onClick={() => setUserMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 90 }} />
                     <div style={{
                       position: "absolute", top: "100%", right: 0, marginTop: 8,
                       background: theme.card, border: `1px solid ${theme.border}`,
-                      borderRadius: 12, padding: 8, zIndex: 91, minWidth: 180,
+                      borderRadius: 12, padding: token && userProfile ? 8 : 16, zIndex: 91, minWidth: token && userProfile ? 180 : 240,
                       boxShadow: "0 8px 32px rgba(0,0,0,0.3)"
                     }}>
-                      {/* User info */}
-                      <div style={{ padding: "8px 12px 10px", borderBottom: `1px solid ${theme.border}`, marginBottom: 6 }}>
-                        <div style={{ fontSize: 13, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif" }}>{userProfile.username}</div>
-                        <div style={{ fontSize: 11, color: theme.textDim, fontFamily: "Outfit, sans-serif" }}>{userProfile.email}</div>
-                      </div>
+                      {token && userProfile ? (
+                        <>
+                          {/* User info */}
+                          <div style={{ padding: "8px 12px 10px", borderBottom: `1px solid ${theme.border}`, marginBottom: 6 }}>
+                            <div style={{ fontSize: 13, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif" }}>{userProfile.username}</div>
+                            <div style={{ fontSize: 11, color: theme.textDim, fontFamily: "Outfit, sans-serif" }}>{userProfile.email}</div>
+                          </div>
 
-                      {/* Menu items */}
-                      {[
-                        { icon: "🌲", label: "Meu Bosque", onClick: () => { setBosqueActive(true); setUserMenuOpen(false); } },
-                        { icon: "🏆", label: "Ranking", onClick: () => { loadGlobalRanking(); setUserMenuOpen(false); } },
-                        { icon: "🏅", label: "Conquistas", onClick: () => { setAchievementsActive(true); setUserMenuOpen(false); } },
-                        { icon: "📋", label: "Microtarefas", onClick: () => { setMicrotasksOpen(!microtasksOpen); setUserMenuOpen(false); } },
-                      ].map((item) => (
-                        <button key={item.label} onClick={item.onClick} style={{
-                          display: "flex", alignItems: "center", gap: 10, width: "100%",
-                          padding: "8px 12px", borderRadius: 8, border: "none",
-                          background: "transparent", color: theme.text, fontSize: 13,
-                          fontWeight: 600, cursor: "pointer", fontFamily: "Outfit, sans-serif",
-                          textAlign: "left", transition: "background 0.15s"
-                        }}
-                          onMouseEnter={e => e.currentTarget.style.background = theme.cardHover}
-                          onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                        >
-                          <span style={{ fontSize: 16 }}>{item.icon}</span> {item.label}
-                        </button>
-                      ))}
+                          {/* Menu items */}
+                          {[
+                            { icon: "🌲", label: "Meu Bosque", onClick: () => { setBosqueActive(true); setUserMenuOpen(false); } },
+                            { icon: "🏆", label: "Ranking", onClick: () => { loadGlobalRanking(); setUserMenuOpen(false); } },
+                            { icon: "🏅", label: "Conquistas", onClick: () => { setAchievementsActive(true); setUserMenuOpen(false); } },
+                            { icon: "📋", label: "Microtarefas", onClick: () => { setMicrotasksOpen(!microtasksOpen); setUserMenuOpen(false); } },
+                          ].map((item) => (
+                            <button key={item.label} onClick={item.onClick} style={{
+                              display: "flex", alignItems: "center", gap: 10, width: "100%",
+                              padding: "8px 12px", borderRadius: 8, border: "none",
+                              background: "transparent", color: theme.text, fontSize: 13,
+                              fontWeight: 600, cursor: "pointer", fontFamily: "Outfit, sans-serif",
+                              textAlign: "left", transition: "background 0.15s"
+                            }}
+                              onMouseEnter={e => e.currentTarget.style.background = theme.cardHover}
+                              onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                            >
+                              <span style={{ fontSize: 16 }}>{item.icon}</span> {item.label}
+                            </button>
+                          ))}
 
-                      {/* Logout */}
-                      <div style={{ borderTop: `1px solid ${theme.border}`, marginTop: 6, paddingTop: 6 }}>
-                        <button onClick={() => { handleLogout(); setUserMenuOpen(false); }} style={{
-                          display: "flex", alignItems: "center", gap: 10, width: "100%",
-                          padding: "8px 12px", borderRadius: 8, border: "none",
-                          background: "transparent", color: theme.danger, fontSize: 13,
-                          fontWeight: 600, cursor: "pointer", fontFamily: "Outfit, sans-serif",
-                          textAlign: "left"
-                        }}>
-                          <span style={{ fontSize: 16 }}>🚪</span> Sair
-                        </button>
-                      </div>
+                          {/* Logout */}
+                          <div style={{ borderTop: `1px solid ${theme.border}`, marginTop: 6, paddingTop: 6 }}>
+                            <button onClick={() => { handleLogout(); setUserMenuOpen(false); }} style={{
+                              display: "flex", alignItems: "center", gap: 10, width: "100%",
+                              padding: "8px 12px", borderRadius: 8, border: "none",
+                              background: "transparent", color: theme.danger, fontSize: 13,
+                              fontWeight: 600, cursor: "pointer", fontFamily: "Outfit, sans-serif",
+                              textAlign: "left"
+                            }}>
+                              <span style={{ fontSize: 16 }}>🚪</span> Sair
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                          <div style={{ textAlign: "center" }}>
+                            <div style={{ fontSize: 14, fontWeight: 900, color: theme.text, fontFamily: "Outfit, sans-serif", marginBottom: 4 }}>Entrar no Grove</div>
+                            <div style={{ fontSize: 11, color: theme.textDim, fontFamily: "Outfit, sans-serif", lineHeight: 1.4 }}>Salve seu progresso no bosque e dispute no ranking global.</div>
+                          </div>
+                          <button
+                            onClick={() => { window.google?.accounts?.id?.prompt(); setUserMenuOpen(false); }}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 14px", borderRadius: 10,
+                              border: `1px solid ${theme.borderLight}`, background: theme.cardHover, color: theme.text,
+                              fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Outfit, sans-serif", transition: "all 0.2s", width: "100%"
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = theme.borderLight; }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                            Login com Google
+                          </button>
+
+                          <div style={{ borderTop: `1px solid ${theme.border}`, marginTop: 4, paddingTop: 8, display: "flex", flexDirection: "column", gap: 2 }}>
+                            {[
+                              { icon: "🌲", label: "Meu Bosque", onClick: () => { setBosqueActive(true); setUserMenuOpen(false); } },
+                              { icon: "🏆", label: "Ranking", onClick: () => { loadGlobalRanking(); setUserMenuOpen(false); } },
+                              { icon: "🏅", label: "Conquistas", onClick: () => { setAchievementsActive(true); setUserMenuOpen(false); } },
+                            ].map((item) => (
+                              <button key={item.label} onClick={item.onClick} style={{
+                                display: "flex", alignItems: "center", gap: 10, width: "100%",
+                                padding: "8px 12px", borderRadius: 8, border: "none",
+                                background: "transparent", color: theme.text, fontSize: 13,
+                                fontWeight: 600, cursor: "pointer", fontFamily: "Outfit, sans-serif",
+                                textAlign: "left", transition: "background 0.15s"
+                              }}
+                                onMouseEnter={e => e.currentTarget.style.background = theme.cardHover}
+                                onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                              >
+                                <span style={{ fontSize: 16 }}>{item.icon}</span> {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </>)}
-                </div>
-              ) : (
-                <button
-                  onClick={() => window.google?.accounts?.id?.prompt()}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 10,
-                    border: `1px solid ${theme.borderLight}`, background: theme.card, color: theme.textMuted,
-                    fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "Outfit, sans-serif", transition: "all 0.2s"
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = theme.accent; e.currentTarget.style.color = theme.text; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = theme.borderLight; e.currentTarget.style.color = theme.textMuted; }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                  Login
-                </button>
-              )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Área do timer */}
-        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative", overflow: "auto" }}>
-          <div style={{
-            display: "flex", flexDirection: isMobile ? "column" : "row",
-            alignItems: "center", gap: isMobile ? 16 : 40,
-            width: "100%", maxWidth: isMobile ? 480 : 900
-          }}>
-            {/* Timer */}
-            <div style={{ position: "relative", flexShrink: 0 }}>
-              {showTreeInCenter && (
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 32px", position: "relative", overflow: "auto" }}>
+          {/* Timer */}
+          <div style={{ position: "relative", flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 16, width: "100%", maxWidth: 480 }}>
+            {showTreeInCenter && (
                 <div style={{
                   position: "absolute", top: "50%", left: "50%",
                   transform: "translate(-50%, -50%)",
@@ -830,76 +1241,27 @@ export default function PragmaDashboard() {
                 sessionsToday={sessionsToday}
                 onStartQuick={handleQuickStart}
               />
+              {!isPro && sessionsToday === 3 && (
+                <div style={{
+                  marginTop: 16,
+                  padding: "10px 16px",
+                  borderRadius: 12,
+                  background: "rgba(245,158,11,0.08)",
+                  border: "1px solid rgba(245,158,11,0.2)",
+                  color: "#f59e0b",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  textAlign: "center",
+                  maxWidth: 320,
+                  fontFamily: "Outfit, sans-serif",
+                  lineHeight: 1.4
+                }}>
+                  ⚠️ Esta é sua última sessão gratuita de hoje. Assine o PRO para manter sua sequência e progresso do bosque.
+                </div>
+              )}
             </div>
-
-            {/* Microtarefas — só aparece quando timer parado */}
-            {!timerRunning && (
-              <div style={{
-                width: isMobile ? "100%" : 280,
-                padding: "16px 18px", borderRadius: 14,
-                background: theme.card, border: `1px solid ${theme.border}`,
-                flexShrink: 0
-              }}>
-                <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", color: theme.textDim, marginBottom: 10, fontFamily: "Outfit, sans-serif" }}>
-                  Próximos passos
-                </div>
-                {microtasks.length > 0 ? (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
-                    {microtasks.map((mt, i) => (
-                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0" }}>
-                        <button
-                          onClick={() => {
-                            const updated = [...microtasks];
-                            updated[i] = { ...updated[i], completed: !updated[i].completed };
-                            setMicrotasks(updated);
-                            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-                          }}
-                          style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${mt.completed ? theme.accent : theme.textDim}`, background: mt.completed ? theme.accent : "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, padding: 0 }}
-                        >
-                          {mt.completed && <span style={{ fontSize: 9, color: "white" }}>✓</span>}
-                        </button>
-                        <span style={{ fontSize: 12, color: mt.completed ? theme.accent : theme.text, textDecoration: mt.completed ? "line-through" : "none", fontFamily: "Outfit, sans-serif", flex: 1 }}>
-                          {mt.text}
-                        </span>
-                        <button
-                          onClick={() => {
-                            const updated = microtasks.filter((_, idx) => idx !== i);
-                            setMicrotasks(updated);
-                            localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-                          }}
-                          style={{ background: "none", border: "none", color: theme.danger, cursor: "pointer", fontSize: 11, padding: 0, opacity: 0.4 }}
-                        >✕</button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ fontSize: 11, color: theme.textDim, margin: "0 0 10px", fontFamily: "Outfit, sans-serif" }}>
-                    Divida sua tarefa em passos pequenos
-                  </p>
-                )}
-                <div style={{ display: "flex", gap: 6 }}>
-                  <input
-                    type="text"
-                    value={newMicrotask}
-                    onChange={e => setNewMicrotask(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === "Enter" && newMicrotask.trim()) {
-                        const updated = [...microtasks, { text: newMicrotask.trim(), completed: false }];
-                        setMicrotasks(updated);
-                        localStorage.setItem("pragma_microtasks", JSON.stringify(updated));
-                        setNewMicrotask("");
-                      }
-                    }}
-                    placeholder="+ Adicionar passo"
-                    maxLength={60}
-                    style={{ flex: 1, background: "transparent", border: "none", outline: "none", fontSize: 12, color: theme.textDim, fontFamily: "Outfit, sans-serif", padding: "4px 0" }}
-                  />
-                </div>
-              </div>
-            )}
           </div>
-        </div>
-      </main>
+        </main>
 
       <SettingsModal
         active={settingsActive}
@@ -930,11 +1292,27 @@ export default function PragmaDashboard() {
         onContinue={() => setVictoryActive(false)}
         onShare={handleShare}
         sessionType={victorySessionType}
+        projectName={victoryProjectName}
       />
       <AchievementsModal
         active={achievementsActive}
         onClose={() => setAchievementsActive(false)}
         stats={{ totalSessions, streak, totalXP: totalFocusMinutes, level, treeHealth }}
+      />
+      <SelfCompassionModal
+        active={selfCompassionActive}
+        onClose={() => setSelfCompassionActive(false)}
+      />
+      <MicrotasksModal
+        active={microtasksModalActive}
+        onClose={() => setMicrotasksModalActive(false)}
+        microtasks={microtasks}
+        setMicrotasks={setMicrotasks}
+        whyValue={whyValue}
+        setWhyValue={setWhyValue}
+        triggerConfetti={triggerConfetti}
+        playSound={playSound}
+        onStartFocus={handleStartTimer}
       />
 
       <Bosque
@@ -942,6 +1320,30 @@ export default function PragmaDashboard() {
         onClose={() => setBosqueActive(false)}
         trees={bosqueTrees}
         totalMinutes={totalFocusMinutes}
+        isPro={isPro}
+      />
+
+      <PaywallModal
+        active={paywallActive}
+        onClose={() => setPaywallActive(false)}
+        onSubscribe={async (plan) => {
+          try {
+            const response = await fetch("/api/checkout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ plan })
+            });
+            const data = await response.json();
+            if (data.url) {
+              window.location.href = data.url;
+            } else {
+              alert("Erro ao iniciar o checkout: " + (data.error || "Tente novamente."));
+            }
+          } catch (err) {
+            console.error("Erro ao iniciar o checkout:", err);
+            alert("Erro de conexão com o servidor de pagamento.");
+          }
+        }}
       />
 
       {/* Ranking Overlay */}

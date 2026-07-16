@@ -49,7 +49,7 @@ function BosqueTreeSVG({ tree }) {
   );
 }
 
-export default function Bosque({ active, onClose, trees, totalMinutes }) {
+export default function Bosque({ active, onClose, trees, totalMinutes, isPro = false }) {
   const { theme } = useTheme();
 
   const stats = useMemo(() => {
@@ -88,7 +88,7 @@ export default function Bosque({ active, onClose, trees, totalMinutes }) {
               <TreePine size={20} /> Meu Bosque
             </h3>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.7)", margin: "4px 0 0", fontFamily: "Outfit, sans-serif" }}>
-              {trees.length} {trees.length === 1 ? "árvore" : "árvores"} · {totalMinutes} min focando
+              {trees.length}{!isPro && "/10"} {trees.length === 1 ? "árvore" : "árvores"} {!isPro ? "(Grátis)" : "(PRO)"} · {totalMinutes} min focando
             </p>
           </div>
           <button onClick={onClose} style={{
